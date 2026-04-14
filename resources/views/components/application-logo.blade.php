@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" {{ $attributes }}>
+    <!-- Main Pump Body -->
+    <rect x="25" y="20" width="40" height="70" rx="4" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <!-- Display Screen -->
+    <rect x="33" y="30" width="24" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <!-- Keypad/Buttons area -->
+    <line x1="33" y1="52" x2="40" y2="52" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+    <line x1="33" y1="58" x2="40" y2="58" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+    <line x1="33" y1="64" x2="40" y2="64" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+    
+    <!-- Hose -->
+    <path d="M 65 40 H 75 C 80 40 85 45 85 50 V 75 C 85 80 80 85 75 85 H 65" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <!-- Nozzle Holster -->
+    <path d="M 65 35 V 45" stroke="currentColor" stroke-width="6" stroke-linecap="round" />
+</svg>

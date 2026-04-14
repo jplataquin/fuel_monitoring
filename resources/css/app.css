@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@import "tailwindcss/preflight";
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+@config "../../tailwind.config.js";
+
+/* Material 3 Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1C1B1F;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #49454F;
+    border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #CAC4D0;
+}
+
+/* Smooth transitions for Material feel */
+* {
+    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Material Typography Overrides */
+h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.02em;
+}
+
+input[type="date"], input[type="time"] {
+    color-scheme: dark;
+}
+
+div, section, main {
+    @apply p-2;
+}
+
+/* Global cursor pointers for clickable elements */
+a, button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"], select {
+    cursor: pointer;
+}

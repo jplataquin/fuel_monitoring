@@ -1,0 +1,149 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <div>
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3 text-xs font-bold uppercase tracking-widest text-[#CAC4D0]">
+                        <li class="inline-flex items-center">
+                            <a href="{{ route('chargeable-accounts.index') }}" class="hover:text-[#D0BCFF]">Accounts</a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 text-[#49454F]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                                <span class="ml-1 md:ml-2 text-[#D0BCFF]">{{ $chargeableAccount->name }}</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+            @if(Auth::user()->role === 'administrator')
+                <div class="flex gap-3">
+                    <x-button-link :href="route('chargeable-accounts.edit', $chargeableAccount)" color="secondary">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        {{ __('Edit') }}
+                    </x-button-link>
+                </div>
+            @endif
+        </div>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <!-- Account Info -->
+            <div class="bg-[#2D2930] rounded-[28px] p-10 border border-[#49454F]/50 shadow-xl flex items-center justify-between !mb-4">
+                
+                <div>
+                    <h3 class="text-[10px] font-bold text-[#D0BCFF] uppercase tracking-[0.3em] mb-2 flex items-center">
+                        <span class="w-8 h-px bg-[#D0BCFF]/30 mr-4"></span>
+                        Name
+                    </h3>
+                    <span class="inline-flex items-center !px-4 !py-1.5 rounded-full text-sm font-bold tracking-widest uppercase">
+                        {{ $chargeableAccount->name }}
+                    </span>
+                </div>
+                <div>
+                    <h3 class="text-[10px] font-bold text-[#D0BCFF] uppercase tracking-[0.3em] mb-2 flex items-center">
+                        <span class="w-8 h-px bg-[#D0BCFF]/30 mr-4"></span>
+                        Status
+                    </h3>
+                    <span class="inline-flex items-center !px-4 !py-1.5 rounded-full text-sm font-bold tracking-widest uppercase {{ $chargeableAccount->status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                        {{ $chargeableAccount->status }}
+                    </span>
+                </div>
+                <div class="text-right">
+                    <h3 class="text-[10px] font-bold text-[#D0BCFF] uppercase tracking-[0.3em] mb-2 flex items-center justify-end">
+                        Total Sub-Accounts
+                        <span class="w-8 h-px bg-[#D0BCFF]/30 ml-4"></span>
+                    </h3>
+                    <p class="text-4xl font-bold text-[#E6E1E5]">{{ $chargeableAccount->subAccounts->count() }}</p>
+                </div>
+        </div>
+
+         @if(in_array(Auth::user()->role, ['administrator', 'moderator']))
+       
+            <!-- Add Sub-Account Form Card -->
+            <div class="bg-[#1C1B1F] rounded-[28px] !p-8 md:p-10 border border-[#49454F]/50 shadow-xl mb-8 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-2 h-full bg-[#D0BCFF]"></div>
+                <div class="mb-6">
+                    <h4 class="text-xl font-bold text-[#E6E1E5] tracking-tight">Create Sub-Account</h4>
+                </div>
+                <form action="{{ route('chargeable-accounts.sub-accounts.store', $chargeableAccount) }}" method="POST" class="space-y-6">
+                    @csrf
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <input type="text" name="name" placeholder="e.g. Project Alpha" required class="block w-full px-5 py-3 bg-[#2D2930] text-[#E6E1E5] border border-[#49454F]/50 focus:outline-none focus:ring-2 focus:ring-[#D0BCFF]/50 focus:border-[#D0BCFF] text-base rounded-2xl transition-all shadow-inner placeholder-[#49454F]">
+                            @if ($errors->any())
+                                <div class="text-rose-400 text-[10px] font-bold mt-1">
+                                    <ul>
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-end space-x-4 pt-4 border-t border-[#49454F]/30 gap-x-4">
+                      
+                        <button type="submit" class="bg-[#D0BCFF] text-[#381E72] px-8 py-2.5 rounded-full text-sm font-black uppercase tracking-widest hover:bg-[#EADDFF] hover:scale-105 transition-all shadow-[0_0_20px_rgba(208,188,255,0.3)]">
+                            Add
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+        @endif
+        
+                <div class="bg-[#1C1B1F] rounded-[28px] overflow-hidden border border-[#49454F]/50 shadow-xl">
+                    <div class="p-0 text-gray-100">
+                        <table class="min-w-full divide-y divide-[#49454F]/50">
+                            <thead>
+                                <tr class="bg-[#49454F]/10">
+                                    <th class="px-8 py-5 text-left text-xs font-bold text-[#CAC4D0] uppercase tracking-[0.2em]">Sub Accounts</th>
+                                    <th class="px-8 py-5 text-right text-xs font-bold text-[#CAC4D0] uppercase tracking-[0.2em]">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#49454F]/30 bg-[#1C1B1F]">
+                                @forelse($chargeableAccount->subAccounts as $subAccount)
+                                    <tr class="hover:bg-[#49454F]/10 transition-colors">
+                                        <td class="px-8 py-5 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <svg class="w-4 h-4 text-[#49454F] mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                                <span class="text-sm font-medium text-[#E6E1E5]">{{ $subAccount->name }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-5 whitespace-nowrap text-right">
+                                            <div class="flex items-center justify-end space-x-2">
+                                                <a href="{{ route('sub-accounts.show', $subAccount) }}" class="text-[#D0BCFF] hover:bg-[#D0BCFF]/10 p-2.5 rounded-full transition-colors inline-flex items-center" title="View Sub-Account Details">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                </a>
+                                                @if(Auth::user()->role === 'administrator')
+                                                    <form action="{{ route('sub-accounts.destroy', $subAccount) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-[#F2B8B5] hover:bg-[#F2B8B5]/10 p-2.5 rounded-full transition-colors inline-flex items-center" onclick="return confirm('Are you sure you want to delete this sub-account?')" title="Delete Sub-Account">
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="px-8 py-12 text-center">
+                                            <svg class="mx-auto h-12 w-12 text-[#49454F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                            </svg>
+                                            <h3 class="mt-2 text-sm font-medium text-[#E6E1E5]">No sub-accounts found</h3>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>

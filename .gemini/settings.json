@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "mysql-mcp-server"],
+      "env": {
+        "MYSQL_HOST": "127.0.0.1",
+        "MYSQL_USER": "admin",
+        "MYSQL_PASSWORD": "admin",
+        "MYSQL_DATABASE": "fuel_monitoring"
+      }
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+    }
+  }
+}
