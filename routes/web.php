@@ -54,7 +54,13 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
         Route::patch('account-budgets/{account_budget}/approve', [App\Http\Controllers\SubAccountBudgetController::class, 'approve'])->name('account-budgets.approve');
         Route::patch('account-budgets/{account_budget}/reject', [App\Http\Controllers\SubAccountBudgetController::class, 'reject'])->name('account-budgets.reject');
         
-        Route::resource('users', UserController::class)->except(['create']);
+        // User creation routes that are accessible to both Admin and Moderator
+        // Note: These must be BEFORE the resource route to avoid wildcard conflict
+        Route::get('users/create-data-logger', [UserController::class, 'createDataLogger'])->name('users.create-data-logger');
+        Route::get('users/create-fuel-man', [UserController::class, 'createFuelMan'])->name('users.create-fuel-man');
+        Route::get('users/create-budgeteer', [UserController::class, 'createBudgeteer'])->name('users.create-budgeteer');
+
+        Route::resource('users', UserController::class)->except(['create', 'show']);
         Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
     });
 
@@ -67,10 +73,9 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::middleware('role:administrator')->group(function () {
         Route::resource('asset-types', AssetTypeController::class);
         Route::resource('chargeable-accounts', ChargeableAccountController::class)->except(['index', 'show', 'create']);
+        
+        // Specific user creation for admins only
         Route::get('users/create-moderator', [UserController::class, 'createModerator'])->name('users.create-moderator');
-        Route::get('users/create-data-logger', [UserController::class, 'createDataLogger'])->name('users.create-data-logger');
-        Route::get('users/create-fuel-man', [UserController::class, 'createFuelMan'])->name('users.create-fuel-man');
-        Route::get('users/create-budgeteer', [UserController::class, 'createBudgeteer'])->name('users.create-budgeteer');
         
         // Void Fuel Order
         Route::post('fuel-orders/{fuel_order}/void', [FuelOrderController::class, 'void'])->name('fuel-orders.void');

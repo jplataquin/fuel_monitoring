@@ -49,6 +49,10 @@ class UserController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
+        if ($validated['role'] === 'moderator' && Auth::user()->role !== 'administrator') {
+            abort(403, 'Only administrators can create moderators.');
+        }
+
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
