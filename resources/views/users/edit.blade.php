@@ -29,6 +29,20 @@
                         <x-input-error :messages="$errors->get('email')" class="mt-2 text-rose-400 text-xs font-bold" />
                     </div>
 
+                    @if(Auth::user()->role === 'administrator')
+                    <div>
+                        <x-input-label for="role" :value="__('System Role')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
+                        <select id="role" name="role" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3 shadow-sm focus:border-[#D0BCFF] cursor-pointer">
+                            <option value="administrator" {{ old('role', $user->role) === 'administrator' ? 'selected' : '' }}>Administrator</option>
+                            <option value="moderator" {{ old('role', $user->role) === 'moderator' ? 'selected' : '' }}>Moderator</option>
+                            <option value="data_logger" {{ old('role', $user->role) === 'data_logger' ? 'selected' : '' }}>Data Logger</option>
+                            <option value="fuel_man" {{ old('role', $user->role) === 'fuel_man' ? 'selected' : '' }}>Fuel Man</option>
+                            <option value="budgeteer" {{ old('role', $user->role) === 'budgeteer' ? 'selected' : '' }}>Budgeteer</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('role')" class="mt-2 text-rose-400 text-xs font-bold" />
+                    </div>
+                    @endif
+
                     <div class="flex items-center justify-end pt-8 border-t border-[#49454F]/30">
                         <button type="submit" class="inline-flex items-center justify-center px-10 py-4 bg-[#D0BCFF] text-[#381E72] rounded-full font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#EADDFF] focus:outline-none focus:ring-2 focus:ring-[#D0BCFF] transition shadow-lg shadow-[#D0BCFF]/20">
                             {{ __('Update') }}

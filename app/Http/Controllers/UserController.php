@@ -71,10 +71,16 @@ class UserController extends Controller
 
     public function update(Request $request, User $user): RedirectResponse
     {
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
-        ]);
+        ];
+
+        if (Auth::user()->role === 'administrator') {
+            $rules['role'] = 'required|in:administrator,moderator,data_logger,fuel_man,budgeteer';
+        }
+
+        $validated = $request->validate($rules);
 
         $user->update($validated);
 
