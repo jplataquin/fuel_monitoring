@@ -14,6 +14,7 @@ class SubAccountTest extends TestCase
 
     public function test_administrator_can_add_sub_account(): void
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
 
@@ -30,6 +31,7 @@ class SubAccountTest extends TestCase
 
     public function test_moderator_can_add_sub_account(): void
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'moderator']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
 
@@ -46,6 +48,7 @@ class SubAccountTest extends TestCase
 
     public function test_data_logger_cannot_add_sub_account(): void
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'data_logger']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
 
@@ -68,12 +71,14 @@ class SubAccountTest extends TestCase
         ]);
 
         // Same parent account should fail
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $response = $this->actingAs($user)->post(route('chargeable-accounts.sub-accounts.store', $account1), [
             'name' => 'Shared Name',
         ]);
         $response->assertSessionHasErrors('name');
 
         // Different parent account should pass
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $response = $this->actingAs($user)->post(route('chargeable-accounts.sub-accounts.store', $account2), [
             'name' => 'Shared Name',
         ]);
@@ -86,6 +91,7 @@ class SubAccountTest extends TestCase
 
     public function test_administrator_can_delete_sub_account(): void
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
         $subAccount = $account->subAccounts()->create(['name' => 'To Delete']);
@@ -111,6 +117,7 @@ class SubAccountTest extends TestCase
 
     public function test_sub_account_name_can_be_reused_after_soft_delete(): void
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
         
@@ -135,6 +142,7 @@ class SubAccountTest extends TestCase
 
     public function test_administrator_can_allocate_budget_from_sub_account_page(): void
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
         $subAccount = $account->subAccounts()->create(['name' => 'Sub Account']);
@@ -155,6 +163,7 @@ class SubAccountTest extends TestCase
 
     public function test_budgeteer_can_allocate_budget_from_sub_account_page(): void
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'budgeteer']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
         $subAccount = $account->subAccounts()->create(['name' => 'Sub Account']);
@@ -171,8 +180,9 @@ class SubAccountTest extends TestCase
         ]);
     }
 
-    public function test_moderator_cannot_allocate_budget(): void
+    public function test_moderator_can_allocate_budget(): void
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'moderator']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
         $subAccount = $account->subAccounts()->create(['name' => 'Sub Account']);
@@ -182,11 +192,16 @@ class SubAccountTest extends TestCase
             'budget_quantity' => 100,
         ]);
 
-        $response->assertStatus(403);
+        $response->assertRedirect(route('sub-accounts.show', $subAccount));
+        $this->assertDatabaseHas('sub_account_budgets', [
+            'sub_account_id' => $subAccount->id,
+            'budget_quantity' => 100,
+        ]);
     }
 
     public function test_budgeteer_cannot_update_budget_status(): void
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'budgeteer']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
         $subAccount = $account->subAccounts()->create(['name' => 'Sub Account']);
@@ -212,6 +227,7 @@ class SubAccountTest extends TestCase
 
     public function test_moderator_can_update_budget_status(): void
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'moderator']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
         $subAccount = $account->subAccounts()->create(['name' => 'Sub Account']);

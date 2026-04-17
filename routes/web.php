@@ -43,11 +43,11 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
 
     // Admin and Moderator routes
     Route::middleware('role:administrator,moderator')->group(function () {
-        Route::get('chargeable-accounts', [ChargeableAccountController::class, 'index'])->name('chargeable-accounts.index');
-        Route::get('chargeable-accounts/create', [ChargeableAccountController::class, 'create'])->name('chargeable-accounts.create');
-        Route::get('chargeable-accounts/{chargeable_account}', [ChargeableAccountController::class, 'show'])->name('chargeable-accounts.show');
+        Route::resource('chargeable-accounts', ChargeableAccountController::class);
         Route::get('chargeable-accounts/{chargeable_account}/sub-accounts/json', [App\Http\Controllers\SubAccountController::class, 'byAccount'])->name('chargeable-accounts.sub-accounts.json');
         Route::get('sub-accounts/{sub_account}', [App\Http\Controllers\SubAccountController::class, 'show'])->name('sub-accounts.show');
+        Route::get('sub-accounts/{sub_account}/edit', [App\Http\Controllers\SubAccountController::class, 'edit'])->name('sub-accounts.edit');
+        Route::patch('sub-accounts/{sub_account}', [App\Http\Controllers\SubAccountController::class, 'update'])->name('sub-accounts.update');
         Route::post('chargeable-accounts/{chargeable_account}/sub-accounts', [App\Http\Controllers\SubAccountController::class, 'store'])->name('chargeable-accounts.sub-accounts.store');
         Route::delete('sub-accounts/{sub_account}', [App\Http\Controllers\SubAccountController::class, 'destroy'])->name('sub-accounts.destroy');
         
@@ -72,7 +72,6 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     // Admin only routes
     Route::middleware('role:administrator')->group(function () {
         Route::resource('asset-types', AssetTypeController::class);
-        Route::resource('chargeable-accounts', ChargeableAccountController::class)->except(['index', 'show', 'create']);
         
         // Specific user creation for admins only
         Route::get('users/create-moderator', [UserController::class, 'createModerator'])->name('users.create-moderator');

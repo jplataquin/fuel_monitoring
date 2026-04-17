@@ -72,7 +72,7 @@
                     {{ __('Users') }}
                 </x-nav-link>
                 @endif
-                @if(in_array(Auth::user()->role, ['administrator', 'budgeteer']))
+                @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
                 <x-nav-link :href="route('account-budgets.index')" :active="request()->routeIs('account-budgets.*')">
                     {{ __('Budget') }}
                 </x-nav-link>
@@ -142,11 +142,13 @@
             <x-responsive-nav-link :href="route('asset-types.index')" :active="request()->routeIs('asset-types.*')">
                 {{ __('Asset Types') }}
             </x-responsive-nav-link>
+            @endif
+            @if(in_array(Auth::user()->role, ['administrator', 'moderator']))
             <x-responsive-nav-link :href="route('chargeable-accounts.index')" :active="request()->routeIs('chargeable-accounts.*')">
                 {{ __('Chargeable Accounts') }}
             </x-responsive-nav-link>
             @endif
-            @if(in_array(Auth::user()->role, ['administrator', 'budgeteer']))
+            @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
             <x-responsive-nav-link :href="route('account-budgets.index')" :active="request()->routeIs('account-budgets.*')">
                 {{ __('Budgets') }}
             </x-responsive-nav-link>

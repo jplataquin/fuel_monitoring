@@ -24,7 +24,7 @@ class ChargeableAccountFeatureTest extends TestCase
 
     public function test_standard_user_cannot_access_chargeable_accounts_routes()
     {
-        $user = User::factory()->create(['role' => 'moderator']);
+        $user = User::factory()->create(['role' => 'data_logger']);
 
         $response = $this->actingAs($user)->get(route('chargeable-accounts.index'));
         $response->assertStatus(403);
@@ -32,6 +32,7 @@ class ChargeableAccountFeatureTest extends TestCase
 
     public function test_administrator_can_create_chargeable_account()
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
 
         $response = $this->actingAs($user)->post(route('chargeable-accounts.store'), [
@@ -48,6 +49,7 @@ class ChargeableAccountFeatureTest extends TestCase
 
     public function test_administrator_can_update_chargeable_account()
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
         $account = ChargeableAccount::create(['name' => 'Old Name', 'status' => 'Active']);
 
@@ -66,6 +68,7 @@ class ChargeableAccountFeatureTest extends TestCase
 
     public function test_chargeable_account_must_have_unique_name()
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
         ChargeableAccount::create(['name' => 'Existing Account', 'status' => 'Active']);
 
@@ -80,6 +83,7 @@ class ChargeableAccountFeatureTest extends TestCase
 
     public function test_administrator_can_soft_delete_chargeable_account()
     {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
         $account = ChargeableAccount::create(['name' => 'To Be Deleted']);
 
