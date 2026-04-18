@@ -41,8 +41,8 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::get('fuel-orders/{fuel_order}/actualize', [FuelOrderController::class, 'actualize'])->name('fuel-orders.actualize');
     Route::post('fuel-orders/{fuel_order}/actualize', [FuelOrderController::class, 'storeActualization'])->name('fuel-orders.store-actualization');
 
-    // Admin and Moderator routes
-    Route::middleware('role:administrator,moderator')->group(function () {
+    // Admin, Moderator and Budgeteer routes for accounts
+    Route::middleware('role:administrator,moderator,budgeteer')->group(function () {
         Route::resource('chargeable-accounts', ChargeableAccountController::class);
         Route::get('chargeable-accounts/{chargeable_account}/sub-accounts/json', [App\Http\Controllers\SubAccountController::class, 'byAccount'])->name('chargeable-accounts.sub-accounts.json');
         Route::get('sub-accounts/{sub_account}', [App\Http\Controllers\SubAccountController::class, 'show'])->name('sub-accounts.show');
@@ -50,7 +50,10 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
         Route::patch('sub-accounts/{sub_account}', [App\Http\Controllers\SubAccountController::class, 'update'])->name('sub-accounts.update');
         Route::post('chargeable-accounts/{chargeable_account}/sub-accounts', [App\Http\Controllers\SubAccountController::class, 'store'])->name('chargeable-accounts.sub-accounts.store');
         Route::delete('sub-accounts/{sub_account}', [App\Http\Controllers\SubAccountController::class, 'destroy'])->name('sub-accounts.destroy');
-        
+    });
+
+    // Admin and Moderator only routes for budget approval
+    Route::middleware('role:administrator,moderator')->group(function () {
         Route::patch('account-budgets/{account_budget}/approve', [App\Http\Controllers\SubAccountBudgetController::class, 'approve'])->name('account-budgets.approve');
         Route::patch('account-budgets/{account_budget}/reject', [App\Http\Controllers\SubAccountBudgetController::class, 'reject'])->name('account-budgets.reject');
         

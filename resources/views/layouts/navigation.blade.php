@@ -64,10 +64,12 @@
                     {{ __('Classifications') }}
                 </x-nav-link>
                 @endif
-                @if(in_array(Auth::user()->role, ['administrator', 'moderator']))
+                @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
                 <x-nav-link :href="route('chargeable-accounts.index')" :active="request()->routeIs('chargeable-accounts.*')">
                     {{ __('Accounts') }}
                 </x-nav-link>
+                @endif
+                @if(in_array(Auth::user()->role, ['administrator', 'moderator']))
                 <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                     {{ __('Users') }}
                 </x-nav-link>
@@ -143,7 +145,7 @@
                 {{ __('Asset Types') }}
             </x-responsive-nav-link>
             @endif
-            @if(in_array(Auth::user()->role, ['administrator', 'moderator']))
+            @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
             <x-responsive-nav-link :href="route('chargeable-accounts.index')" :active="request()->routeIs('chargeable-accounts.*')">
                 {{ __('Chargeable Accounts') }}
             </x-responsive-nav-link>

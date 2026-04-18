@@ -58,12 +58,20 @@ class SubAccountBudgetController extends Controller
 
     public function edit(SubAccountBudget $accountBudget)
     {
+        if (Auth::user()->role === 'budgeteer' && $accountBudget->status !== 'Pending') {
+            abort(403, 'You can only edit budgets that are in pending status.');
+        }
+
         $accounts = SubAccount::orderBy('name')->get();
         return view('sub-account-budgets.edit', compact('accountBudget', 'accounts'));
     }
 
     public function update(Request $request, SubAccountBudget $accountBudget)
     {
+        if (Auth::user()->role === 'budgeteer' && $accountBudget->status !== 'Pending') {
+            abort(403, 'You can only update budgets that are in pending status.');
+        }
+
         $rules = [
             'sub_account_id' => 'required|exists:sub_accounts,id',
             'budget_quantity' => 'required|numeric|min:0',
@@ -106,6 +114,10 @@ class SubAccountBudgetController extends Controller
 
     public function destroy(SubAccountBudget $accountBudget)
     {
+        if (Auth::user()->role === 'budgeteer' && $accountBudget->status !== 'Pending') {
+            abort(403, 'You can only delete budgets that are in pending status.');
+        }
+
         $accountBudget->update(['deleted_by' => Auth::id()]);
         $accountBudget->delete();
 
