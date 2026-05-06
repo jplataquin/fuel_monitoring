@@ -1,28 +1,28 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="text-2xl font-bold text-[#E6E1E5] tracking-tight">
-                {{ __('Update Sub-Account') }}
-            </h2>
-        </div>
+        <h2 class="h4 font-weight-bold text-white mb-0">
+            {{ __('Update Sub-Account') }}
+        </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-[#1C1B1F] rounded-[28px] overflow-hidden border border-[#49454F]/50 shadow-2xl p-10">
-                <form method="POST" action="{{ route('sub-accounts.update', $subAccount) }}" class="space-y-8">
+    <div class="py-5">
+        <div class="container" style="max-width: 600px;">
+            <div class="card bg-dark border-secondary shadow-lg rounded-4 p-4">
+                <form method="POST" action="{{ route('sub-accounts.update', $subAccount) }}">
                     @csrf
                     @method('PATCH')
 
-                    <div>
-                        <x-input-label for="name" :value="__('Sub-Account Name')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                        <x-text-input id="name" name="name" type="text" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3" :value="old('name', $subAccount->name)" required autofocus />
-                        <x-input-error :messages="$errors->get('name')" class="mt-2 text-rose-400 text-xs font-bold" />
+                    <div class="mb-4">
+                        <label for="name" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Sub-Account Name</label>
+                        <input id="name" name="name" type="text" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-primary" value="{{ old('name', $subAccount->name) }}" required autofocus>
+                        @error('name')
+                            <div class="text-danger small mt-2 fw-bold">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <div class="flex items-center justify-end pt-8 border-t border-[#49454F]/30 gap-x-4">
-                        <a href="{{ route('chargeable-accounts.show', $subAccount->chargeableAccount) }}" class="text-[#CAC4D0] hover:text-[#E6E1E5] text-xs font-bold uppercase tracking-widest mr-8 transition-colors">Cancel</a>
-                        <button type="submit" class="inline-flex items-center justify-center px-10 py-4 bg-[#D0BCFF] text-[#381E72] rounded-full font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#EADDFF] focus:outline-none focus:ring-2 focus:ring-[#D0BCFF] transition shadow-lg shadow-[#D0BCFF]/20">
+                    <div class="d-flex align-items-center justify-content-end pt-4 border-top border-secondary border-opacity-25 gap-3">
+                        <a href="{{ route('chargeable-accounts.show', $subAccount->chargeableAccount) }}" class="btn btn-link text-secondary text-decoration-none small fw-bold text-uppercase tracking-widest me-3">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-5 py-3 rounded-pill fw-bold small text-uppercase tracking-wider shadow">
                             {{ __('Update') }}
                         </button>
                     </div>

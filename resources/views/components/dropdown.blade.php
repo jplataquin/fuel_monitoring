@@ -1,35 +1,19 @@
-@props(['align' => 'right', 'width' => '48', 'contentClasses' => 'py-1 bg-[#2D2930]'])
+@props(['align' => 'end', 'contentClasses' => ''])
 
 @php
-$alignmentClasses = match ($align) {
-    'left' => 'ltr:origin-top-left rtl:origin-top-right start-0',
-    'top' => 'origin-top',
-    default => 'ltr:origin-top-right rtl:origin-top-left end-0',
-};
-
-$width = match ($width) {
-    '48' => 'w-48',
-    default => $width,
+$alignmentClass = match ($align) {
+    'start' => 'dropdown-menu-start',
+    'end' => 'dropdown-menu-end',
+    default => 'dropdown-menu-end',
 };
 @endphp
 
-<div class="relative" x-data="{ dropdownOpen: false }" @click.outside="dropdownOpen = false" @close.stop="dropdownOpen = false">
-    <div @click="dropdownOpen = ! dropdownOpen">
+<div class="dropdown">
+    <div data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
         {{ $trigger }}
     </div>
 
-    <div x-show="dropdownOpen"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition ease-in duration-75"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            class="absolute z-50 mt-2 {{ $width }} rounded-md shadow-lg {{ $alignmentClasses }}"
-            style="display: none;"
-            @click="dropdownOpen = false">
-        <div class="rounded-md ring-1 ring-black ring-opacity-5 {{ $contentClasses }}">
-            {{ $content }}
-        </div>
-    </div>
+    <ul {{ $attributes->merge(['class' => "dropdown-menu {$alignmentClass} {$contentClasses}"]) }}>
+        {{ $content }}
+    </ul>
 </div>

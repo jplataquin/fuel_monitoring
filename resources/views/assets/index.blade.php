@@ -1,58 +1,58 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            <h2 class="text-2xl font-bold text-[#E6E1E5] tracking-tight">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <h2 class="h4 fw-bold text-light mb-0">
                 {{ __('Fleet Inventory') }}
             </h2>
             @if(in_array(Auth::user()->role, ['administrator', 'moderator']))
-                <x-button-link :href="route('assets.create')" color="primary">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                <a href="{{ route('assets.create') }}" class="btn btn-primary d-inline-flex align-items-center">
+                    <svg class="me-2" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                     {{ __('New Asset') }}
-                </x-button-link>
+                </a>
             @endif
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-            <!-- Action Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                @foreach($assets as $asset)
+    <div class="container-xl py-5">
+        <!-- Action Cards Grid -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach($assets as $asset)
+                <div class="col">
                     <!-- Individual Asset Card -->
-                    <a href="{{ route('assets.show', $asset) }}" class="group bg-[#2D2930] hover:bg-[#49454F]/50 rounded-[28px] p-8 transition-all duration-300 shadow-xl border border-[#49454F]/50 flex flex-col justify-between min-h-[80px]">
-                        <div>
-                            <div class="flex justify-between items-start mb-6">
-                                <div>
-                                    <h4 class="text-2xl font-black text-[#E6E1E5] tracking-tight group-hover:text-[#D0BCFF] transition-colors">{{ $asset->fleet_no }}</h4>
-                                    <p class="text-[10px] font-bold text-[#D0BCFF] uppercase tracking-[0.2em] mt-1">{{ $asset->assetType->name }}</p>
-                                </div>
-                                <span class="px-3 py-1 bg-[#49454F]/30 text-[#CAC4D0] text-[10px] font-bold rounded-lg border border-[#49454F]/50 uppercase tracking-widest">{{ $asset->plate_no ?? '—' }}</span>
+                    <a href="{{ route('assets.show', $asset) }}" class="card h-100 bg-dark border-secondary border-opacity-25 shadow-sm text-decoration-none p-4 transition-all">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h4 class="h5 fw-bold text-light mb-1">{{ $asset->fleet_no }}</h4>
+                                <p class="small fw-bold text-primary text-uppercase tracking-widest mb-0" style="font-size: 0.7rem;">{{ $asset->assetType->name }}</p>
                             </div>
+                            <span class="badge bg-secondary bg-opacity-10 border border-secondary border-opacity-25 text-secondary fw-bold text-uppercase tracking-widest px-2 py-1" style="font-size: 0.6rem;">
+                                {{ $asset->plate_no ?? '—' }}
+                            </span>
                         </div>
-                        
-                        
                     </a>
-                @endforeach
-            </div>
-
-            @if($assets->isEmpty())
-                <div class="bg-[#1C1B1F] rounded-[28px] overflow-hidden border border-[#49454F]/50 shadow-xl mt-8">
-                    <div class="p-16 text-center">
-                        <div class="bg-[#49454F]/20 w-20 h-20 rounded-[28px] flex items-center justify-center mx-auto mb-6">
-                            <svg class="h-10 w-10 text-[#CAC4D0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-[#E6E1E5]">No assets registered</h3>
-                        <p class="mt-2 text-[#CAC4D0] max-w-xs mx-auto">Start building your fleet inventory to begin monitoring utilization.</p>
-                        @if(in_array(Auth::user()->role, ['administrator', 'moderator']))
-                            <div class="mt-8">
-                                <a href="{{ route('assets.create') }}" class="text-[#D0BCFF] font-bold uppercase tracking-widest text-sm hover:underline underline-offset-8 decoration-2">Add your first asset</a>
-                            </div>
-                        @endif
-                    </div>
                 </div>
-            @endif
+            @endforeach
         </div>
+
+        @if($assets->isEmpty())
+            <div class="card bg-dark border-secondary border-opacity-25 shadow-sm mt-4">
+                <div class="card-body p-5 text-center">
+                    <div class="bg-secondary bg-opacity-10 d-inline-flex align-items-center justify-content-center rounded-circle mb-4" style="width: 80px; height: 80px;">
+                        <svg width="40" height="40" class="text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="h5 fw-bold text-light mb-2">No assets registered</h3>
+                    <p class="text-secondary mx-auto" style="max-width: 320px;">Start building your fleet inventory to begin monitoring utilization.</p>
+                    @if(in_array(Auth::user()->role, ['administrator', 'moderator']))
+                        <div class="mt-4">
+                            <a href="{{ route('assets.create') }}" class="btn btn-link text-primary fw-bold text-uppercase tracking-widest text-decoration-none small">
+                                Add your first asset
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endif
     </div>
 </x-app-layout>

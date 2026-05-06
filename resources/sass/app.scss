@@ -1,9 +1,8 @@
-@import "tailwindcss";
-@import "tailwindcss/preflight";
-@import "tailwindcss/theme";
-@import "tailwindcss/utilities";
+// Bootstrap
+@import "bootstrap/scss/bootstrap";
 
-@config "../../tailwind.config.js";
+// Bootstrap Icons
+@import "bootstrap-icons/font/bootstrap-icons.css";
 
 /* Material 3 Scrollbar */
 ::-webkit-scrollbar {
@@ -41,7 +40,7 @@ input[type="date"], input[type="time"] {
 }
 
 div, section, main {
-    @apply p-2;
+    padding: 0.5rem; // Equivalent to tailwind p-2
 }
 
 /* Global cursor pointers for clickable elements */

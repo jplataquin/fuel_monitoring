@@ -1,77 +1,83 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-2xl font-bold text-[#E6E1E5] tracking-tight">
+        <h2 class="h4 font-weight-bold text-light mb-0">
             {{ __('Update Access') }}: {{ $user->name }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-            <!-- User Information Section -->
-            <div class="bg-[#1C1B1F] rounded-[28px] overflow-hidden border border-[#49454F]/50 shadow-2xl p-10">
-                <h3 class="text-[10px] font-bold text-[#D0BCFF] uppercase tracking-[0.3em] mb-10 flex items-center">
-                    <span class="w-8 h-px bg-[#D0BCFF]/30 mr-4"></span>
-                    Identity Information
-                </h3>
-                <form method="POST" action="{{ route('users.update', $user) }}" class="space-y-8">
-                    @csrf
-                    @method('PATCH')
+    <div class="py-5">
+        <div class="container" style="max-width: 800px;">
+            <div class="row g-4">
+                <!-- User Information Section -->
+                <div class="col-12">
+                    <div class="card bg-dark border-secondary shadow-lg rounded-4 p-4">
+                        <h3 class="small fw-bold text-primary text-uppercase tracking-widest mb-4 d-flex align-items-center">
+                            <span class="bg-primary opacity-25 me-3" style="width: 32px; height: 1px;"></span>
+                            Identity Information
+                        </h3>
+                        <form method="POST" action="{{ route('users.update', $user) }}">
+                            @csrf
+                            @method('PATCH')
 
-                    <div>
-                        <x-input-label for="name" :value="__('Full Name')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                        <x-text-input id="name" name="name" type="text" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3" :value="old('name', $user->name)" required autofocus />
-                        <x-input-error :messages="$errors->get('name')" class="mt-2 text-rose-400 text-xs font-bold" />
+                            <div class="mb-4">
+                                <label for="name" class="form-label small fw-bold text-secondary text-uppercase tracking-widest">{{ __('Full Name') }}</label>
+                                <input id="name" name="name" type="text" class="form-control bg-dark text-light border-secondary p-3 rounded-3" value="{{ old('name', $user->name) }}" required autofocus>
+                                <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="email" class="form-label small fw-bold text-secondary text-uppercase tracking-widest">{{ __('Email Address') }}</label>
+                                <input id="email" name="email" type="email" class="form-control bg-dark text-light border-secondary p-3 rounded-3 font-monospace" value="{{ old('email', $user->email) }}" required>
+                                <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                            </div>
+
+                            @if(Auth::user()->role === 'administrator')
+                            <div class="mb-4">
+                                <label for="role" class="form-label small fw-bold text-secondary text-uppercase tracking-widest">{{ __('System Role') }}</label>
+                                <select id="role" name="role" class="form-select bg-dark text-light border-secondary p-3 rounded-3">
+                                    <option value="administrator" {{ old('role', $user->role) === 'administrator' ? 'selected' : '' }}>Administrator</option>
+                                    <option value="moderator" {{ old('role', $user->role) === 'moderator' ? 'selected' : '' }}>Moderator</option>
+                                    <option value="data_logger" {{ old('role', $user->role) === 'data_logger' ? 'selected' : '' }}>Data Logger</option>
+                                    <option value="fuel_man" {{ old('role', $user->role) === 'fuel_man' ? 'selected' : '' }}>Fuel Man</option>
+                                    <option value="budgeteer" {{ old('role', $user->role) === 'budgeteer' ? 'selected' : '' }}>Budgeteer</option>
+                                </select>
+                                <x-input-error :messages="$errors->get('role')" class="mt-2" />
+                            </div>
+                            @endif
+
+                            <div class="d-flex justify-content-end pt-4 border-top border-secondary">
+                                <button type="submit" class="btn btn-primary rounded-pill px-5 py-3 fw-bold small text-uppercase tracking-widest shadow-sm">
+                                    {{ __('Update') }}
+                                </button>
+                            </div>
+                        </form>
                     </div>
+                </div>
 
-                    <div>
-                        <x-input-label for="email" :value="__('Email Address')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                        <x-text-input id="email" name="email" type="email" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3 font-mono" :value="old('email', $user->email)" required />
-                        <x-input-error :messages="$errors->get('email')" class="mt-2 text-rose-400 text-xs font-bold" />
+                <!-- Password Reset Section -->
+                <div class="col-12">
+                    <div class="card bg-dark border-danger border-opacity-25 shadow-lg rounded-4 p-4">
+                        <h3 class="small fw-bold text-danger text-uppercase tracking-widest mb-4 d-flex align-items-center">
+                            <span class="bg-danger opacity-25 me-3" style="width: 32px; height: 1px;"></span>
+                            Security Override
+                        </h3>
+                        <form method="POST" action="{{ route('users.reset-password', $user) }}">
+                            @csrf
+
+                            <div class="mb-4">
+                                <label for="password" class="form-label small fw-bold text-secondary text-uppercase tracking-widest">{{ __('New Temporary Password') }}</label>
+                                <input id="password" name="password" type="text" class="form-control bg-dark text-light border-danger border-opacity-25 p-3 rounded-3 font-monospace" required placeholder="Issue a new password">
+                                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                            </div>
+
+                            <div class="d-flex justify-content-end pt-4 border-top border-secondary">
+                                <button type="submit" class="btn btn-danger rounded-pill px-5 py-3 fw-bold small text-uppercase tracking-widest shadow-sm">
+                                    {{ __('Reset Password') }}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-
-                    @if(Auth::user()->role === 'administrator')
-                    <div>
-                        <x-input-label for="role" :value="__('System Role')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                        <select id="role" name="role" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3 shadow-sm focus:border-[#D0BCFF] cursor-pointer">
-                            <option value="administrator" {{ old('role', $user->role) === 'administrator' ? 'selected' : '' }}>Administrator</option>
-                            <option value="moderator" {{ old('role', $user->role) === 'moderator' ? 'selected' : '' }}>Moderator</option>
-                            <option value="data_logger" {{ old('role', $user->role) === 'data_logger' ? 'selected' : '' }}>Data Logger</option>
-                            <option value="fuel_man" {{ old('role', $user->role) === 'fuel_man' ? 'selected' : '' }}>Fuel Man</option>
-                            <option value="budgeteer" {{ old('role', $user->role) === 'budgeteer' ? 'selected' : '' }}>Budgeteer</option>
-                        </select>
-                        <x-input-error :messages="$errors->get('role')" class="mt-2 text-rose-400 text-xs font-bold" />
-                    </div>
-                    @endif
-
-                    <div class="flex items-center justify-end pt-8 border-t border-[#49454F]/30">
-                        <button type="submit" class="inline-flex items-center justify-center px-10 py-4 bg-[#D0BCFF] text-[#381E72] rounded-full font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#EADDFF] focus:outline-none focus:ring-2 focus:ring-[#D0BCFF] transition shadow-lg shadow-[#D0BCFF]/20">
-                            {{ __('Update') }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Password Reset Section -->
-            <div class="bg-[#1C1B1F] rounded-[28px] overflow-hidden border border-[#F2B8B5]/30 shadow-2xl p-10">
-                <h3 class="text-[10px] font-bold text-[#F2B8B5] uppercase tracking-[0.3em] mb-10 flex items-center">
-                    <span class="w-8 h-px bg-[#F2B8B5]/30 mr-4"></span>
-                    Security Override
-                </h3>
-                <form method="POST" action="{{ route('users.reset-password', $user) }}" class="space-y-8">
-                    @csrf
-
-                    <div>
-                        <x-input-label for="password" :value="__('New Temporary Password')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                        <x-text-input id="password" name="password" type="text" class="block w-full bg-[#2D2930] border-[#F2B8B5]/30 text-[#E6E1E5] focus:ring-[#F2B8B5] rounded-xl p-3 font-mono" required placeholder="Issue a new password" />
-                        <x-input-error :messages="$errors->get('password')" class="mt-2 text-rose-400 text-xs font-bold" />
-                    </div>
-
-                    <div class="flex items-center justify-end pt-8 border-t border-[#49454F]/30">
-                        <button type="submit" class="inline-flex items-center justify-center px-10 py-4 bg-[#F2B8B5] text-[#601410] rounded-full font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#F9DEDC] focus:outline-none focus:ring-2 focus:ring-[#F2B8B5] transition shadow-lg shadow-[#F2B8B5]/20">
-                            {{ __('Reset Password') }}
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>

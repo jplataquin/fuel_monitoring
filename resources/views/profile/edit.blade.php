@@ -1,27 +1,35 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-2xl font-bold text-[#E6E1E5] tracking-tight">
+        <h2 class="h2 fw-bold text-light mb-0">
             {{ __('Profile Settings') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8 space-y-8">
-            <div class="p-8 bg-[#2D2930] shadow-xl rounded-[28px] border border-[#49454F]/50">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
+    <div class="py-5">
+        <div class="container-xl">
+            <div class="vstack gap-4">
+                <div class="card bg-dark border-secondary border-opacity-25 rounded-4 shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        <div style="max-width: 600px;">
+                            @include('profile.partials.update-profile-information-form')
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="p-8 bg-[#2D2930] shadow-xl rounded-[28px] border border-[#49454F]/50">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
+                <div class="card bg-dark border-secondary border-opacity-25 rounded-4 shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        <div style="max-width: 600px;">
+                            @include('profile.partials.update-password-form')
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="p-8 bg-[#2D2930] shadow-xl rounded-[28px] border border-[#49454F]/50">
-                <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
+                <div class="card bg-dark border-secondary border-opacity-25 rounded-4 shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        <div style="max-width: 600px;">
+                            @include('profile.partials.delete-user-form')
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

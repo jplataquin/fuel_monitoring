@@ -1,104 +1,174 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-2xl font-bold text-[#E6E1E5] tracking-tight">
+        <h2 class="h4 fw-bold text-light mb-0">
             {{ __('Update Asset') }}: {{ $asset->fleet_no }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-[#1C1B1F] rounded-[28px] overflow-hidden border border-[#49454F]/50 shadow-2xl p-10">
-                <form method="POST" action="{{ route('assets.update', $asset) }}" class="space-y-8">
-                    @csrf
-                    @method('PATCH')
+    <div class="container-xl py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card bg-dark border-secondary border-opacity-25 shadow-lg">
+                    <div class="card-body p-4 p-md-5">
+                        <form method="POST" action="{{ route('assets.update', $asset) }}">
+                            @csrf
+                            @method('PATCH')
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="md:col-span-2">
-                            <x-input-label for="fleet_no" :value="__('Fleet Number')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                            <x-text-input id="fleet_no" name="fleet_no" type="text" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3" :value="old('fleet_no', $asset->fleet_no)" required autofocus />
-                            <x-input-error :messages="$errors->get('fleet_no')" class="mt-2 text-rose-400 text-xs font-bold" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="asset_type_id" :value="__('Equipment Category')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                            <select id="asset_type_id" name="asset_type_id" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] focus:border-[#D0BCFF] rounded-xl shadow-sm p-3 text-sm" required>
-                                @foreach($assetTypes as $type)
-                                    <option value="{{ $type->id }}" {{ old('asset_type_id', $asset->asset_type_id) == $type->id ? 'selected' : '' }} class="bg-[#2D2930]">{{ $type->name }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('asset_type_id')" class="mt-2 text-rose-400 text-xs font-bold" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="plate_no" :value="__('Plate Number')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                            <x-text-input id="plate_no" name="plate_no" type="text" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3 font-mono" :value="old('plate_no', $asset->plate_no)" />
-                            <x-input-error :messages="$errors->get('plate_no')" class="mt-2 text-rose-400 text-xs font-bold" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="fuel_type" :value="__('Fuel Type')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                            <select id="fuel_type" name="fuel_type" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] focus:border-[#D0BCFF] rounded-xl shadow-sm p-3 text-sm" required>
-                                <option value="Diesel" {{ old('fuel_type', $asset->fuel_type) == 'Diesel' ? 'selected' : '' }} class="bg-[#2D2930]">Diesel</option>
-                                <option value="Gasoline" {{ old('fuel_type', $asset->fuel_type) == 'Gasoline' ? 'selected' : '' }} class="bg-[#2D2930]">Gasoline</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('fuel_type')" class="mt-2 text-rose-400 text-xs font-bold" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="tank_capacity" :value="__('Tank Capacity (Liters)')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                            <x-text-input id="tank_capacity" name="tank_capacity" type="number" step="0.01" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3 font-mono" :value="old('tank_capacity', $asset->tank_capacity)" required />
-                            <x-input-error :messages="$errors->get('tank_capacity')" class="mt-2 text-rose-400 text-xs font-bold" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="last_kilometer_reading" :value="__('Last Odo (KM)')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                            <x-text-input id="last_kilometer_reading" name="last_kilometer_reading" type="number" step="0.01" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3 font-mono" :value="old('last_kilometer_reading', $asset->last_kilometer_reading)" required />
-                            <x-input-error :messages="$errors->get('last_kilometer_reading')" class="mt-2 text-rose-400 text-xs font-bold" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="last_engine_hours" :value="__('Last Engine (HR)')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                            <x-text-input id="last_engine_hours" name="last_engine_hours" type="number" step="0.01" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3 font-mono" :value="old('last_engine_hours', $asset->last_engine_hours)" required />
-                            <x-input-error :messages="$errors->get('last_engine_hours')" class="mt-2 text-rose-400 text-xs font-bold" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="last_time" :value="__('Last Time')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                            <x-text-input id="last_time" name="last_time" type="time" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3 font-mono" :value="old('last_time', $asset->last_time)" />
-                            <x-input-error :messages="$errors->get('last_time')" class="mt-2 text-rose-400 text-xs font-bold" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="last_date" :value="__('Last Date')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                            <x-text-input id="last_date" name="last_date" type="date" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3 font-mono" :value="old('last_date', $asset->last_date)" />
-                            <x-input-error :messages="$errors->get('last_date')" class="mt-2 text-rose-400 text-xs font-bold" />
-                        </div>
-
-                        <div class="pt-4 border-t border-[#49454F]/30 md:col-span-2">
-                            <h4 class="text-[10px] font-bold text-[#D0BCFF] uppercase tracking-[0.3em] mb-6">Consumption Factors</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div>
-                                    <x-input-label for="fuel_factor_km" :value="__('Kilometer / Liter')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                                    <x-text-input id="fuel_factor_km" name="fuel_factor_km" type="number" step="0.01" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3 font-mono" :value="old('fuel_factor_km', $asset->fuel_factor_km)" />
-                                    <x-input-error :messages="$errors->get('fuel_factor_km')" class="mt-2 text-rose-400 text-xs font-bold" />
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <label for="fleet_no" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">
+                                        {{ __('Fleet Number') }}
+                                    </label>
+                                    <input id="fleet_no" name="fleet_no" type="text" 
+                                        class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" 
+                                        value="{{ old('fleet_no', $asset->fleet_no) }}" required autofocus>
+                                    @if($errors->has('fleet_no'))
+                                        <div class="text-danger small fw-bold mt-2 ps-1">{{ $errors->first('fleet_no') }}</div>
+                                    @endif
                                 </div>
 
-                                <div>
-                                    <x-input-label for="fuel_factor_hr" :value="__('Liter / Hour')" class="text-[#CAC4D0] text-[10px] font-bold uppercase tracking-[0.2em] ml-1 mb-2" />
-                                    <x-text-input id="fuel_factor_hr" name="fuel_factor_hr" type="number" step="0.01" class="block w-full bg-[#2D2930] border-[#49454F] text-[#E6E1E5] focus:ring-[#D0BCFF] rounded-xl p-3 font-mono" :value="old('fuel_factor_hr', $asset->fuel_factor_hr)" />
-                                    <x-input-error :messages="$errors->get('fuel_factor_hr')" class="mt-2 text-rose-400 text-xs font-bold" />
+                                <div class="col-md-6">
+                                    <label for="asset_type_id" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">
+                                        {{ __('Equipment Category') }}
+                                    </label>
+                                    <select id="asset_type_id" name="asset_type_id" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required>
+                                        @foreach($assetTypes as $type)
+                                            <option value="{{ $type->id }}" {{ old('asset_type_id', $asset->asset_type_id) == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @if($errors->has('asset_type_id'))
+                                        <div class="text-danger small fw-bold mt-2 ps-1">{{ $errors->first('asset_type_id') }}</div>
+                                    @endif
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="plate_no" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">
+                                        {{ __('Plate Number') }}
+                                    </label>
+                                    <input id="plate_no" name="plate_no" type="text" 
+                                        class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" 
+                                        value="{{ old('plate_no', $asset->plate_no) }}">
+                                    @if($errors->has('plate_no'))
+                                        <div class="text-danger small fw-bold mt-2 ps-1">{{ $errors->first('plate_no') }}</div>
+                                    @endif
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="fuel_type" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">
+                                        {{ __('Fuel Type') }}
+                                    </label>
+                                    <select id="fuel_type" name="fuel_type" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required>
+                                        <option value="Diesel" {{ old('fuel_type', $asset->fuel_type) == 'Diesel' ? 'selected' : '' }}>Diesel</option>
+                                        <option value="Gasoline" {{ old('fuel_type', $asset->fuel_type) == 'Gasoline' ? 'selected' : '' }}>Gasoline</option>
+                                    </select>
+                                    @if($errors->has('fuel_type'))
+                                        <div class="text-danger small fw-bold mt-2 ps-1">{{ $errors->first('fuel_type') }}</div>
+                                    @endif
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="tank_capacity" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">
+                                        {{ __('Tank Capacity (Liters)') }}
+                                    </label>
+                                    <input id="tank_capacity" name="tank_capacity" type="number" step="0.01" 
+                                        class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" 
+                                        value="{{ old('tank_capacity', $asset->tank_capacity) }}" required>
+                                    @if($errors->has('tank_capacity'))
+                                        <div class="text-danger small fw-bold mt-2 ps-1">{{ $errors->first('tank_capacity') }}</div>
+                                    @endif
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="last_kilometer_reading" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">
+                                        {{ __('Last Odo (KM)') }}
+                                    </label>
+                                    <input id="last_kilometer_reading" name="last_kilometer_reading" type="number" step="0.01" 
+                                        class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" 
+                                        value="{{ old('last_kilometer_reading', $asset->last_kilometer_reading) }}" required>
+                                    @if($errors->has('last_kilometer_reading'))
+                                        <div class="text-danger small fw-bold mt-2 ps-1">{{ $errors->first('last_kilometer_reading') }}</div>
+                                    @endif
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="last_engine_hours" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">
+                                        {{ __('Last Engine (HR)') }}
+                                    </label>
+                                    <input id="last_engine_hours" name="last_engine_hours" type="number" step="0.01" 
+                                        class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" 
+                                        value="{{ old('last_engine_hours', $asset->last_engine_hours) }}" required>
+                                    @if($errors->has('last_engine_hours'))
+                                        <div class="text-danger small fw-bold mt-2 ps-1">{{ $errors->first('last_engine_hours') }}</div>
+                                    @endif
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="last_time" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">
+                                        {{ __('Last Time') }}
+                                    </label>
+                                    <input id="last_time" name="last_time" type="time" 
+                                        class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" 
+                                        value="{{ old('last_time', $asset->last_time) }}">
+                                    @if($errors->has('last_time'))
+                                        <div class="text-danger small fw-bold mt-2 ps-1">{{ $errors->first('last_time') }}</div>
+                                    @endif
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="last_date" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">
+                                        {{ __('Last Date') }}
+                                    </label>
+                                    <input id="last_date" name="last_date" type="date" 
+                                        class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" 
+                                        value="{{ old('last_date', $asset->last_date) }}">
+                                    @if($errors->has('last_date'))
+                                        <div class="text-danger small fw-bold mt-2 ps-1">{{ $errors->first('last_date') }}</div>
+                                    @endif
+                                </div>
+
+                                <div class="col-12 mt-5">
+                                    <div class="pt-4 border-top border-secondary border-opacity-25">
+                                        <h4 class="small fw-bold text-primary text-uppercase tracking-widest mb-4">Consumption Factors</h4>
+                                        <div class="row g-4">
+                                            <div class="col-md-6">
+                                                <label for="fuel_factor_km" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">
+                                                    {{ __('Kilometers / Liter') }}
+                                                </label>
+                                                <input id="fuel_factor_km" name="fuel_factor_km" type="number" step="0.01" 
+                                                    class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" 
+                                                    value="{{ old('fuel_factor_km', $asset->fuel_factor_km) }}">
+                                                @if($errors->has('fuel_factor_km'))
+                                                    <div class="text-danger small fw-bold mt-2 ps-1">{{ $errors->first('fuel_factor_km') }}</div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label for="fuel_factor_hr" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">
+                                                    {{ __('Liters / Hour') }}
+                                                </label>
+                                                <input id="fuel_factor_hr" name="fuel_factor_hr" type="number" step="0.01" 
+                                                    class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" 
+                                                    value="{{ old('fuel_factor_hr', $asset->fuel_factor_hr) }}">
+                                                @if($errors->has('fuel_factor_hr'))
+                                                    <div class="text-danger small fw-bold mt-2 ps-1">{{ $errors->first('fuel_factor_hr') }}</div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="flex items-center justify-end pt-8 border-t border-[#49454F]/30 gap-x-4">
-                        <a href="{{ route('assets.index') }}" class="text-[#CAC4D0] hover:text-[#E6E1E5] text-xs font-bold uppercase tracking-widest mr-8 transition-colors">Cancel</a>
-                        <button type="submit" class="inline-flex items-center justify-center px-10 py-4 bg-[#D0BCFF] text-[#381E72] rounded-full font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#EADDFF] focus:outline-none focus:ring-2 focus:ring-[#D0BCFF] transition shadow-lg shadow-[#D0BCFF]/20">
-                            {{ __('Update Asset') }}
-                        </button>
+                            <div class="d-flex align-items-center justify-content-end pt-4 mt-5 border-top border-secondary border-opacity-25 gap-3">
+                                <a href="{{ route('assets.index') }}" class="btn btn-link text-secondary text-uppercase small fw-bold tracking-widest text-decoration-none px-4">
+                                    Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary rounded-pill px-5 py-3 fw-bold text-uppercase tracking-widest shadow-sm">
+                                    {{ __('Update') }}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>

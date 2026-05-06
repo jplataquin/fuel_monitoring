@@ -1,7 +1,7 @@
 # Project Context: This is a fuel monitoring management system where authorized users can log the utilization of each asset or equipment based on their kilometer and hour reading. The utilization data is then used to compute the estimated consumed fuel based on the defined factor so the users can issue the prescribed fuel order to replenish the asset or equipment's fuel tank.
 
 ## Overview
-This project is a fuel monitoring management system built with Laravel 12, Livewire 4, MySQL v9.6.0, and Tailwind CSS 4
+This project is a fuel monitoring management system built with Laravel 12, Livewire 4, MySQL v9.6.0, and Bootstrap 5.3 (SCSS).
 
 ## Key Features
 *   User authentication via Laravel Sanctum for API access.
@@ -13,9 +13,10 @@ This project is a fuel monitoring management system built with Laravel 12, Livew
 *   All new features require accompanying unit tests located in the `tests/Feature` directory.
 
 ## UI design standards
-*   Implement dark mode theme
-*   Keep UI design of component and elements such as tables, buttons, and links consitent across all pages
-*   Make all the cursor of clickable anchor links and buttons a pointer on hover   
+*   Implement dark mode theme (Bootstrap `data-bs-theme="dark"`).
+*   Keep UI design of component and elements such as tables, buttons, and links consistent across all pages.
+*   Use Bootstrap's utility classes and components for layout and elements.
+*   Make all the cursor of clickable anchor links and buttons a pointer on hover.   
 
 ## Testing & Development
 Everytime there are changes in the CSS, HTML, or UI in general, run the "npm build" command 

@@ -1,19 +1,23 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-2xl font-bold text-[#E6E1E5] tracking-tight">
+        <h2 class="h4 fw-bold text-light mb-0">
             {{ __('Create Fuel Order') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-[#1C1B1F] rounded-[28px] shadow-2xl p-8 md:p-12 border border-[#49454F]/50">
-                <div class="mb-8 border-b border-[#49454F]/50 pb-6">
-                    <h3 class="text-xl font-bold text-[#D0BCFF]">Issue Fuel Order</h3>
-                    <p class="text-[#CAC4D0] mt-2 text-sm">Calculate fuel consumption and issue an order to replenish the asset's fuel tank.</p>
-                </div>
+    <div class="container-xl py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <div class="card bg-dark border-secondary border-opacity-25 shadow-lg rounded-4 overflow-hidden">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="mb-4 border-bottom border-secondary border-opacity-25 pb-4">
+                            <h3 class="h5 fw-bold text-primary mb-2">Issue Fuel Order</h3>
+                            <p class="text-secondary mb-0 small">Calculate fuel consumption and issue an order to replenish the asset's fuel tank.</p>
+                        </div>
 
-                @livewire('create-fuel-order')
+                        @livewire('create-fuel-order')
+                    </div>
+                </div>
             </div>
         </div>
     </div>
