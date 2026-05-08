@@ -33,6 +33,9 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::get('assets/{asset}/logs', [UtilizationEntryController::class, 'logs'])->name('assets.logs');
     Route::get('assets/{asset}/logs/print', [UtilizationEntryController::class, 'printLogs'])->name('assets.logs.print');
 
+    // Sub Accounts JSON (needed by utilization form for all roles)
+    Route::get('chargeable-accounts/{chargeable_account}/sub-accounts/json', [App\Http\Controllers\SubAccountController::class, 'byAccount'])->name('chargeable-accounts.sub-accounts.json');
+
     // Utilization Entries
     Route::resource('utilization-entries', UtilizationEntryController::class)->except(['index']);
 
@@ -44,7 +47,6 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     // Admin, Moderator and Budgeteer routes for accounts
     Route::middleware('role:administrator,moderator,budgeteer')->group(function () {
         Route::resource('chargeable-accounts', ChargeableAccountController::class);
-        Route::get('chargeable-accounts/{chargeable_account}/sub-accounts/json', [App\Http\Controllers\SubAccountController::class, 'byAccount'])->name('chargeable-accounts.sub-accounts.json');
         Route::get('sub-accounts/{sub_account}', [App\Http\Controllers\SubAccountController::class, 'show'])->name('sub-accounts.show');
         Route::get('sub-accounts/{sub_account}/edit', [App\Http\Controllers\SubAccountController::class, 'edit'])->name('sub-accounts.edit');
         Route::patch('sub-accounts/{sub_account}', [App\Http\Controllers\SubAccountController::class, 'update'])->name('sub-accounts.update');

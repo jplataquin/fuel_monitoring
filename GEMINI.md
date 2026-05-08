@@ -10,7 +10,6 @@ This project is a fuel monitoring management system built with Laravel 12, Livew
 
 ## Code Standards
 *   We follow [Laravel Pint](https://github.com) for code style.
-*   All new features require accompanying unit tests located in the `tests/Feature` directory.
 
 ## UI design standards
 *   Implement dark mode theme (Bootstrap `data-bs-theme="dark"`).
