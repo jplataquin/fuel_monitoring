@@ -44,15 +44,17 @@
         @media print {
             .card { background-color: white !important; color: black !important; border: none !important; box-shadow: none !important; }
             .bg-dark { background-color: white !important; color: black !important; }
-            .text-light, .text-secondary, .text-primary, .text-indigo-600 { color: black !important; }
-            .bg-secondary, .bg-primary { background-color: transparent !important; }
+            .text-light, .text-secondary, .text-primary, .text-indigo-600, .text-success, .text-warning, .text-danger { color: black !important; }
+            .bg-secondary, .bg-primary, .bg-success, .bg-warning, .bg-danger { background-color: transparent !important; }
             .border-secondary { border-color: #dee2e6 !important; }
             .table-dark { --bs-table-bg: white !important; --bs-table-color: black !important; border-color: #dee2e6 !important; }
+            .table-primary, .table-secondary, .table-success, .table-info, .table-warning, .table-danger { --bs-table-bg: #f8f9fa !important; --bs-table-color: black !important; }
             .badge { border: 1px solid black !important; color: black !important; background: transparent !important; }
             .font-monospace { font-family: monospace !important; }
             .print-bg-black { background-color: black !important; color: white !important; -webkit-print-color-adjust: exact; }
             .container-xl { max-width: 100% !important; padding: 0 !important; }
             .rounded-4, .rounded-3, .rounded-pill { border-radius: 0 !important; }
+            .bg-opacity-10, .bg-opacity-20 { background-color: transparent !important; }
         }
     </style>
 

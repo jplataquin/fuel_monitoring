@@ -60,6 +60,32 @@
                 body { background-color: white !important; color: black !important; }
                 .print-none { display: none !important; }
                 .min-vh-100 { min-height: auto !important; }
+                
+                /* Force light theme for printing */
+                .bg-dark, .table-dark, .card, .modal-content, .bg-secondary {
+                    background-color: white !important;
+                    color: black !important;
+                }
+                
+                /* Fix for Bootstrap 5 table-dark and other colored tables */
+                .table-dark, .table-primary, .table-secondary, .table-success, .table-info, .table-warning, .table-danger {
+                    --bs-table-bg: transparent !important;
+                    --bs-table-color: black !important;
+                    --bs-table-border-color: #dee2e6 !important;
+                    color: black !important;
+                }
+                
+                /* Ensure all text colors are readable on white */
+                .text-light, .text-white, .text-secondary, .text-primary, .text-info, .text-success, .text-warning, .text-danger {
+                    color: black !important;
+                }
+                
+                /* Force background colors if specifically needed (e.g. badges) */
+                .badge {
+                    border: 1px solid #000 !important;
+                    color: #000 !important;
+                    background-color: transparent !important;
+                }
             }
         </style>
 
