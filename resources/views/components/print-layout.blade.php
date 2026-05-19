@@ -21,28 +21,28 @@
                 background-color: white !important;
                 color: black !important;
                 font-family: 'Figtree', sans-serif;
-                font-size: 11px !important;
+                font-size: 10px !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
             .print-container {
                 max-width: 100%;
                 margin: 0 auto;
-                padding: 2rem;
+                padding: 1rem;
             }
             .print-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 border-bottom: 2px solid #333;
-                padding-bottom: 1rem;
-                margin-bottom: 2rem;
+                padding-bottom: 0.5rem;
+                margin-bottom: 1rem;
             }
             .print-footer {
-                margin-top: 3rem;
+                margin-top: 2rem;
                 border-top: 1px solid #dee2e6;
-                padding-top: 1rem;
-                font-size: 0.85rem;
+                padding-top: 0.5rem;
+                font-size: 0.75rem;
                 color: #6c757d;
                 display: flex;
                 justify-content: space-between;
@@ -50,7 +50,7 @@
             @media print {
                 @page {
                     size: auto;
-                    margin: 15mm;
+                    margin: 10mm;
                 }
                 body {
                     padding: 0;
@@ -69,10 +69,11 @@
                 width: 100% !important;
                 border-collapse: collapse !important;
                 color: black !important;
+                font-size: 10px !important;
             }
             .table th, .table td {
                 border: 1px solid #dee2e6 !important;
-                padding: 0.5rem !important;
+                padding: 4px 8px !important;
             }
             .table-dark {
                 background-color: transparent !important;

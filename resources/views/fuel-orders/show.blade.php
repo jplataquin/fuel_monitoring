@@ -51,10 +51,28 @@
         <style>
             @media print {
                 @page { size: portrait; margin: 10mm; }
-                .print-slip { border: 2px solid #000; padding: 20px; min-height: 275mm; display: flex; flex-direction: column; justify-content: space-between; background: white; }
-                .table th, .table td { border-color: #000 !important; }
+                .print-slip { 
+                    border: 1.5px solid #000; 
+                    padding: 15px; 
+                    background: white;
+                    font-size: 10px !important;
+                    min-height: auto;
+                }
+                .table th, .table td { border-color: #000 !important; padding: 2px 6px !important; font-size: 9.5px !important; }
+                h1.h3 { font-size: 1.2rem !important; }
+                h2.h4 { font-size: 1rem !important; }
+                h4.small { font-size: 9px !important; }
+                p.h5, p.h4, p.h3, span.h1, span.h2, span.h5 { font-size: 1rem !important; }
+                .mb-4, .mb-5 { margin-bottom: 0.5rem !important; }
+                .p-4, .p-md-5 { padding: 0.25rem !important; }
+                .gap-4 { gap: 0.25rem !important; }
+                .row.g-3, .row.g-4, .row.g-5 { --bs-gutter-y: 0.25rem !important; --bs-gutter-x: 0.5rem !important; }
+                .mt-4, .mt-5 { margin-top: 0.5rem !important; }
+                .pt-4, .pt-5 { padding-top: 0.5rem !important; }
+                .card { border: none !important; }
+                .shadow-lg, .shadow-sm, .shadow-inner { box-shadow: none !important; }
             }
-            .print-slip { border: 1px solid #dee2e6; padding: 2rem; max-width: 800px; margin: 0 auto; background: white; }
+            .print-slip { border: 1px solid #dee2e6; padding: 1.5rem; max-width: 800px; margin: 0 auto; background: white; font-size: 10px; }
         </style>
     @endif
 
