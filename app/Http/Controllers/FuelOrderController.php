@@ -41,11 +41,12 @@ class FuelOrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(FuelOrder $fuelOrder)
+    public function show(FuelOrder $fuelOrder, Request $request)
     {
-        $fuelOrder->load(['asset.assetType', 'creator', 'updater', 'actualizer', 'voider', 'utilizationEntries']);
+        $fuelOrder->load(['asset.assetType', 'creator', 'updater', 'actualizer', 'voider', 'utilizationEntries.chargeableAccount', 'utilizationEntries.subAccount']);
+        $isPrint = $request->boolean('print');
 
-        return view('fuel-orders.show', compact('fuelOrder'));
+        return view('fuel-orders.show', compact('fuelOrder', 'isPrint'));
     }
 
     /**
