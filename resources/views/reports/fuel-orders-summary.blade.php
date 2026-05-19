@@ -13,24 +13,6 @@
         </div>
     </x-slot>
 
-    <style>
-        @media print {
-            .card { border: none !important; shadow: none !important; }
-            .card-header, .btn, .d-print-none { display: none !important; }
-            .bg-dark { background-color: white !important; color: black !important; }
-            .text-light, .text-secondary, .text-primary, .text-success, .text-info { color: black !important; }
-            .table { color: black !important; border-collapse: collapse !important; }
-            .table.border-secondary { border-color: black !important; }
-            .table-dark { --bs-table-bg: white !important; --bs-table-color: black !important; }
-            .table-secondary, .table-primary, .table-success, .table-info, .table-warning, .table-danger { --bs-table-bg: #f8f9fa !important; --bs-table-color: black !important; }
-            .table-striped tbody tr:nth-of-type(odd) { background-color: rgba(0, 0, 0, 0.05) !important; }
-            .table-active { background-color: rgba(0, 0, 0, 0.1) !important; }
-            .container-xl { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
-            .p-4 { padding: 0.5rem !important; }
-            .mb-4 { margin-bottom: 0.5rem !important; }
-        }
-    </style>
-
     <div class="py-5">
         <div class="container-xl" style="max-width: 1280px;">
             <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
