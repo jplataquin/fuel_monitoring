@@ -21,6 +21,7 @@
                 background-color: white !important;
                 color: black !important;
                 font-family: 'Figtree', sans-serif;
+                font-size: 11px !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }

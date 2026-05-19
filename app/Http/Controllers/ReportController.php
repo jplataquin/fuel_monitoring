@@ -40,6 +40,9 @@ class ReportController extends Controller
         if ($assetId || $dateFrom || $dateTo) {
             $entries = $query->orderBy('date', 'asc')
                 ->get()
+                ->sortBy(function($entry) {
+                    return $entry->asset->fleet_no ?? '';
+                })
                 ->groupBy('fuel_order_id');
         }
 
@@ -155,8 +158,10 @@ class ReportController extends Controller
             ];
         }
 
-        // We re-sort by desc for the table below if needed, but in Laravel we can just reverse the collection
-        $fuelOrders = $fuelOrders->sortByDesc('created_at')->values();
+        // Order by asset fleet_no as requested
+        $fuelOrders = $fuelOrders->sortBy(function($order) {
+            return $order->asset->fleet_no ?? '';
+        })->values();
 
         return view('reports.fuel-orders-summary', compact('fuelOrders', 'dateFrom', 'dateTo', 'chartData', 'isPrint'));
     }
