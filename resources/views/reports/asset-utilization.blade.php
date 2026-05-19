@@ -1,63 +1,73 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3">
-            <h2 class="h4 font-weight-bold text-light mb-0">
-                {{ __('Asset Data Report') }}
-            </h2>
-            <div class="d-flex align-items-center gap-2 d-print-none">
-                <button onclick="window.print()" class="btn btn-light rounded-pill px-4 shadow-sm fw-bold text-uppercase small">
-                    <svg class="me-2" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                    Print Report
-                </button>
-            </div>
-        </div>
-    </x-slot>
+@php
+    $layout = $isPrint ? 'print-layout' : 'app-layout';
+    $title = __('Asset Data Report');
+@endphp
 
-    <div class="py-5">
-        <div class="container-xl" style="max-width: 1280px;">
-            <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
-                
-                <!-- Report Filter Form -->
-                <div class="card-header bg-dark border-secondary p-4 d-print-none">
-                    <form action="{{ route('reports.asset-utilization') }}" method="GET" class="row g-3 align-items-end">
-                        <div class="col-md-4">
-                            <label for="asset_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Asset</label>
-                            <select name="asset_id" id="asset_id" class="form-select bg-dark text-light border-secondary" required>
-                                <option value="">Select Asset...</option>
-                                @foreach($assets as $asset)
-                                    <option value="{{ $asset->id }}" {{ $assetId == $asset->id ? 'selected' : '' }}>
-                                        {{ $asset->fleet_no }} ({{ $asset->assetType->name ?? 'N/A' }})
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
-                            <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}" class="form-control bg-dark text-light border-secondary">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="date_to" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date To</label>
-                            <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}" class="form-control bg-dark text-light border-secondary">
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold text-uppercase small shadow-sm py-2">
-                                Generate
-                            </button>
-                        </div>
-                    </form>
+<x-dynamic-component :component="$layout" :title="$title">
+    @if(!$isPrint)
+        <x-slot name="header">
+            <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3">
+                <h2 class="h4 font-weight-bold text-light mb-0">
+                    {{ $title }}
+                </h2>
+                <div class="d-flex align-items-center gap-2 d-print-none">
+                    <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" target="_blank" class="btn btn-light rounded-pill px-4 shadow-sm fw-bold text-uppercase small">
+                        <svg class="me-2" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        Print Report
+                    </a>
                 </div>
+            </div>
+        </x-slot>
+    @endif
+
+    <div class="{{ $isPrint ? '' : 'py-5' }}">
+        <div class="container-xl" style="max-width: 1280px;">
+            <div class="card {{ $isPrint ? 'border-0' : 'bg-dark border-secondary shadow-lg rounded-4 overflow-hidden' }}">
+                
+                @if(!$isPrint)
+                    <!-- Report Filter Form -->
+                    <div class="card-header bg-dark border-secondary p-4 d-print-none">
+                        <form action="{{ route('reports.asset-utilization') }}" method="GET" class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label for="asset_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Asset</label>
+                                <select name="asset_id" id="asset_id" class="form-select bg-dark text-light border-secondary" required>
+                                    <option value="">Select Asset...</option>
+                                    @foreach($assets as $asset)
+                                        <option value="{{ $asset->id }}" {{ $assetId == $asset->id ? 'selected' : '' }}>
+                                            {{ $asset->fleet_no }} ({{ $asset->assetType->name ?? 'N/A' }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
+                                <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}" class="form-control bg-dark text-light border-secondary">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="date_to" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date To</label>
+                                <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}" class="form-control bg-dark text-light border-secondary">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold text-uppercase small shadow-sm py-2">
+                                    Generate
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                @endif
 
                 <!-- Report Content -->
-                <div class="card-body p-0 text-light">
-                    <div class="d-none d-print-block p-4 text-center border-bottom border-secondary">
-                        <h2 class="h3 fw-black text-uppercase tracking-widest">Asset Data Report</h2>
-                        @if($assetId)
-                            <p class="small fw-bold mt-2">Asset: {{ $assets->firstWhere('id', $assetId)?->fleet_no }}</p>
-                        @endif
-                        @if($dateFrom || $dateTo)
-                            <p class="small fw-bold">Date: {{ $dateFrom ?? 'Any' }} - {{ $dateTo ?? 'Any' }}</p>
-                        @endif
-                    </div>
+                <div class="card-body p-0 {{ $isPrint ? 'text-dark' : 'text-light' }}">
+                    @if($isPrint)
+                        <div class="mb-4">
+                            @if($assetId)
+                                <span class="badge bg-light text-dark border me-2">Asset: {{ $assets->firstWhere('id', $assetId)?->fleet_no }}</span>
+                            @endif
+                            @if($dateFrom || $dateTo)
+                                <span class="badge bg-light text-dark border">Period: {{ $dateFrom ?? 'Start' }} to {{ $dateTo ?? 'End' }}</span>
+                            @endif
+                        </div>
+                    @endif
                     
                     @if($assetId && $selectedAsset = $assets->firstWhere('id', $assetId))
                         <div class="p-4 border-bottom border-secondary bg-dark">

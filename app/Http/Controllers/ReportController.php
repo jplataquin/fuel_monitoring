@@ -43,13 +43,16 @@ class ReportController extends Controller
                 ->groupBy('fuel_order_id');
         }
 
-        return view('reports.asset-utilization', compact('assets', 'entries', 'assetId', 'dateFrom', 'dateTo'));
+        $isPrint = $request->boolean('print');
+
+        return view('reports.asset-utilization', compact('assets', 'entries', 'assetId', 'dateFrom', 'dateTo', 'isPrint'));
     }
 
     public function fuelOrdersSummary(Request $request)
     {
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
+        $isPrint = $request->boolean('print');
 
         $query = \App\Models\FuelOrder::with('asset.assetType')
             ->where('status', 'DONE')
@@ -155,7 +158,7 @@ class ReportController extends Controller
         // We re-sort by desc for the table below if needed, but in Laravel we can just reverse the collection
         $fuelOrders = $fuelOrders->sortByDesc('created_at')->values();
 
-        return view('reports.fuel-orders-summary', compact('fuelOrders', 'dateFrom', 'dateTo', 'chartData'));
+        return view('reports.fuel-orders-summary', compact('fuelOrders', 'dateFrom', 'dateTo', 'chartData', 'isPrint'));
     }
 
     public function chargeableAccountSummary(Request $request)
@@ -163,6 +166,7 @@ class ReportController extends Controller
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
         $accountId = $request->input('account_id');
+        $isPrint = $request->boolean('print');
 
         $query = \App\Models\FuelOrder::with(['utilizationEntries.chargeableAccount'])
             ->where('status', 'DONE')
@@ -321,6 +325,6 @@ class ReportController extends Controller
 
         $accounts = \App\Models\ChargeableAccount::orderBy('name')->get();
 
-        return view('reports.chargeable-account-summary', compact('accountSummaries', 'dateFrom', 'dateTo', 'accounts', 'accountId'));
+        return view('reports.chargeable-account-summary', compact('accountSummaries', 'dateFrom', 'dateTo', 'accounts', 'accountId', 'isPrint'));
     }
 }
