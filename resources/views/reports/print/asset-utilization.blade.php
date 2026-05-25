@@ -29,10 +29,10 @@
             <div class="mb-2 d-flex justify-content-between align-items-center">
                 <div>
                     @if($assetId)
-                        <span class="badge text-dark border me-1">Asset: {{ $assets->firstWhere('id', $assetId)?->fleet_no }}</span>
+                        <span class="badge border me-1">Asset: {{ $assets->firstWhere('id', $assetId)?->fleet_no }}</span>
                     @endif
                     @if($dateFrom || $dateTo)
-                        <span class="badge text-dark border">Period: {{ $dateFrom ?? 'Start' }} to {{ $dateTo ?? 'End' }}</span>
+                        <span class="badge border">Period: {{ $dateFrom ?? 'Start' }} to {{ $dateTo ?? 'End' }}</span>
                     @endif
                 </div>
             </div>
@@ -61,25 +61,23 @@
                 <table class="table table-bordered mb-1">
                     <thead class="table-light">
                         <tr class="text-uppercase fw-bold">
-                            <th style="width: 12%;">Date</th>
+                            <th style="width: 10%;">Date</th>
                             <th>Particulars</th>
                             <th>Account / Sub</th>
-                            <th style="width: 10%;">Type</th>
-                            <th class="text-end" style="width: 10%;">KM</th>
-                            <th class="text-end" style="width: 10%;">HR</th>
-                            <th class="text-end" style="width: 12%;">Qty (L)</th>
-                            <th class="text-end" style="width: 12%;">Say (L)</th>
-                            <th class="text-end" style="width: 12%;">Actual (L)</th>
+                            <th style="width: 8%;">Type</th>
+                            <th class="text-end" style="width: 8%;">KM</th>
+                            <th class="text-end" style="width: 8%;">HR</th>
+                            <th class="text-end" style="width: 9%;">Comp. Qty</th>
+                            <th class="text-end" style="width: 9%;">Say Qty</th>
+                            <th class="text-end" style="width: 9%;">Actual Qty</th>
                         </tr>
                     </thead>
                     <tbody>
                         @php
                             $grandTotalKm = 0;
                             $grandTotalHours = 0;
-                            $grandTotalQty = 0;
-                            $grandTotalSay = 0;
                             $grandTotalActual = 0;
-                            
+                            $grandTotalSay = 0;
                         @endphp
                         @forelse($entries as $fuelOrderId => $group)
                             @php
@@ -87,16 +85,16 @@
                                 $groupTotalKm = 0;
                                 $groupTotalHours = 0;
                                 $groupTotalQty = 0;
-
-                                $grandTotalSay += $fuelOrder->say_quantity;
-                                
                                 $grandTotalActual += $fuelOrder->actual_quantity;
+                                $grandTotalSay += $fuelOrder->say_quantity;
                             @endphp
                             <tr class="table-active fw-bold">
-                                <td colspan="9" class="py-1">
+                                <td colspan="7" class="py-1">
                                     FUEL ORDER #{{ str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT) }} 
                                     <span class="fw-normal small ms-2">({{ $fuelOrder->created_at->format('M d, Y') }})</span>
                                 </td>
+                                <td class="text-end py-1">{{ number_format($fuelOrder->say_quantity, 1) }}</td>
+                                <td class="text-end py-1">{{ number_format($fuelOrder->actual_quantity, 1) }}</td>
                             </tr>
 
                             @foreach($group as $entry)
@@ -130,6 +128,8 @@
                                     <td class="text-end">{{ $calcKm > 0 ? number_format($calcKm, 1) : '-' }}</td>
                                     <td class="text-end">{{ $calcHours > 0 ? number_format($calcHours, 1) : '-' }}</td>
                                     <td class="text-end fw-bold">{{ number_format($qty, 1) }}</td>
+                                    <td></td>
+                                    <td></td>
                                 </tr>
                             @endforeach
                             <tr class="fw-bold bg-light">
@@ -137,18 +137,20 @@
                                 <td class="text-end">{{ $groupTotalKm > 0 ? number_format($groupTotalKm, 1) : '-' }}</td>
                                 <td class="text-end">{{ $groupTotalHours > 0 ? number_format($groupTotalHours, 1) : '-' }}</td>
                                 <td class="text-end">{{ number_format($groupTotalQty, 1) }}</td>
+                                <td class="text-end">{{ number_format($fuelOrder->say_quantity, 1) }}</td>
+                                <td class="text-end">{{ number_format($fuelOrder->actual_quantity, 1) }}</td>
                             </tr>
                         @empty
-                            <tr><td colspan="7" class="text-center py-4">No records found.</td></tr>
+                            <tr><td colspan="9" class="text-center py-4">No records found.</td></tr>
                         @endforelse
                         
                         @if($entries->count() > 0)
                             <tr class="table-primary fw-bold" style="background-color: #f0f7ff !important;">
-                                <td colspan="4" class="text-end">GRAND TOTAL (ACTUAL DISPENSED):</td>
+                                <td colspan="4" class="text-end">GRAND TOTAL:</td>
                                 <td class="text-end">{{ $grandTotalKm > 0 ? number_format($grandTotalKm, 1) : '-' }}</td>
                                 <td class="text-end">{{ $grandTotalHours > 0 ? number_format($grandTotalHours, 1) : '-' }}</td>
-                                <td class="text-end">{{ number_format($grandTotalQty,1) }} L</td>
-                                <td class="text-end">{{ number_format($grandTotalSay,1) }} L</td>
+                                <td class="text-end">{{ number_format($grandTotalKm > 0 || $grandTotalHours > 0 ? $grandTotalKm / max(1, $selectedAsset->fuel_factor_km ?? 1) + ($grandTotalHours * ($selectedAsset->fuel_factor_hr ?? 0)) : 0, 1) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalSay, 1) }}</td>
                                 <td class="text-end">{{ number_format($grandTotalActual, 1) }} L</td>
                             </tr>
                         @endif
