@@ -42,7 +42,7 @@
             @endif
             
             <div class="table-responsive d-print-overflow-visible">
-                <table class="table table-striped mb-0 d-print-table d-print-text-dark border-secondary">
+                <table class="table mb-0 d-print-table d-print-text-dark border-secondary">
                     <thead class="table-light">
                         <tr class="text-uppercase small fw-bold tracking-widest">
                             <th class="px-4 py-3 border-secondary d-print-p-1">Date</th>
