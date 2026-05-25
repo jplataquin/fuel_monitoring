@@ -150,7 +150,7 @@
                                 <td class="text-end">{{ $grandTotalKm > 0 ? number_format($grandTotalKm, 1) : '-' }}</td>
                                 <td class="text-end">{{ $grandTotalHours > 0 ? number_format($grandTotalHours, 1) : '-' }}</td>
                                 <td></td>
-                                <td class="text-end">{{ number_format(grandTotalSay,1) }} L</td>
+                                <td class="text-end">{{ number_format($grandTotalSay,1) }} L</td>
                                 <td class="text-end">{{ number_format($grandTotalActual, 1) }} L</td>
                             </tr>
                         @endif
