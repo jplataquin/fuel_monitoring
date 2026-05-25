@@ -134,9 +134,9 @@
                                 <td colspan="4" class="text-end">Sub-Total:</td>
                                 <td class="text-end">{{ $groupTotalKm > 0 ? number_format($groupTotalKm, 1) : '-' }}</td>
                                 <td class="text-end">{{ $groupTotalHours > 0 ? number_format($groupTotalHours, 1) : '-' }}</td>
-                                <td class="text-end">{{ number_format($groupTotalQty, 1) }}</td>
-                                <td class="text-end">{{ number_format($fuelOrder->say_quantity, 1) }}</td>
-                                <td class="text-end">{{ number_format($fuelOrder->actual_quantity, 1) }}</td>
+                                <td class="text-end">{{ number_format($groupTotalQty, 1) }} L</td>
+                                <td class="text-end">{{ number_format($fuelOrder->say_quantity, 1) }} L</td>
+                                <td class="text-end">{{ number_format($fuelOrder->actual_quantity, 1) }} L</td>
                             </tr>
                         @empty
                             <tr><td colspan="9" class="text-center py-4">No records found.</td></tr>
