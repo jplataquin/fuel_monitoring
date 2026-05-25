@@ -74,9 +74,10 @@
                         @php
                             $grandTotalKm = 0;
                             $grandTotalHours = 0;
+                            $grandTotalQty = 0;
                             $grandTotalSay = 0;
                             $grandTotalActual = 0;
-
+                            
                         @endphp
                         @forelse($entries as $fuelOrderId => $group)
                             @php
@@ -118,6 +119,8 @@
                                     
                                     $groupTotalKm += $calcKm; $groupTotalHours += $calcHours; $groupTotalQty += $qty;
                                     $grandTotalKm += $calcKm; $grandTotalHours += $calcHours;
+
+                                    $grandTotalQty += $qty;
                                 @endphp
                                 <tr>
                                     <td>{{ $entry->date->format('M d, Y') }}</td>
@@ -149,7 +152,7 @@
                                 <td colspan="4" class="text-end">GRAND TOTAL (ACTUAL DISPENSED):</td>
                                 <td class="text-end">{{ $grandTotalKm > 0 ? number_format($grandTotalKm, 1) : '-' }}</td>
                                 <td class="text-end">{{ $grandTotalHours > 0 ? number_format($grandTotalHours, 1) : '-' }}</td>
-                                <td></td>
+                                <td class="text-end">{{ number_format($grandTotalQty,1) }} L</td>
                                 <td class="text-end">{{ number_format($grandTotalSay,1) }} L</td>
                                 <td class="text-end">{{ number_format($grandTotalActual, 1) }} L</td>
                             </tr>
