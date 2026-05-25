@@ -123,7 +123,7 @@
                                     <td class="px-4 py-3 small border-secondary">{{ $entry->particulars ?? '—' }}</td>
                                     <td class="px-4 py-3 small border-secondary fw-bold text-primary">{{ $entry->chargeableAccount->name ?? 'Unassigned' }} - {{ $entry->subAccount->name ?? '—' }}</td>
                                     <td class="px-4 py-3 border-secondary">
-                                        <span class="badge border border-secondary rounded-pill text-uppercase tracking-widest" style="font-size: 0.6rem;">{{ $entry->calculation_type ?? 'N/A' }}</span>
+                                        <span class="badge text-dark border border-secondary rounded-pill text-uppercase tracking-widest" style="font-size: 0.6rem;">{{ $entry->calculation_type ?? 'N/A' }}</span>
                                     </td>
                                     <td class="px-4 py-3 text-end font-monospace border-secondary">{{ $calcKm > 0 ? number_format($calcKm, 2) : '-' }}</td>
                                     <td class="px-4 py-3 text-end font-monospace border-secondary">{{ $calcHours > 0 ? number_format($calcHours, 2) : '-' }}</td>
