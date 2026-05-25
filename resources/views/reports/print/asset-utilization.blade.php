@@ -88,10 +88,10 @@
                                     <span class="fw-normal small ms-2">({{ $fuelOrder->created_at->format('M d, Y') }})</span>
                                 </td>
                                 <td class="text-end py-1" colspan="3">
-                                    <span class="badge text-dark border me-1">
+                                    <span class="badge text-dark border border-primary ps-3 pe-3 me-3">
                                         Say: {{ number_format($fuelOrder->say_quantity, 1) }}
                                     </span> 
-                                    <span class="badge text-dark border me-1">
+                                    <span class="badge text-dark border border-primary ps-3 pe-3 me-3">
                                         Actual: {{ number_format($fuelOrder->actual_quantity, 1) }}
                                     </span>
                                 </td>
