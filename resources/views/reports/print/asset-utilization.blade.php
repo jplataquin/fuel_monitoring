@@ -66,6 +66,8 @@
                             <th class="text-end" style="width: 10%;">KM</th>
                             <th class="text-end" style="width: 10%;">HR</th>
                             <th class="text-end" style="width: 12%;">Qty (L)</th>
+                            <th class="text-end" style="width: 12%;">Say (L)</th>
+                            <th class="text-end" style="width: 12%;">Actual (L)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,17 +85,9 @@
                                 $grandTotalActual += $fuelOrder->actual_quantity;
                             @endphp
                             <tr class="table-active fw-bold">
-                                <td colspan="4" class="py-1">
+                                <td colspan="9" class="py-1">
                                     FUEL ORDER #{{ str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT) }} 
                                     <span class="fw-normal small ms-2">({{ $fuelOrder->created_at->format('M d, Y') }})</span>
-                                </td>
-                                <td class="text-end py-1" colspan="3">
-                                    <span class="badge text-dark border border-primary ps-3 pe-3 me-3">
-                                        Say: {{ number_format($fuelOrder->say_quantity, 1) }}
-                                    </span> 
-                                    <span class="badge text-dark border border-primary ps-3 pe-3 me-3">
-                                        Actual: {{ number_format($fuelOrder->actual_quantity, 1) }}
-                                    </span>
                                 </td>
                             </tr>
 
@@ -128,6 +122,8 @@
                                     <td class="text-end">{{ $calcKm > 0 ? number_format($calcKm, 1) : '-' }}</td>
                                     <td class="text-end">{{ $calcHours > 0 ? number_format($calcHours, 1) : '-' }}</td>
                                     <td class="text-end fw-bold">{{ number_format($qty, 1) }}</td>
+                                    <td></td>
+                                    <td></td>
                                 </tr>
                             @endforeach
                             <tr class="fw-bold bg-light">
@@ -135,9 +131,12 @@
                                 <td class="text-end">{{ $groupTotalKm > 0 ? number_format($groupTotalKm, 1) : '-' }}</td>
                                 <td class="text-end">{{ $groupTotalHours > 0 ? number_format($groupTotalHours, 1) : '-' }}</td>
                                 <td class="text-end">{{ number_format($groupTotalQty, 1) }}</td>
+                                <td>{{ number_format($fuelOrder->say_quantity, 1) }}</td>
+                                <td>{{ number_format($fuelOrder->actual_quantity, 1) }}</td>
+
                             </tr>
                         @empty
-                            <tr><td colspan="7" class="text-center py-4">No records found.</td></tr>
+                            <tr><td colspan="9" class="text-center py-4">No records found.</td></tr>
                         @endforelse
                         
                         @if($entries->count() > 0)
@@ -145,6 +144,8 @@
                                 <td colspan="4" class="text-end">GRAND TOTAL (ACTUAL DISPENSED):</td>
                                 <td class="text-end">{{ $grandTotalKm > 0 ? number_format($grandTotalKm, 1) : '-' }}</td>
                                 <td class="text-end">{{ $grandTotalHours > 0 ? number_format($grandTotalHours, 1) : '-' }}</td>
+                                <td></td>
+                                <td></td>
                                 <td class="text-end">{{ number_format($grandTotalActual, 1) }} L</td>
                             </tr>
                         @endif
