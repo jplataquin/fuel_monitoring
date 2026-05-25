@@ -1,74 +1,58 @@
 @php
-    $layout = $isPrint ? 'print-layout' : 'app-layout';
     $title = __('Asset Data Report');
 @endphp
 
-<x-dynamic-component :component="$layout" :title="$title">
-    @if(!$isPrint)
-        <x-slot name="header">
-            <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3">
-                <h2 class="h4 font-weight-bold text-light mb-0">
-                    {{ $title }}
-                </h2>
-                <div class="d-flex align-items-center gap-2 d-print-none">
-                    <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" target="_blank" class="btn btn-light rounded-pill px-4 shadow-sm fw-bold text-uppercase small">
-                        <svg class="me-2" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                        Print Report
-                    </a>
-                </div>
+<x-app-layout :title="$title">
+    <x-slot name="header">
+        <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3">
+            <h2 class="h4 font-weight-bold text-light mb-0">
+                {{ $title }}
+            </h2>
+            <div class="d-flex align-items-center gap-2 d-print-none">
+                <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" target="_blank" class="btn btn-light rounded-pill px-4 shadow-sm fw-bold text-uppercase small">
+                    <svg class="me-2" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    Print Report
+                </a>
             </div>
-        </x-slot>
-    @endif
+        </div>
+    </x-slot>
 
-    <div class="{{ $isPrint ? '' : 'py-5' }}">
+    <div class="py-5">
         <div class="container-xl" style="max-width: 1280px;">
-            <div class="card {{ $isPrint ? 'border-0' : 'bg-dark border-secondary shadow-lg rounded-4 overflow-hidden' }}">
+            <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
                 
-                @if(!$isPrint)
-                    <!-- Report Filter Form -->
-                    <div class="card-header bg-dark border-secondary p-4 d-print-none">
-                        <form action="{{ route('reports.asset-utilization') }}" method="GET" class="row g-3 align-items-end">
-                            <div class="col-md-4">
-                                <label for="asset_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Asset</label>
-                                <select name="asset_id" id="asset_id" class="form-select bg-dark text-light border-secondary" required>
-                                    <option value="">Select Asset...</option>
-                                    @foreach($assets as $asset)
-                                        <option value="{{ $asset->id }}" {{ $assetId == $asset->id ? 'selected' : '' }}>
-                                            {{ $asset->fleet_no }} ({{ $asset->assetType->name ?? 'N/A' }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
-                                <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}" class="form-control bg-dark text-light border-secondary">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="date_to" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date To</label>
-                                <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}" class="form-control bg-dark text-light border-secondary">
-                            </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold text-uppercase small shadow-sm py-2">
-                                    Generate
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                @endif
+                <!-- Report Filter Form -->
+                <div class="card-header bg-dark border-secondary p-4 d-print-none">
+                    <form action="{{ route('reports.asset-utilization') }}" method="GET" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="asset_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Asset</label>
+                            <select name="asset_id" id="asset_id" class="form-select bg-dark text-light border-secondary" required>
+                                <option value="">Select Asset...</option>
+                                @foreach($assets as $asset)
+                                    <option value="{{ $asset->id }}" {{ $assetId == $asset->id ? 'selected' : '' }}>
+                                        {{ $asset->fleet_no }} ({{ $asset->assetType->name ?? 'N/A' }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
+                            <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}" class="form-control bg-dark text-light border-secondary">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="date_to" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date To</label>
+                            <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}" class="form-control bg-dark text-light border-secondary">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold text-uppercase small shadow-sm py-2">
+                                Generate
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
                 <!-- Report Content -->
-                <div class="card-body p-0 {{ $isPrint ? 'text-dark' : 'text-light' }}">
-                    @if($isPrint)
-                        <div class="mb-4">
-                            @if($assetId)
-                                <span class="badge bg-light text-dark border me-2">Asset: {{ $assets->firstWhere('id', $assetId)?->fleet_no }}</span>
-                            @endif
-                            @if($dateFrom || $dateTo)
-                                <span class="badge bg-light text-dark border">Period: {{ $dateFrom ?? 'Start' }} to {{ $dateTo ?? 'End' }}</span>
-                            @endif
-                        </div>
-                    @endif
-                    
+                <div class="card-body p-0 text-light">
                     @if($assetId && $selectedAsset = $assets->firstWhere('id', $assetId))
                         <div class="p-4 border-bottom border-secondary bg-dark">
                             <h3 class="small fw-bold text-primary text-uppercase tracking-widest mb-4 d-flex align-items-center">
@@ -78,7 +62,7 @@
                             <div class="row g-4">
                                 <div class="col-sm-6 col-md-4 col-lg">
                                     <div class="d-flex align-items-start gap-3">
-                                        <div class="p-2 rounded bg-primary bg-opacity-10 d-print-bg-light">
+                                        <div class="p-2 rounded bg-primary bg-opacity-10">
                                             <svg width="16" height="16" class="text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                                         </div>
                                         <div>
@@ -89,7 +73,7 @@
                                 </div>
                                 <div class="col-sm-6 col-md-4 col-lg">
                                     <div class="d-flex align-items-start gap-3">
-                                        <div class="p-2 rounded bg-primary bg-opacity-10 d-print-bg-light">
+                                        <div class="p-2 rounded bg-primary bg-opacity-10">
                                             <svg width="16" height="16" class="text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg>
                                         </div>
                                         <div>
@@ -100,7 +84,7 @@
                                 </div>
                                 <div class="col-sm-6 col-md-4 col-lg">
                                     <div class="d-flex align-items-start gap-3">
-                                        <div class="p-2 rounded bg-success bg-opacity-10 d-print-bg-light">
+                                        <div class="p-2 rounded bg-success bg-opacity-10">
                                             <svg width="16" height="16" class="text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
                                         </div>
                                         <div>
@@ -111,7 +95,7 @@
                                 </div>
                                 <div class="col-sm-6 col-md-4 col-lg">
                                     <div class="d-flex align-items-start gap-3">
-                                        <div class="p-2 rounded bg-info bg-opacity-10 d-print-bg-light">
+                                        <div class="p-2 rounded bg-info bg-opacity-10">
                                             <svg width="16" height="16" class="text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                                         </div>
                                         <div>
@@ -122,7 +106,7 @@
                                 </div>
                                 <div class="col-sm-6 col-md-4 col-lg">
                                     <div class="d-flex align-items-start gap-3">
-                                        <div class="p-2 rounded bg-info bg-opacity-10 d-print-bg-light">
+                                        <div class="p-2 rounded bg-info bg-opacity-10">
                                             <svg width="16" height="16" class="text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                         </div>
                                         <div>
@@ -135,17 +119,17 @@
                         </div>
                     @endif
                     
-                    <div class="table-responsive d-print-overflow-visible">
-                        <table class="table {{ $isPrint ? 'table-striped' : 'table-dark table-hover table-striped' }} mb-0 d-print-table d-print-text-dark border-secondary">
-                            <thead class="{{ $isPrint ? 'table-light' : 'table-secondary' }}">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover table-striped mb-0 border-secondary">
+                            <thead class="table-secondary">
                                 <tr class="text-uppercase small fw-bold tracking-widest">
-                                    <th class="px-4 py-3 border-secondary d-print-p-1">Date</th>
-                                    <th class="px-4 py-3 border-secondary d-print-p-1">Particulars</th>
-                                    <th class="px-4 py-3 border-secondary d-print-p-1">Account / Sub Account</th>
-                                    <th class="px-4 py-3 border-secondary d-print-p-1">Calc. Type</th>
-                                    <th class="px-4 py-3 border-secondary text-end d-print-p-1">Calc. KM</th>
-                                    <th class="px-4 py-3 border-secondary text-end d-print-p-1">Calc. HR</th>
-                                    <th class="px-4 py-3 border-secondary text-end d-print-p-1">Computed Qty</th>
+                                    <th class="px-4 py-3 border-secondary">Date</th>
+                                    <th class="px-4 py-3 border-secondary">Particulars</th>
+                                    <th class="px-4 py-3 border-secondary">Account / Sub Account</th>
+                                    <th class="px-4 py-3 border-secondary">Calc. Type</th>
+                                    <th class="px-4 py-3 border-secondary text-end">Calc. KM</th>
+                                    <th class="px-4 py-3 border-secondary text-end">Calc. HR</th>
+                                    <th class="px-4 py-3 border-secondary text-end">Computed Qty</th>
                                 </tr>
                             </thead>
                             <tbody class="border-secondary">
@@ -242,15 +226,12 @@
                                 @empty
                                     <tr>
                                         <td colspan="7" class="px-4 py-5 text-center border-secondary">
-                                            <div class="py-5 d-print-none">
+                                            <div class="py-5">
                                                 <div class="bg-secondary bg-opacity-10 d-inline-flex p-3 rounded-4 mb-3">
                                                     <svg width="32" height="32" class="text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                                 </div>
                                                 <p class="fw-bold mb-1">No report data to display.</p>
                                                 <p class="small text-secondary mb-0">Please select an asset and date range to generate the report.</p>
-                                            </div>
-                                            <div class="d-none d-print-block text-dark">
-                                                No records found for the selected parameters.
                                             </div>
                                         </td>
                                     </tr>
@@ -279,14 +260,14 @@
                     
                     @if($entries->count() > 0)
                         <!-- Card Footer / Final Summary -->
-                        <div class="p-4 border-top border-secondary bg-dark d-print-bg-white rounded-bottom-4">
-                            <h3 class="small fw-bold text-success d-print-text-success text-uppercase tracking-widest mb-4 d-flex align-items-center">
+                        <div class="p-4 border-top border-secondary bg-dark rounded-bottom-4">
+                            <h3 class="small fw-bold text-success text-uppercase tracking-widest mb-4 d-flex align-items-center">
                                 <span class="bg-success opacity-25 me-3" style="width: 32px; height: 1px;"></span>
                                 Performance Metrics (Actualized)
                             </h3>
                             <div class="row g-4">
                                 <div class="col-md-6">
-                                    <div class="card bg-dark border-secondary p-4 d-print-bg-light">
+                                    <div class="card bg-dark border-secondary p-4">
                                         <div class="d-flex justify-content-between">
                                             <div>
                                                 <p class="small fw-bold text-secondary text-uppercase tracking-widest mb-1">Actual KM Factor</p>
@@ -321,7 +302,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="card bg-dark border-secondary p-4 d-print-bg-light">
+                                    <div class="card bg-dark border-secondary p-4">
                                         <div class="d-flex justify-content-between">
                                             <div>
                                                 <p class="small fw-bold text-secondary text-uppercase tracking-widest mb-1">Actual Hour Factor</p>
@@ -361,4 +342,4 @@
             </div>
         </div>
     </div>
-</x-dynamic-component>
+</x-app-layout>

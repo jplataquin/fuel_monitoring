@@ -1,80 +1,65 @@
 @php
-    $layout = $isPrint ? 'print-layout' : 'app-layout';
     $title = __('Fuel Orders Summary Report');
 @endphp
 
-<x-dynamic-component :component="$layout" :title="$title">
-    @if(!$isPrint)
-        <x-slot name="header">
-            <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3">
-                <h2 class="h4 font-weight-bold text-light mb-0">
-                    {{ $title }}
-                </h2>
-                <div class="d-flex align-items-center gap-2 d-print-none">
-                    <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" target="_blank" class="btn btn-light rounded-pill px-4 shadow-sm fw-bold text-uppercase small">
-                        <svg class="me-2" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                        Print Report
-                    </a>
-                </div>
+<x-app-layout :title="$title">
+    <x-slot name="header">
+        <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3">
+            <h2 class="h4 font-weight-bold text-light mb-0">
+                {{ $title }}
+            </h2>
+            <div class="d-flex align-items-center gap-2 d-print-none">
+                <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" target="_blank" class="btn btn-light rounded-pill px-4 shadow-sm fw-bold text-uppercase small">
+                    <svg class="me-2" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    Print Report
+                </a>
             </div>
-        </x-slot>
-    @endif
+        </div>
+    </x-slot>
 
-    <div class="{{ $isPrint ? '' : 'py-5' }}">
+    <div class="py-5">
         <div class="container-xl" style="max-width: 1280px;">
-            <div class="card {{ $isPrint ? 'border-0' : 'bg-dark border-secondary shadow-lg rounded-4 overflow-hidden' }}">
+            <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
                 
-                @if(!$isPrint)
-                    <!-- Report Filter Form -->
-                    <div class="card-header bg-dark border-secondary p-4 d-print-none">
-                        <form action="{{ route('reports.fuel-orders') }}" method="GET" class="row g-3 align-items-end">
-                            <div class="col-md-4">
-                                <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
-                                <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}" class="form-control bg-dark text-light border-secondary" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="date_to" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date To</label>
-                                <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}" class="form-control bg-dark text-light border-secondary" required>
-                            </div>
-                            <div class="col-md-4">
-                                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold text-uppercase small shadow-sm py-2">
-                                    Generate
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                @endif
+                <!-- Report Filter Form -->
+                <div class="card-header bg-dark border-secondary p-4 d-print-none">
+                    <form action="{{ route('reports.fuel-orders') }}" method="GET" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
+                            <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}" class="form-control bg-dark text-light border-secondary" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="date_to" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date To</label>
+                            <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}" class="form-control bg-dark text-light border-secondary" required>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold text-uppercase small shadow-sm py-2">
+                                Generate
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
                 <!-- Report Content -->
-                <div class="card-body p-0 {{ $isPrint ? 'text-dark' : 'text-light' }}">
-                    @if($isPrint)
-                        <div class="mb-4">
-                            @if($dateFrom || $dateTo)
-                                <span class="badge bg-light text-dark border">Period: {{ $dateFrom ?? 'Start' }} to {{ $dateTo ?? 'End' }}</span>
-                            @endif
+                <div class="card-body p-0 text-light">
+                    @if($fuelOrders->isNotEmpty())
+                        <div class="p-4 border-bottom border-secondary d-print-none">
+                            <h3 class="h5 fw-bold text-light mb-4">Fuel Consumption Trend</h3>
+                            <div class="w-100" style="height: 320px;">
+                                <canvas id="fuelConsumptionChart"></canvas>
+                            </div>
                         </div>
                     @endif
-
-                    @if($fuelOrders->isNotEmpty())
-                        @if(!$isPrint)
-                            <div class="p-4 border-bottom border-secondary d-print-none">
-                                <h3 class="h5 fw-bold text-light mb-4">Fuel Consumption Trend</h3>
-                                <div class="w-100" style="height: 320px;">
-                                    <canvas id="fuelConsumptionChart"></canvas>
-                                </div>
-                            </div>
-                        @endif
-                    @endif
                     
-                    <div class="table-responsive d-print-overflow-visible">
-                        <table class="table {{ $isPrint ? 'table-bordered' : 'table-dark table-hover table-striped' }} mb-0 d-print-table d-print-text-dark border-secondary">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover table-striped mb-0 border-secondary">
                             <thead class="table-secondary">
                                 <tr class="text-uppercase small fw-bold tracking-widest">
-                                    <th class="px-4 py-3 border-secondary d-print-p-1">ID</th>
-                                    <th class="px-4 py-3 border-secondary d-print-p-1">Asset</th>
-                                    <th class="px-4 py-3 border-secondary d-print-p-1">Period</th>
-                                    <th class="px-4 py-3 border-secondary text-end d-print-p-1">Say Qty</th>
-                                    <th class="px-4 py-3 border-secondary text-end d-print-p-1">Actual Qty</th>
+                                    <th class="px-4 py-3 border-secondary">ID</th>
+                                    <th class="px-4 py-3 border-secondary">Asset</th>
+                                    <th class="px-4 py-3 border-secondary">Period</th>
+                                    <th class="px-4 py-3 border-secondary text-end">Say Qty</th>
+                                    <th class="px-4 py-3 border-secondary text-end">Actual Qty</th>
                                 </tr>
                             </thead>
                             <tbody class="border-secondary">
@@ -108,15 +93,12 @@
                                 @empty
                                     <tr>
                                         <td colspan="5" class="px-4 py-5 text-center border-secondary">
-                                            <div class="py-5 d-print-none">
+                                            <div class="py-5">
                                                 <div class="bg-secondary bg-opacity-10 d-inline-flex p-3 rounded-4 mb-3">
                                                     <svg width="32" height="32" class="text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                                 </div>
                                                 <p class="fw-bold mb-1">No report data to display.</p>
                                                 <p class="small text-secondary mb-0">Please select a date range to generate the report.</p>
-                                            </div>
-                                            <div class="d-none d-print-block text-dark">
-                                                No records found for the selected parameters.
                                             </div>
                                         </td>
                                     </tr>
@@ -228,4 +210,4 @@
             });
         </script>
     @endif
-</x-dynamic-component>
+</x-app-layout>

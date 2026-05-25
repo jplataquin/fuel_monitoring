@@ -47,8 +47,9 @@ class ReportController extends Controller
         }
 
         $isPrint = $request->boolean('print');
+        $view = $isPrint ? 'reports.print.asset-utilization' : 'reports.asset-utilization';
 
-        return view('reports.asset-utilization', compact('assets', 'entries', 'assetId', 'dateFrom', 'dateTo', 'isPrint'));
+        return view($view, compact('assets', 'entries', 'assetId', 'dateFrom', 'dateTo', 'isPrint'));
     }
 
     public function fuelOrdersSummary(Request $request)
@@ -163,7 +164,9 @@ class ReportController extends Controller
             return $order->asset->fleet_no ?? '';
         })->values();
 
-        return view('reports.fuel-orders-summary', compact('fuelOrders', 'dateFrom', 'dateTo', 'chartData', 'isPrint'));
+        $view = $isPrint ? 'reports.print.fuel-orders-summary' : 'reports.fuel-orders-summary';
+
+        return view($view, compact('fuelOrders', 'dateFrom', 'dateTo', 'chartData', 'isPrint'));
     }
 
     public function chargeableAccountSummary(Request $request)
@@ -330,6 +333,8 @@ class ReportController extends Controller
 
         $accounts = \App\Models\ChargeableAccount::orderBy('name')->get();
 
-        return view('reports.chargeable-account-summary', compact('accountSummaries', 'dateFrom', 'dateTo', 'accounts', 'accountId', 'isPrint'));
+        $view = $isPrint ? 'reports.print.chargeable-account-summary' : 'reports.chargeable-account-summary';
+
+        return view($view, compact('accountSummaries', 'dateFrom', 'dateTo', 'accounts', 'accountId', 'isPrint'));
     }
 }
