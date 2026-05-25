@@ -70,7 +70,7 @@
                             @endphp
                             <!-- Group Header -->
                             <tr class="">
-                                <td colspan="7" class="px-4 py-3 border-secondary">
+                                <td colspan="7" class="px-4 border-secondary">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="d-flex align-items-center gap-3">
                                             <span class="fw-bold text-primary font-monospace">FUEL ORDER #{{ str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT) }}</span>
@@ -165,7 +165,7 @@
                                 <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary text-info">
                                     {{ $grandTotalHours > 0 ? number_format($grandTotalHours, 2) : '-' }}
                                 </td>
-                                <td class="px-4 py-4 text-end font-monospace h5 fw-bold text-success border-secondary mb-0">
+                                <td class="px-4 py-4 text-end font-monospace fw-bold text-success border-secondary mb-0">
                                     {{ number_format($grandTotalActual, 2) }} L
                                 </td>
                             </tr>
