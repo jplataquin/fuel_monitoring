@@ -66,13 +66,13 @@
                     display: none !important;
                 }
                 
-                /* Aggressively override dark mode */
+                /* Aggressively override dark mode and remove all backgrounds */
                 .table-dark {
                     --bs-table-bg: transparent !important;
                     --bs-table-color: black !important;
                     --bs-table-border-color: #dee2e6 !important;
-                    --bs-table-striped-bg: #f8f9fa !important;
-                    --bs-table-active-bg: #f2f2f2 !important;
+                    --bs-table-striped-bg: transparent !important;
+                    --bs-table-active-bg: transparent !important;
                     background-color: transparent !important;
                     color: black !important;
                     border-color: #dee2e6 !important;
@@ -83,15 +83,19 @@
                     border-color: #dee2e6 !important;
                 }
                 .table-secondary {
-                    --bs-table-bg: #e9ecef !important;
+                    --bs-table-bg: transparent !important;
                     --bs-table-color: black !important;
                 }
                 .table-active {
-                    --bs-table-bg: #f8f9fa !important;
+                    --bs-table-bg: transparent !important;
                     --bs-table-color: black !important;
-                    background-color: #f8f9fa !important;
+                    background-color: transparent !important;
                 }
-                .bg-dark {
+                .table-striped > tbody > tr:nth-of-type(odd) > * {
+                    --bs-table-bg-type: transparent !important;
+                    background-color: transparent !important;
+                }
+                .bg-dark, .bg-light, .bg-secondary, .bg-primary, .bg-success, .bg-info, .bg-warning, .bg-danger {
                     background-color: transparent !important;
                     color: black !important;
                     border: 1px solid #dee2e6 !important;
@@ -111,28 +115,21 @@
                     background-color: transparent !important;
                     color: black !important;
                 }
-                .bg-primary, .bg-success, .bg-info, .bg-warning, .bg-danger {
-                    background-color: transparent !important;
-                    border: 1px solid #dee2e6 !important;
-                    color: black !important;
-                }
                 .text-primary, .text-success, .text-info, .text-warning, .text-danger {
                     color: black !important;
                     font-weight: bold !important;
                 }
                 
                 /* Custom d-print utility classes */
-                .d-print-bg-light {
-                    background-color: #f8f9fa !important;
-                }
-                .d-print-bg-white {
-                    background-color: white !important;
+                .d-print-bg-light, .d-print-bg-white {
+                    background-color: transparent !important;
                 }
                 .d-print-text-dark {
                     color: black !important;
                 }
                 .d-print-text-success {
-                    color: #198754 !important;
+                    color: black !important;
+                    font-weight: bold !important;
                 }
                 .d-print-overflow-visible {
                     overflow: visible !important;
