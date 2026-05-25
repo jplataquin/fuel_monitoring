@@ -16,7 +16,7 @@
             </div>
             
             @if($assetId && $selectedAsset = $assets->firstWhere('id', $assetId))
-                <div class="p-4 border-bottom border-secondary bg-dark mb-4">
+                <div class="p-4 border-bottom border-secondary mb-4">
                     <h3 class="small fw-bold text-primary text-uppercase tracking-widest mb-4 d-flex align-items-center">
                         Technical Specifications
                     </h3>
