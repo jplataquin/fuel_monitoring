@@ -3,58 +3,72 @@
 @endphp
 
 <x-print-layout :title="$title">
+    <style>
+        /* Extreme compression for print */
+        .print-container { padding: 0.25rem !important; }
+        .table th, .table td { 
+            padding: 2px 4px !important; 
+            font-size: 8.5px !important;
+            line-height: 1.1 !important;
+        }
+        .card-body { padding: 0 !important; }
+        .mb-4 { margin-bottom: 0.5rem !important; }
+        .mt-4 { margin-top: 0.5rem !important; }
+        .p-4 { padding: 0.5rem !important; }
+        .py-4 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+        .h2, .h3, .h5, .h6 { margin-bottom: 0.25rem !important; font-size: 10px !important; }
+        .badge { font-size: 8px !important; padding: 2px 4px !important; }
+        .row.g-4 { --bs-gutter-x: 0.5rem; --bs-gutter-y: 0.25rem; }
+    </style>
+
     <div class="card border-0">
         <!-- Report Content -->
-        <div class="card-body p-0 text-dark">
-            <div class="mb-4">
-                @if($assetId)
-                    <span class="badge bg-light text-dark border me-2">Asset: {{ $assets->firstWhere('id', $assetId)?->fleet_no }}</span>
-                @endif
-                @if($dateFrom || $dateTo)
-                    <span class="badge bg-light text-dark border">Period: {{ $dateFrom ?? 'Start' }} to {{ $dateTo ?? 'End' }}</span>
-                @endif
+        <div class="card-body text-dark">
+            <div class="mb-2 d-flex justify-content-between align-items-center">
+                <div>
+                    @if($assetId)
+                        <span class="badge border me-1">Asset: {{ $assets->firstWhere('id', $assetId)?->fleet_no }}</span>
+                    @endif
+                    @if($dateFrom || $dateTo)
+                        <span class="badge border">Period: {{ $dateFrom ?? 'Start' }} to {{ $dateTo ?? 'End' }}</span>
+                    @endif
+                </div>
             </div>
             
             @if($assetId && $selectedAsset = $assets->firstWhere('id', $assetId))
-                <div class="p-4 border-bottom border-secondary mb-4">
-                    <h3 class="small fw-bold text-primary text-uppercase tracking-widest mb-4 d-flex align-items-center">
-                        Technical Specifications
-                    </h3>
-                    <div class="row g-4">
+                <div class="p-2 border border-secondary mb-2">
+                    <h3 class="small fw-bold text-uppercase tracking-widest mb-1">Technical Specs</h3>
+                    <div class="row">
                         <div class="col-3">
-                            <p class="small fw-bold text-secondary text-uppercase tracking-widest mb-1" style="font-size: 0.65rem;">Equipment Type</p>
-                            <p class="fw-bold mb-0">{{ $selectedAsset->assetType->name ?? 'N/A' }}</p>
+                            <span class="text-secondary small" style="font-size: 7px;">Type:</span> {{ $selectedAsset->assetType->name ?? 'N/A' }}
                         </div>
                         <div class="col-3">
-                            <p class="small fw-bold text-secondary text-uppercase tracking-widest mb-1" style="font-size: 0.65rem;">Fleet / Plate No.</p>
-                            <p class="fw-bold mb-0">{{ $selectedAsset->fleet_no }} <span class="small fw-normal text-secondary">({{ $selectedAsset->plate_no ?? 'N/A' }})</span></p>
+                            <span class="text-secondary small" style="font-size: 7px;">Fleet:</span> {{ $selectedAsset->fleet_no }}
                         </div>
                         <div class="col-3">
-                            <p class="small fw-bold text-secondary text-uppercase tracking-widest mb-1" style="font-size: 0.65rem;">Fuel Type & Cap.</p>
-                            <p class="fw-bold mb-0 text-success">{{ $selectedAsset->fuel_type ?? 'N/A' }} <span class="small fw-normal">({{ $selectedAsset->tank_capacity ? number_format($selectedAsset->tank_capacity, 2) . ' L' : 'N/A' }})</span></p>
+                            <span class="text-secondary small" style="font-size: 7px;">Fuel/Cap:</span> {{ $selectedAsset->fuel_type }} ({{ $selectedAsset->tank_capacity ? number_format($selectedAsset->tank_capacity, 1) . 'L' : 'N/A' }})
                         </div>
-                        <div class="col-3">
-                            <p class="small fw-bold text-secondary text-uppercase tracking-widest mb-1" style="font-size: 0.65rem;">Factor (KM/HR)</p>
-                            <p class="fw-bold mb-0 text-info font-monospace">{{ number_format($selectedAsset->fuel_factor_km, 2) }} / {{ number_format($selectedAsset->fuel_factor_hr, 2) }}</p>
+                        <div class="col-3 text-end">
+                            <span class="text-secondary small" style="font-size: 7px;">Factors:</span> {{ number_format($selectedAsset->fuel_factor_km, 2) }} / {{ number_format($selectedAsset->fuel_factor_hr, 2) }}
                         </div>
                     </div>
                 </div>
             @endif
             
-            <div class="table-responsive d-print-overflow-visible">
-                <table class="table mb-0 d-print-table d-print-text-dark border-secondary">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-1">
                     <thead class="table-light">
-                        <tr class="text-uppercase small fw-bold tracking-widest">
-                            <th class="px-4 py-3 border-secondary d-print-p-1">Date</th>
-                            <th class="px-4 py-3 border-secondary d-print-p-1">Particulars</th>
-                            <th class="px-4 py-3 border-secondary d-print-p-1">Account / Sub Account</th>
-                            <th class="px-4 py-3 border-secondary d-print-p-1">Calc. Type</th>
-                            <th class="px-4 py-3 border-secondary text-end d-print-p-1">Calc. KM</th>
-                            <th class="px-4 py-3 border-secondary text-end d-print-p-1">Calc. HR</th>
-                            <th class="px-4 py-3 border-secondary text-end d-print-p-1">Computed Qty</th>
+                        <tr class="text-uppercase fw-bold">
+                            <th style="width: 12%;">Date</th>
+                            <th>Particulars</th>
+                            <th>Account / Sub</th>
+                            <th style="width: 10%;">Type</th>
+                            <th class="text-end" style="width: 10%;">KM</th>
+                            <th class="text-end" style="width: 10%;">HR</th>
+                            <th class="text-end" style="width: 12%;">Qty (L)</th>
                         </tr>
                     </thead>
-                    <tbody class="border-secondary">
+                    <tbody>
                         @php
                             $grandTotalKm = 0;
                             $grandTotalHours = 0;
@@ -68,33 +82,19 @@
                                 $groupTotalQty = 0;
                                 $grandTotalActual += $fuelOrder->actual_quantity;
                             @endphp
-                            <!-- Group Header -->
-                            <tr>
-                                <td colspan="7" class="border-secondary">
-                                    <div class="d-flex justify-content-between align-items-center" style="padding:0px !important">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <span class="fw-bold text-primary font-monospace">FUEL ORDER #{{ str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT) }}</span>
-                                            <span class="small fw-bold text-secondary text-uppercase tracking-widest">Released: {{ $fuelOrder->created_at->format('M d, Y') }}</span>
-                                        </div>
-                                        <div class="d-flex align-items-center gap-4">
-                                            <div class="text-end">
-                                                <span class="small fw-bold text-secondary text-uppercase tracking-widest d-block" style="font-size: 0.6rem;">Approved (Say)</span>
-                                                <span class="fw-bold text-dark font-monospace">{{ number_format($fuelOrder->say_quantity, 2) }} L</span>
-                                            </div>
-                                            <div class="text-end">
-                                                <span class="small fw-bold text-success text-uppercase tracking-widest d-block" style="font-size: 0.6rem;">Actual Dispensed</span>
-                                                <span class="fw-bold text-success font-monospace">{{ number_format($fuelOrder->actual_quantity, 2) }} L</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <tr class="table-active fw-bold">
+                                <td colspan="4" class="py-1">
+                                    FUEL ORDER #{{ str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT) }} 
+                                    <span class="fw-normal small ms-2">({{ $fuelOrder->created_at->format('M d, Y') }})</span>
                                 </td>
+                                <td class="text-end py-1">Say:</td>
+                                <td class="text-end py-1">{{ number_format($fuelOrder->say_quantity, 1) }}</td>
+                                <td class="text-end py-1">{{ number_format($fuelOrder->actual_quantity, 1) }}</td>
                             </tr>
 
                             @foreach($group as $entry)
                                 @php
-                                    $qty = 0;
-                                    $calcKm = 0;
-                                    $calcHours = 0;
+                                    $qty = 0; $calcKm = 0; $calcHours = 0;
                                     $calcType = strtolower($entry->calculation_type ?? '');
                                     
                                     if (str_contains($calcType, 'kilometer')) {
@@ -112,62 +112,35 @@
                                         $qty = $calcHours * $entry->fuel_factor_hr;
                                     }
                                     
-                                    $groupTotalKm += $calcKm;
-                                    $groupTotalHours += $calcHours;
-                                    $groupTotalQty += $qty;
-                                    $grandTotalKm += $calcKm;
-                                    $grandTotalHours += $calcHours;
+                                    $groupTotalKm += $calcKm; $groupTotalHours += $calcHours; $groupTotalQty += $qty;
+                                    $grandTotalKm += $calcKm; $grandTotalHours += $calcHours;
                                 @endphp
                                 <tr>
-                                    <td class="px-4 py-3 small border-secondary">{{ $entry->date->format('M d, Y') }}</td>
-                                    <td class="px-4 py-3 small border-secondary">{{ $entry->particulars ?? '—' }}</td>
-                                    <td class="px-4 py-3 small border-secondary fw-bold text-primary">{{ $entry->chargeableAccount->name ?? 'Unassigned' }} - {{ $entry->subAccount->name ?? '—' }}</td>
-                                    <td class="px-4 py-3 border-secondary">
-                                        <span class="badge text-dark border border-secondary rounded-pill text-uppercase tracking-widest" style="font-size: 0.6rem;">{{ $entry->calculation_type ?? 'N/A' }}</span>
-                                    </td>
-                                    <td class="px-4 py-3 text-end font-monospace border-secondary">{{ $calcKm > 0 ? number_format($calcKm, 2) : '-' }}</td>
-                                    <td class="px-4 py-3 text-end font-monospace border-secondary">{{ $calcHours > 0 ? number_format($calcHours, 2) : '-' }}</td>
-                                    <td class="px-4 py-3 text-end font-monospace fw-bold text-secondary border-secondary">{{ number_format($qty, 2) }} L</td>
+                                    <td>{{ $entry->date->format('M d, Y') }}</td>
+                                    <td class="text-truncate" style="max-width: 150px;">{{ $entry->particulars }}</td>
+                                    <td>{{ $entry->chargeableAccount->name ?? '—' }}</td>
+                                    <td class="text-center small">{{ $entry->calculation_type }}</td>
+                                    <td class="text-end">{{ $calcKm > 0 ? number_format($calcKm, 1) : '-' }}</td>
+                                    <td class="text-end">{{ $calcHours > 0 ? number_format($calcHours, 1) : '-' }}</td>
+                                    <td class="text-end fw-bold">{{ number_format($qty, 1) }}</td>
                                 </tr>
                             @endforeach
-                            <!-- Group Footer -->
-                            <tr class="bg-light border-secondary">
-                                <td colspan="4" class="px-4 py-2 text-end small fw-bold text-secondary text-uppercase tracking-widest border-secondary">
-                                    Sub-Total (Order #{{ str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT) }}):
-                                </td>
-                                <td class="px-4 py-2 text-end font-monospace fw-bold text-info border-secondary">
-                                    {{ $groupTotalKm > 0 ? number_format($groupTotalKm, 2) : '-' }}
-                                </td>
-                                <td class="px-4 py-2 text-end font-monospace fw-bold text-info border-secondary">
-                                    {{ $groupTotalHours > 0 ? number_format($groupTotalHours, 2) : '-' }}
-                                </td>
-                                <td class="px-4 py-2 text-end small fw-bold text-success border-secondary">
-                                    {{ number_format($groupTotalQty, 2) }} L
-                                </td>
+                            <tr class="fw-bold bg-light">
+                                <td colspan="4" class="text-end">Sub-Total:</td>
+                                <td class="text-end">{{ $groupTotalKm > 0 ? number_format($groupTotalKm, 1) : '-' }}</td>
+                                <td class="text-end">{{ $groupTotalHours > 0 ? number_format($groupTotalHours, 1) : '-' }}</td>
+                                <td class="text-end">{{ number_format($groupTotalQty, 1) }}</td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="7" class="px-4 py-5 text-center border-secondary">
-                                    No records found for the selected parameters.
-                                </td>
-                            </tr>
+                            <tr><td colspan="7" class="text-center py-4">No records found.</td></tr>
                         @endforelse
                         
                         @if($entries->count() > 0)
-                            <!-- Grand Total Row -->
-                            <tr class="table-primary border-top border-secondary">
-                                <td colspan="4" class="px-4 py-4 text-end h6 fw-bold text-uppercase tracking-widest mb-0 border-secondary">
-                                    Grand Total (Actual Dispensed):
-                                </td>
-                                <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary text-info">
-                                    {{ $grandTotalKm > 0 ? number_format($grandTotalKm, 2) : '-' }}
-                                </td>
-                                <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary text-info">
-                                    {{ $grandTotalHours > 0 ? number_format($grandTotalHours, 2) : '-' }}
-                                </td>
-                                <td class="px-4 py-4 text-end font-monospace fw-bold text-success border-secondary mb-0">
-                                    {{ number_format($grandTotalActual, 2) }} L
-                                </td>
+                            <tr class="table-primary fw-bold" style="background-color: #f0f7ff !important;">
+                                <td colspan="4" class="text-end">GRAND TOTAL (ACTUAL DISPENSED):</td>
+                                <td class="text-end">{{ $grandTotalKm > 0 ? number_format($grandTotalKm, 1) : '-' }}</td>
+                                <td class="text-end">{{ $grandTotalHours > 0 ? number_format($grandTotalHours, 1) : '-' }}</td>
+                                <td class="text-end">{{ number_format($grandTotalActual, 1) }} L</td>
                             </tr>
                         @endif
                     </tbody>
@@ -175,37 +148,17 @@
             </div>
             
             @if($entries->count() > 0)
-                <!-- Final Summary -->
-                <div class="p-4 border-top border-secondary mt-4">
-                    <h3 class="small fw-bold text-success text-uppercase tracking-widest mb-4 d-flex align-items-center">
-                        Performance Metrics (Actualized)
-                    </h3>
-                    <div class="row g-4">
-                        <div class="col-6">
-                            <div class="card border-secondary p-4">
-                                <p class="small fw-bold text-secondary text-uppercase tracking-widest mb-1">Actual KM Factor</p>
-                                <p class="small text-secondary opacity-75 mb-3">(Total Dispensed / Total Calc. KM)</p>
-                                <p class="h2 font-monospace fw-bold text-success mb-0">
-                                    @if($grandTotalKm > 0)
-                                        {{ number_format($grandTotalActual / $grandTotalKm, 4) }}
-                                    @else
-                                        -
-                                    @endif
-                                </p>
-                            </div>
+                <div class="row g-2 mt-2">
+                    <div class="col-6">
+                        <div class="border p-1">
+                            <span class="small text-secondary text-uppercase" style="font-size: 7px;">Actual KM Factor</span>
+                            <p class="h6 mb-0">@if($grandTotalKm > 0) {{ number_format($grandTotalActual / $grandTotalKm, 4) }} @else - @endif</p>
                         </div>
-                        <div class="col-6">
-                            <div class="card border-secondary p-4">
-                                <p class="small fw-bold text-secondary text-uppercase tracking-widest mb-1">Actual Hour Factor</p>
-                                <p class="small text-secondary opacity-75 mb-3">(Total Dispensed / Total Calc. Hours)</p>
-                                <p class="h2 font-monospace fw-bold text-success mb-0">
-                                    @if($grandTotalHours > 0)
-                                        {{ number_format($grandTotalActual / $grandTotalHours, 4) }}
-                                    @else
-                                        -
-                                    @endif
-                                </p>
-                            </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border p-1">
+                            <span class="small text-secondary text-uppercase" style="font-size: 7px;">Actual HR Factor</span>
+                            <p class="h6 mb-0">@if($grandTotalHours > 0) {{ number_format($grandTotalActual / $grandTotalHours, 4) }} @else - @endif</p>
                         </div>
                     </div>
                 </div>

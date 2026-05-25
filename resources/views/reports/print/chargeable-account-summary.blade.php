@@ -3,41 +3,48 @@
 @endphp
 
 <x-print-layout :title="$title">
+    <style>
+        .print-container { padding: 0.25rem !important; }
+        .table th, .table td { 
+            padding: 2px 4px !important; 
+            font-size: 8.5px !important;
+            line-height: 1.1 !important;
+        }
+        .mb-4 { margin-bottom: 0.5rem !important; }
+        .badge { font-size: 8px !important; padding: 2px 4px !important; }
+    </style>
+
     <div class="card border-0">
         <!-- Report Content -->
         <div class="card-body p-0 text-dark">
-            <div class="mb-4">
+            <div class="mb-2">
                 @if($accountId)
-                    <span class="badge bg-light text-dark border me-2">Account: {{ $accounts->firstWhere('id', $accountId)?->name }}</span>
+                    <span class="badge border me-2">Account: {{ $accounts->firstWhere('id', $accountId)?->name }}</span>
                 @endif
                 @if($dateFrom || $dateTo)
-                    <span class="badge bg-light text-dark border">Period: {{ $dateFrom ? \Carbon\Carbon::parse($dateFrom)->format('M d, Y') : 'Start' }} to {{ $dateTo ? \Carbon\Carbon::parse($dateTo)->format('M d, Y') : 'End' }}</span>
+                    <span class="badge border">Period: {{ $dateFrom ? \Carbon\Carbon::parse($dateFrom)->format('M d, Y') : 'Start' }} to {{ $dateTo ? \Carbon\Carbon::parse($dateTo)->format('M d, Y') : 'End' }}</span>
                 @endif
             </div>
             
-            <div class="table-responsive d-print-overflow-visible">
-                <table class="table table-bordered mb-0 d-print-table d-print-text-dark border-secondary">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0 border-secondary">
                     <thead class="table-light">
-                        <tr class="text-uppercase small fw-bold tracking-widest">
-                            <th class="px-4 py-3 border-secondary d-print-p-1">Account Name</th>
-                            <th class="px-4 py-3 border-secondary text-end d-print-p-1">Total KM</th>
-                            <th class="px-4 py-3 border-secondary text-end d-print-p-1">Total HR</th>
-                            <th class="px-4 py-3 border-secondary text-end d-print-p-1">Budgeted Fuel</th>
-                            <th class="px-4 py-3 border-secondary text-end d-print-p-1">Unbudgeted Fuel</th>
-                            <th class="px-4 py-3 border-secondary text-end d-print-p-1">Total Calc. Fuel</th>
-                            <th class="px-4 py-3 border-secondary text-end d-print-p-1">Total Budget</th>
-                            <th class="px-4 py-3 border-secondary text-end d-print-p-1">Remaining</th>
+                        <tr class="text-uppercase small fw-bold">
+                            <th>Account Name</th>
+                            <th class="text-end">KM</th>
+                            <th class="text-end">HR</th>
+                            <th class="text-end">Budgeted</th>
+                            <th class="text-end">Unbudgeted</th>
+                            <th class="text-end">Total Calc</th>
+                            <th class="text-end">Budget</th>
+                            <th class="text-end">Rem.</th>
                         </tr>
                     </thead>
                     <tbody class="border-secondary">
                         @php
-                            $grandTotalKm = 0;
-                            $grandTotalHours = 0;
-                            $grandTotalBudgeted = 0;
-                            $grandTotalUnbudgeted = 0;
-                            $grandTotalTotalCalc = 0;
-                            $grandTotalTotalBudget = 0;
-                            $grandTotalRemaining = 0;
+                            $grandTotalKm = 0; $grandTotalHours = 0; $grandTotalBudgeted = 0;
+                            $grandTotalUnbudgeted = 0; $grandTotalTotalCalc = 0;
+                            $grandTotalTotalBudget = 0; $grandTotalRemaining = 0;
                         @endphp
                         @forelse($accountSummaries as $account)
                             @php
@@ -48,112 +55,54 @@
                                 $grandTotalTotalCalc += $account['total_calculated_fuel'];
                                 $grandTotalTotalBudget += $account['total_budget'];
                             @endphp
-                            <tr class="table-active">
-                                <td class="px-4 py-3 fw-bold text-primary border-secondary">
-                                    {{ $account['name'] }}
-                                </td>
-                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary">
-                                    {{ number_format($account['total_km'], 2) }}
-                                </td>
-                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary">
-                                    {{ number_format($account['total_hours'], 2) }}
-                                </td>
-                                <td class="px-4 py-3 text-end font-monospace fw-bold text-success border-secondary">
-                                    {{ number_format($account['budgeted_fuel'], 2) }} L
-                                </td>
-                                <td class="px-4 py-3 text-end font-monospace fw-bold text-danger border-secondary">
-                                    {{ number_format($account['unbudgeted_fuel'], 2) }} L
-                                </td>
-                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary">
-                                    {{ number_format($account['total_calculated_fuel'], 2) }} L
-                                </td>
-                                <td class="px-4 py-3 text-end font-monospace fw-bold text-primary border-secondary">
-                                    {{ number_format($account['total_budget'], 2) }} L
-                                </td>
-                                <td class="px-4 py-3 text-end font-monospace fw-bold text-primary border-secondary">
-                                    @php 
-                                        $remaining = ($account['total_budget'] - $account['total_calculated_fuel']);
-                                    @endphp
+                            <tr class="table-active fw-bold">
+                                <td>{{ $account['name'] }}</td>
+                                <td class="text-end">{{ number_format($account['total_km'], 1) }}</td>
+                                <td class="text-end">{{ number_format($account['total_hours'], 1) }}</td>
+                                <td class="text-end">{{ number_format($account['budgeted_fuel'], 1) }}</td>
+                                <td class="text-end">{{ number_format($account['unbudgeted_fuel'], 1) }}</td>
+                                <td class="text-end">{{ number_format($account['total_calculated_fuel'], 1) }}</td>
+                                <td class="text-end">{{ number_format($account['total_budget'], 1) }}</td>
+                                <td class="text-end">
+                                    @php $remaining = ($account['total_budget'] - $account['total_calculated_fuel']); @endphp
                                     @if($account['total_budget'] > 0)
-                                        {{ number_format($remaining, 2) }} L
+                                        {{ number_format($remaining, 1) }}
                                         @php $grandTotalRemaining += $remaining; @endphp
-                                    @else
-                                        0.00 L
-                                    @endif
+                                    @else 0.0 @endif
                                 </td>
                             </tr>
 
                             @if(isset($account['sub_accounts']) && count($account['sub_accounts']) > 0)
                                 @foreach($account['sub_accounts'] as $subAccount)
-                                    <tr>
-                                        <td class="px-4 py-2 small text-secondary border-secondary" style="padding-left: 2.5rem !important;">
-                                            └ {{ $subAccount['name'] }}
-                                        </td>
-                                        <td class="px-4 py-2 text-end font-monospace small border-secondary">
-                                            {{ number_format($subAccount['total_km'], 2) }}
-                                        </td>
-                                        <td class="px-4 py-2 text-end font-monospace small border-secondary">
-                                            {{ number_format($subAccount['total_hours'], 2) }}
-                                        </td>
-                                        <td class="px-4 py-2 text-end font-monospace small fw-bold text-success border-secondary">
-                                            {{ number_format($subAccount['budgeted_fuel'], 2) }} L
-                                        </td>
-                                        <td class="px-4 py-2 text-end font-monospace small fw-bold text-danger border-secondary">
-                                            {{ number_format($subAccount['unbudgeted_fuel'], 2) }} L
-                                        </td>
-                                        <td class="px-4 py-2 text-end font-monospace small fw-bold border-secondary">
-                                            {{ number_format($subAccount['total_calculated_fuel'], 2) }} L
-                                        </td>
-                                        <td class="px-4 py-2 text-end font-monospace small text-primary border-secondary">
-                                            {{ number_format($subAccount['total_budget'], 2) }} L
-                                        </td>
-                                        <td class="px-4 py-2 text-end font-monospace small text-primary border-secondary">
-                                            @php 
-                                                $subRemaining = ($subAccount['total_budget'] - $subAccount['total_calculated_fuel']);
-                                            @endphp
-                                            @if($subAccount['total_budget'] > 0)
-                                                {{ number_format($subRemaining, 2) }} L
-                                            @else
-                                                0.00 L
-                                            @endif
+                                    <tr style="font-size: 8px !important;">
+                                        <td class="ps-3">└ {{ $subAccount['name'] }}</td>
+                                        <td class="text-end">{{ number_format($subAccount['total_km'], 1) }}</td>
+                                        <td class="text-end">{{ number_format($subAccount['total_hours'], 1) }}</td>
+                                        <td class="text-end">{{ number_format($subAccount['budgeted_fuel'], 1) }}</td>
+                                        <td class="text-end">{{ number_format($subAccount['unbudgeted_fuel'], 1) }}</td>
+                                        <td class="text-end">{{ number_format($subAccount['total_calculated_fuel'], 1) }}</td>
+                                        <td class="text-end">{{ number_format($subAccount['total_budget'], 1) }}</td>
+                                        <td class="text-end">
+                                            @php $subRemaining = ($subAccount['total_budget'] - $subAccount['total_calculated_fuel']); @endphp
+                                            {{ $subAccount['total_budget'] > 0 ? number_format($subRemaining, 1) : '0.0' }}
                                         </td>
                                     </tr>
                                 @endforeach
                             @endif
                         @empty
-                            <tr>
-                                <td colspan="8" class="px-4 py-5 text-center border-secondary">
-                                    No records found for the selected parameters.
-                                </td>
-                            </tr>
+                            <tr><td colspan="8" class="text-center">No data found.</td></tr>
                         @endforelse
                         
                         @if(count($accountSummaries) > 0)
-                            <tr class="table-primary border-top border-secondary">
-                                <td class="px-4 py-4 text-end h6 fw-bold text-uppercase tracking-widest mb-0 border-secondary">
-                                    Grand Total:
-                                </td>
-                                <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary">
-                                    {{ number_format($grandTotalKm, 2) }}
-                                </td>
-                                <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary">
-                                    {{ number_format($grandTotalHours, 2) }}
-                                </td>
-                                <td class="px-4 py-4 text-end font-monospace fw-bold text-success border-secondary">
-                                    {{ number_format($grandTotalBudgeted, 2) }} L
-                                </td>
-                                <td class="px-4 py-4 text-end font-monospace fw-bold text-danger border-secondary">
-                                    {{ number_format($grandTotalUnbudgeted, 2) }} L
-                                </td>
-                                <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary">
-                                    {{ number_format($grandTotalTotalCalc, 2) }} L
-                                </td>
-                                <td class="px-4 py-4 text-end font-monospace fw-bold text-primary border-secondary">
-                                     {{ number_format($grandTotalTotalBudget, 2) }} L
-                                </td>
-                                <td class="px-4 py-4 text-end font-monospace h5 fw-bold text-primary border-secondary mb-0">
-                                    {{ number_format($grandTotalRemaining, 2) }} L
-                                </td>
+                            <tr class="table-primary fw-bold">
+                                <td class="text-end">GRAND TOTAL:</td>
+                                <td class="text-end">{{ number_format($grandTotalKm, 1) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalHours, 1) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalBudgeted, 1) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalUnbudgeted, 1) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalTotalCalc, 1) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalTotalBudget, 1) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalRemaining, 1) }}</td>
                             </tr>
                         @endif
                     </tbody>
