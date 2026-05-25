@@ -228,4 +228,4 @@
             });
         </script>
     @endif
-</x-app-layout>
+</x-dynamic-component>

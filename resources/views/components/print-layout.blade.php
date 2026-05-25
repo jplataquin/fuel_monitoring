@@ -55,12 +55,103 @@
                 body {
                     padding: 0;
                     margin: 0;
+                    background-color: white !important;
+                    color: black !important;
                 }
                 .print-container {
                     padding: 0;
+                    max-width: 100%;
                 }
-                .no-print {
+                .no-print, .d-print-none {
                     display: none !important;
+                }
+                
+                /* Aggressively override dark mode */
+                .table-dark {
+                    --bs-table-bg: transparent !important;
+                    --bs-table-color: black !important;
+                    --bs-table-border-color: #dee2e6 !important;
+                    --bs-table-striped-bg: #f8f9fa !important;
+                    --bs-table-active-bg: #f2f2f2 !important;
+                    background-color: transparent !important;
+                    color: black !important;
+                    border-color: #dee2e6 !important;
+                }
+                .table-dark th, .table-dark td {
+                    background-color: transparent !important;
+                    color: black !important;
+                    border-color: #dee2e6 !important;
+                }
+                .table-secondary {
+                    --bs-table-bg: #e9ecef !important;
+                    --bs-table-color: black !important;
+                }
+                .table-active {
+                    --bs-table-bg: #f8f9fa !important;
+                    --bs-table-color: black !important;
+                    background-color: #f8f9fa !important;
+                }
+                .bg-dark {
+                    background-color: transparent !important;
+                    color: black !important;
+                    border: 1px solid #dee2e6 !important;
+                }
+                .text-light, .text-white {
+                    color: black !important;
+                }
+                .border-secondary {
+                    border-color: #dee2e6 !important;
+                }
+                .card {
+                    border: 1px solid #dee2e6 !important;
+                    background-color: transparent !important;
+                }
+                .badge {
+                    border: 1px solid #dee2e6 !important;
+                    background-color: transparent !important;
+                    color: black !important;
+                }
+                .bg-primary, .bg-success, .bg-info, .bg-warning, .bg-danger {
+                    background-color: transparent !important;
+                    border: 1px solid #dee2e6 !important;
+                    color: black !important;
+                }
+                .text-primary, .text-success, .text-info, .text-warning, .text-danger {
+                    color: black !important;
+                    font-weight: bold !important;
+                }
+                
+                /* Custom d-print utility classes */
+                .d-print-bg-light {
+                    background-color: #f8f9fa !important;
+                }
+                .d-print-bg-white {
+                    background-color: white !important;
+                }
+                .d-print-text-dark {
+                    color: black !important;
+                }
+                .d-print-text-success {
+                    color: #198754 !important;
+                }
+                .d-print-overflow-visible {
+                    overflow: visible !important;
+                }
+                .d-print-table {
+                    display: table !important;
+                }
+                .d-print-p-1 {
+                    padding: 0.25rem !important;
+                }
+                .d-print-block {
+                    display: block !important;
+                }
+                
+                /* Remove transparency/opacity in print */
+                .bg-opacity-10, .bg-opacity-25, .bg-opacity-50, .bg-opacity-75,
+                .opacity-10, .opacity-25, .opacity-50, .opacity-75 {
+                    opacity: 1 !important;
+                    background-color: transparent !important;
                 }
             }
             
@@ -74,14 +165,6 @@
             .table th, .table td {
                 border: 1px solid #dee2e6 !important;
                 padding: 4px 8px !important;
-            }
-            .table-dark {
-                background-color: transparent !important;
-                color: black !important;
-            }
-            .bg-dark {
-                background-color: #f8f9fa !important;
-                color: black !important;
             }
         </style>
     </head>

@@ -224,4 +224,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-dynamic-component>
