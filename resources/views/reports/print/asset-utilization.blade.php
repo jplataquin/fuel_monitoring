@@ -82,6 +82,9 @@
                                 $groupTotalKm = 0;
                                 $groupTotalHours = 0;
                                 $groupTotalQty = 0;
+
+                                $grandTotalSay += $fuelOrder->say_quantity;
+                                
                                 $grandTotalActual += $fuelOrder->actual_quantity;
                             @endphp
                             <tr class="table-active fw-bold">
@@ -131,8 +134,8 @@
                                 <td class="text-end">{{ $groupTotalKm > 0 ? number_format($groupTotalKm, 1) : '-' }}</td>
                                 <td class="text-end">{{ $groupTotalHours > 0 ? number_format($groupTotalHours, 1) : '-' }}</td>
                                 <td class="text-end">{{ number_format($groupTotalQty, 1) }}</td>
-                                <td>{{ number_format($fuelOrder->say_quantity, 1) }}</td>
-                                <td>{{ number_format($fuelOrder->actual_quantity, 1) }}</td>
+                                <td class="text-end">{{ number_format($fuelOrder->say_quantity, 1) }}</td>
+                                <td class="text-end">{{ number_format($fuelOrder->actual_quantity, 1) }}</td>
 
                             </tr>
                         @empty
@@ -145,7 +148,7 @@
                                 <td class="text-end">{{ $grandTotalKm > 0 ? number_format($grandTotalKm, 1) : '-' }}</td>
                                 <td class="text-end">{{ $grandTotalHours > 0 ? number_format($grandTotalHours, 1) : '-' }}</td>
                                 <td></td>
-                                <td></td>
+                                <td class="text-end">{{ number_format(grandTotalSay,1) }} L</td>
                                 <td class="text-end">{{ number_format($grandTotalActual, 1) }} L</td>
                             </tr>
                         @endif
