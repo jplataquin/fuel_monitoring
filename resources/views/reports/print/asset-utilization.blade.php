@@ -89,12 +89,10 @@
                                 $grandTotalSay += $fuelOrder->say_quantity;
                             @endphp
                             <tr class="table-active fw-bold">
-                                <td colspan="7" class="py-1">
+                                <td colspan="9" class="py-1">
                                     FUEL ORDER #{{ str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT) }} 
                                     <span class="fw-normal small ms-2">({{ $fuelOrder->created_at->format('M d, Y') }})</span>
                                 </td>
-                                <td class="text-end py-1">{{ number_format($fuelOrder->say_quantity, 1) }}</td>
-                                <td class="text-end py-1">{{ number_format($fuelOrder->actual_quantity, 1) }}</td>
                             </tr>
 
                             @foreach($group as $entry)
@@ -149,8 +147,8 @@
                                 <td colspan="4" class="text-end">GRAND TOTAL:</td>
                                 <td class="text-end">{{ $grandTotalKm > 0 ? number_format($grandTotalKm, 1) : '-' }}</td>
                                 <td class="text-end">{{ $grandTotalHours > 0 ? number_format($grandTotalHours, 1) : '-' }}</td>
-                                <td class="text-end">{{ number_format($grandTotalKm > 0 || $grandTotalHours > 0 ? $grandTotalKm / max(1, $selectedAsset->fuel_factor_km ?? 1) + ($grandTotalHours * ($selectedAsset->fuel_factor_hr ?? 0)) : 0, 1) }}</td>
-                                <td class="text-end">{{ number_format($grandTotalSay, 1) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalKm > 0 || $grandTotalHours > 0 ? $grandTotalKm / max(1, $selectedAsset->fuel_factor_km ?? 1) + ($grandTotalHours * ($selectedAsset->fuel_factor_hr ?? 0)) : 0, 1) }} L</td>
+                                <td class="text-end">{{ number_format($grandTotalSay, 1) }} L</td>
                                 <td class="text-end">{{ number_format($grandTotalActual, 1) }} L</td>
                             </tr>
                         @endif
