@@ -69,9 +69,9 @@
                                 $grandTotalActual += $fuelOrder->actual_quantity;
                             @endphp
                             <!-- Group Header -->
-                            <tr class="">
-                                <td colspan="7" class="px-4 py-3 border-secondary">
-                                    <div class="d-flex justify-content-between align-items-center">
+                            <tr>
+                                <td colspan="7" class="border-secondary">
+                                    <div class="d-flex justify-content-between align-items-center" style="padding:0px !important">
                                         <div class="d-flex align-items-center gap-3">
                                             <span class="fw-bold text-primary font-monospace">FUEL ORDER #{{ str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT) }}</span>
                                             <span class="small fw-bold text-secondary text-uppercase tracking-widest">Released: {{ $fuelOrder->created_at->format('M d, Y') }}</span>
