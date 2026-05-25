@@ -87,7 +87,14 @@
                                     FUEL ORDER #{{ str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT) }} 
                                     <span class="fw-normal small ms-2">({{ $fuelOrder->created_at->format('M d, Y') }})</span>
                                 </td>
-                                <td class="text-end py-1" colspan="3">Say: {{ number_format($fuelOrder->say_quantity, 1) }} Actual: {{ number_format($fuelOrder->actual_quantity, 1) }}</td>
+                                <td class="text-end py-1" colspan="3">
+                                    <span class="badge text-dark border me-1">
+                                        Say: {{ number_format($fuelOrder->say_quantity, 1) }}
+                                    </span> 
+                                    <span class="badge text-dark border me-1">
+                                        Actual: {{ number_format($fuelOrder->actual_quantity, 1) }}
+                                    </span>
+                                </td>
                             </tr>
 
                             @foreach($group as $entry)
