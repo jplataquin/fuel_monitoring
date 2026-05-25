@@ -69,7 +69,7 @@
                                 $grandTotalActual += $fuelOrder->actual_quantity;
                             @endphp
                             <!-- Group Header -->
-                            <tr class="table-active">
+                            <tr class="">
                                 <td colspan="7" class="px-4 py-3 border-secondary">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="d-flex align-items-center gap-3">
