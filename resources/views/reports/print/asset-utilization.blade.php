@@ -74,7 +74,9 @@
                         @php
                             $grandTotalKm = 0;
                             $grandTotalHours = 0;
+                            $grandTotalSay = 0;
                             $grandTotalActual = 0;
+
                         @endphp
                         @forelse($entries as $fuelOrderId => $group)
                             @php
