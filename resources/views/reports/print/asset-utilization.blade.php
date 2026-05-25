@@ -27,10 +27,10 @@
             <div class="mb-2 d-flex justify-content-between align-items-center">
                 <div>
                     @if($assetId)
-                        <span class="badge border me-1">Asset: {{ $assets->firstWhere('id', $assetId)?->fleet_no }}</span>
+                        <span class="badge text-dark border me-1">Asset: {{ $assets->firstWhere('id', $assetId)?->fleet_no }}</span>
                     @endif
                     @if($dateFrom || $dateTo)
-                        <span class="badge border">Period: {{ $dateFrom ?? 'Start' }} to {{ $dateTo ?? 'End' }}</span>
+                        <span class="badge text-dark border">Period: {{ $dateFrom ?? 'Start' }} to {{ $dateTo ?? 'End' }}</span>
                     @endif
                 </div>
             </div>
@@ -87,9 +87,7 @@
                                     FUEL ORDER #{{ str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT) }} 
                                     <span class="fw-normal small ms-2">({{ $fuelOrder->created_at->format('M d, Y') }})</span>
                                 </td>
-                                <td class="text-end py-1">Say:</td>
-                                <td class="text-end py-1">{{ number_format($fuelOrder->say_quantity, 1) }}</td>
-                                <td class="text-end py-1">{{ number_format($fuelOrder->actual_quantity, 1) }}</td>
+                                <td class="text-end py-1" colspan="3">Say: {{ number_format($fuelOrder->say_quantity, 1) }} Actual: {{ number_format($fuelOrder->actual_quantity, 1) }}</td>
                             </tr>
 
                             @foreach($group as $entry)
