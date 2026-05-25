@@ -10,6 +10,8 @@
             padding: 2px 4px !important; 
             font-size: 8.5px !important;
             line-height: 1.1 !important;
+            white-space: normal !important;
+            word-wrap: break-word !important;
         }
         .card-body { padding: 0 !important; }
         .mb-4 { margin-bottom: 0.5rem !important; }
@@ -119,19 +121,15 @@
                                     
                                     $groupTotalKm += $calcKm; $groupTotalHours += $calcHours; $groupTotalQty += $qty;
                                     $grandTotalKm += $calcKm; $grandTotalHours += $calcHours;
-
-                                    $grandTotalQty += $qty;
                                 @endphp
                                 <tr>
                                     <td>{{ $entry->date->format('M d, Y') }}</td>
-                                    <td class="text-truncate" style="max-width: 150px;">{{ $entry->particulars }}</td>
+                                    <td>{{ $entry->particulars }}</td>
                                     <td>{{ $entry->chargeableAccount->name ?? '—' }}</td>
                                     <td class="text-center small">{{ $entry->calculation_type }}</td>
                                     <td class="text-end">{{ $calcKm > 0 ? number_format($calcKm, 1) : '-' }}</td>
                                     <td class="text-end">{{ $calcHours > 0 ? number_format($calcHours, 1) : '-' }}</td>
                                     <td class="text-end fw-bold">{{ number_format($qty, 1) }}</td>
-                                    <td></td>
-                                    <td></td>
                                 </tr>
                             @endforeach
                             <tr class="fw-bold bg-light">
@@ -139,12 +137,9 @@
                                 <td class="text-end">{{ $groupTotalKm > 0 ? number_format($groupTotalKm, 1) : '-' }}</td>
                                 <td class="text-end">{{ $groupTotalHours > 0 ? number_format($groupTotalHours, 1) : '-' }}</td>
                                 <td class="text-end">{{ number_format($groupTotalQty, 1) }}</td>
-                                <td class="text-end">{{ number_format($fuelOrder->say_quantity, 1) }}</td>
-                                <td class="text-end">{{ number_format($fuelOrder->actual_quantity, 1) }}</td>
-
                             </tr>
                         @empty
-                            <tr><td colspan="9" class="text-center py-4">No records found.</td></tr>
+                            <tr><td colspan="7" class="text-center py-4">No records found.</td></tr>
                         @endforelse
                         
                         @if($entries->count() > 0)
