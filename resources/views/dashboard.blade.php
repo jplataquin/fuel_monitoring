@@ -165,6 +165,28 @@
                             </div>
                         </a>
                     </div>
+
+                    <!-- Budget Dashboard Card -->
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <a href="{{ route('dashboard.account-budgets') }}" class="card h-100 bg-dark border-secondary border-opacity-25 rounded-4 p-4 text-decoration-none shadow-sm transition-all hover-opacity">
+                            <div class="card-body d-flex flex-column justify-content-between p-0">
+                                <div>
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center mb-4 shadow-sm" style="width: 64px; height: 64px; background-color: #82C8B5;">
+                                        <svg style="width: 32px; height: 32px; color: #053D2A;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                                        </svg>
+                                    </div>
+                                    <h4 class="h5 fw-bold text-light mb-2">Budget Dashboard</h4>
+                                    <p class="text-secondary small mb-4">Visual dashboard showing budget vs consumption data.</p>
+                                </div>
+                                <div class="mt-4 d-flex align-items-center fw-bold small text-uppercase tracking-widest" style="color: #82C8B5;">
+                                    View Dashboard
+                                    <svg class="ms-2" style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

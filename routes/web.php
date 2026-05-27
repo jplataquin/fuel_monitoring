@@ -27,6 +27,7 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::get('reports/asset-utilization', [ReportController::class, 'assetUtilization'])->name('reports.asset-utilization');
     Route::get('reports/fuel-orders', [ReportController::class, 'fuelOrdersSummary'])->name('reports.fuel-orders');
     Route::get('reports/chargeable-accounts', [ReportController::class, 'chargeableAccountSummary'])->name('reports.chargeable-accounts');
+    Route::get('dashboard/account-budgets', [ReportController::class, 'accountBudgetDashboard'])->name('dashboard.account-budgets');
 
     // Assets
     Route::resource('assets', AssetController::class);
