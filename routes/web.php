@@ -14,9 +14,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified', 'check_temp_password'])->name('dashboard');
+Route::get('/dashboard', [ReportController::class, 'accountBudgetDashboard'])
+    ->middleware(['auth', 'verified', 'check_temp_password'])->name('dashboard');
 
 Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -27,7 +26,6 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::get('reports/asset-utilization', [ReportController::class, 'assetUtilization'])->name('reports.asset-utilization');
     Route::get('reports/fuel-orders', [ReportController::class, 'fuelOrdersSummary'])->name('reports.fuel-orders');
     Route::get('reports/chargeable-accounts', [ReportController::class, 'chargeableAccountSummary'])->name('reports.chargeable-accounts');
-    Route::get('dashboard/account-budgets', [ReportController::class, 'accountBudgetDashboard'])->name('dashboard.account-budgets');
 
     // Assets
     Route::resource('assets', AssetController::class);

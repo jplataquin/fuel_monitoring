@@ -468,6 +468,6 @@ class ReportController extends Controller
 
         $accounts = \App\Models\ChargeableAccount::orderBy('name')->get();
 
-        return view('dashboards.account-budgets', compact('chartData', 'dateFrom', 'dateTo', 'accounts', 'accountId'));
+        return view('dashboard', compact('chartData', 'dateFrom', 'dateTo', 'accounts', 'accountId'));
     }
 }
