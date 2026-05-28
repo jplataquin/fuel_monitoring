@@ -1,17 +1,7 @@
 <x-app-layout>
-    <div x-data="{ 
-        search: '',
-        assets: {{ $assets->toJson() }},
-        get filteredAssets() {
-            if (this.search === '') return this.assets;
-            return this.assets.filter(asset => 
-                asset.fleet_no.toLowerCase().includes(this.search.toLowerCase())
-            );
-        }
-    }">
     <x-slot name="header">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <div class="d-flex flex-column flex-md-row align-items-md-center gap-3 flex-grow-1">
+            <div class="d-flex flex-column flex-md-row align-items-md-center gap-3 flex-grow-1" x-data>
                 <h2 class="h4 fw-bold text-light mb-0">
                     {{ __('Fleet Inventory') }}
                 </h2>
@@ -20,7 +10,7 @@
                         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </span>
                     <input type="text" 
-                           x-model="search" 
+                           @input="$dispatch('search-fleet', $el.value)"
                            placeholder="Search fleet no..." 
                            class="form-control bg-dark border-secondary border-opacity-50 text-light rounded-pill ps-5 py-2 shadow-sm focus-ring-primary"
                            style="font-size: 0.9rem;">
@@ -35,7 +25,17 @@
         </div>
     </x-slot>
 
-    <div class="container-xl py-5">
+    <div class="container-xl py-5" x-data="{ 
+        search: '',
+        assets: {{ $assets->toJson() }},
+        get filteredAssets() {
+            if (this.search === '') return this.assets;
+            let term = this.search.toLowerCase();
+            return this.assets.filter(asset => 
+                asset.fleet_no.toLowerCase().includes(term)
+            );
+        }
+    }" @search-fleet.window="search = $event.detail">
         <!-- Action Cards Grid -->
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             <template x-for="asset in filteredAssets" :key="asset.id">
@@ -72,6 +72,5 @@
                     @endif
                 </div>
             </div>
-    </div>
     </div>
 </x-app-layout>
