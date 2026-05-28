@@ -85,7 +85,7 @@
                                         $grandTotalTotalBudget += $account['total_budget'];
                                     @endphp
                                     <tr class="table-active">
-                                        <td class="px-4 py-3 fw-bold text-primary border-secondary">
+                                        <td class="px-4 py-3 fw-bold text-white border-secondary">
                                             {{ $account['name'] }}
                                         </td>
                                         <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary">
@@ -103,10 +103,10 @@
                                         <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary">
                                             {{ number_format($account['total_calculated_fuel'], 2) }} L
                                         </td>
-                                        <td class="px-4 py-3 text-end font-monospace fw-bold text-primary border-secondary">
+                                        <td class="px-4 py-3 text-end font-monospace fw-bold text-white border-secondary">
                                             {{ number_format($account['total_budget'], 2) }} L
                                         </td>
-                                        <td class="px-4 py-3 text-end font-monospace fw-bold text-primary border-secondary">
+                                        <td class="px-4 py-3 text-end font-monospace fw-bold text-white border-secondary">
                                             @php 
                                                 $remaining = ($account['total_budget'] - $account['total_calculated_fuel']);
                                             @endphp
@@ -140,10 +140,10 @@
                                                 <td class="px-4 py-2 text-end font-monospace small fw-bold border-secondary">
                                                     {{ number_format($subAccount['total_calculated_fuel'], 2) }} L
                                                 </td>
-                                                <td class="px-4 py-2 text-end font-monospace small text-primary border-secondary">
+                                                <td class="px-4 py-2 text-end font-monospace small text-white border-secondary">
                                                     {{ number_format($subAccount['total_budget'], 2) }} L
                                                 </td>
-                                                <td class="px-4 py-2 text-end font-monospace small text-primary border-secondary">
+                                                <td class="px-4 py-2 text-end font-monospace small text-white border-secondary">
                                                     @php 
                                                         $subRemaining = ($subAccount['total_budget'] - $subAccount['total_calculated_fuel']);
                                                     @endphp
@@ -190,10 +190,10 @@
                                         <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary">
                                             {{ number_format($grandTotalTotalCalc, 2) }} L
                                         </td>
-                                        <td class="px-4 py-4 text-end font-monospace fw-bold text-primary border-secondary">
+                                        <td class="px-4 py-4 text-end font-monospace fw-bold text-white border-secondary">
                                              {{ number_format($grandTotalTotalBudget, 2) }} L
                                         </td>
-                                        <td class="px-4 py-4 text-end font-monospace h5 fw-bold text-primary border-secondary mb-0">
+                                        <td class="px-4 py-4 text-end font-monospace h5 fw-bold text-white border-secondary mb-0">
                                             {{ number_format($grandTotalRemaining, 2) }} L
                                         </td>
                                     </tr>
