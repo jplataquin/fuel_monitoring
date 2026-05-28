@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class UtilizationEntryController extends Controller
@@ -31,6 +32,11 @@ class UtilizationEntryController extends Controller
             'start_time' => [
                 'required', 
                 'date_format:H:i',
+                Rule::unique('utilization_entries')->where(function ($query) use ($request) {
+                    return $query->where('asset_id', $request->asset_id)
+                                 ->where('date', $request->date)
+                                 ->whereNull('deleted_at');
+                }),
                 function ($attribute, $value, $fail) use ($request, $asset) {
                     if ($asset->last_date !== null && $asset->last_time !== null && $request->date) {
                         try {
@@ -206,6 +212,11 @@ class UtilizationEntryController extends Controller
             'start_time' => [
                 'required', 
                 'date_format:H:i',
+                Rule::unique('utilization_entries')->where(function ($query) use ($request, $utilizationEntry) {
+                    return $query->where('asset_id', $utilizationEntry->asset_id)
+                                 ->where('date', $request->date)
+                                 ->whereNull('deleted_at');
+                })->ignore($utilizationEntry->id),
                 function ($attribute, $value, $fail) use ($request, $utilizationEntry) {
                     if ($utilizationEntry->last_date !== null && $utilizationEntry->last_time !== null && $request->date) {
                         try {
