@@ -18,7 +18,7 @@
     </x-slot>
 
     <div class="py-5">
-        <div class="container-xl" style="max-width: 1280px;">
+        <div class="container-fluid px-md-5">
             <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
                 
                 <!-- Report Filter Form -->
@@ -52,7 +52,7 @@
                 <!-- Report Content -->
                 <div class="card-body p-0 text-light">
                     <div class="table-responsive">
-                        <table class="table table-dark table-hover mb-0 border-secondary">
+                        <table class="table table-dark table-hover mb-0 border-secondary" style="min-width: 1400px;">
                             <thead class="table-secondary">
                                 <tr class="text-uppercase small fw-bold tracking-widest">
                                     <th class="px-4 py-3 border-secondary">Account Name</th>
@@ -171,7 +171,7 @@
                                 @endforelse
                                 
                                 @if(count($accountSummaries) > 0)
-                                    <tr class="table-primary border-top border-secondary">
+                                    <tr class="border-top border-secondary">
                                         <td class="px-4 py-4 text-end h6 fw-bold text-uppercase tracking-widest mb-0 border-secondary">
                                             Grand Total:
                                         </td>
@@ -193,7 +193,7 @@
                                         <td class="px-4 py-4 text-end font-monospace fw-bold text-white border-secondary">
                                              {{ number_format($grandTotalTotalBudget, 2) }} L
                                         </td>
-                                        <td class="px-4 py-4 text-end font-monospace h5 fw-bold text-white border-secondary mb-0">
+                                        <td class="px-4 py-4 text-end font-monospace fw-bold text-white border-secondary mb-0">
                                             {{ number_format($grandTotalRemaining, 2) }} L
                                         </td>
                                     </tr>
