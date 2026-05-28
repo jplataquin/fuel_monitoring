@@ -14,7 +14,7 @@ class AssetController extends Controller
 {
     public function index(): View
     {
-        $assets = Asset::with('assetType')->get();
+        $assets = Asset::with('assetType')->orderBy('fleet_no', 'asc')->get();
 
         return view('assets.index', compact('assets'));
     }
