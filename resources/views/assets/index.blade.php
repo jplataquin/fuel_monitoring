@@ -1,4 +1,14 @@
 <x-app-layout>
+    <div x-data="{ 
+        search: '',
+        assets: {{ $assets->toJson() }},
+        get filteredAssets() {
+            if (this.search === '') return this.assets;
+            return this.assets.filter(asset => 
+                asset.fleet_no.toLowerCase().includes(this.search.toLowerCase())
+            );
+        }
+    }">
     <x-slot name="header">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <div class="d-flex flex-column flex-md-row align-items-md-center gap-3 flex-grow-1">
@@ -25,16 +35,7 @@
         </div>
     </x-slot>
 
-    <div class="container-xl py-5" x-data="{ 
-        search: '',
-        assets: {{ $assets->toJson() }},
-        get filteredAssets() {
-            if (this.search === '') return this.assets;
-            return this.assets.filter(asset => 
-                asset.fleet_no.toLowerCase().includes(this.search.toLowerCase())
-            );
-        }
-    }">
+    <div class="container-xl py-5">
         <!-- Action Cards Grid -->
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             <template x-for="asset in filteredAssets" :key="asset.id">
@@ -71,5 +72,6 @@
                     @endif
                 </div>
             </div>
+    </div>
     </div>
 </x-app-layout>
