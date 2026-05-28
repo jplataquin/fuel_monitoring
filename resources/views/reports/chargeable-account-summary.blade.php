@@ -52,9 +52,9 @@
                 <!-- Report Content -->
                 <div class="card-body p-0 text-light">
                     <div class="table-responsive">
-                        <table class="table table-dark table-hover mb-0 border-secondary" style="min-width: 1400px;">
+                        <table class="table table-dark table-hover mb-0 border-secondary" style="min-width: 1800px;">
                             <thead class="table-secondary">
-                                <tr class="text-uppercase small fw-bold tracking-widest">
+                                <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
                                     <th class="px-4 py-3 border-secondary">Account Name</th>
                                     <th class="px-4 py-3 border-secondary text-end">Total KM</th>
                                     <th class="px-4 py-3 border-secondary text-end">Total HR</th>
