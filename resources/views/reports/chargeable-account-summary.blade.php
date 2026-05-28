@@ -97,7 +97,7 @@
                                         <td class="px-4 py-3 text-end font-monospace fw-bold text-success border-secondary">
                                             {{ number_format($account['budgeted_fuel'], 2) }} L
                                         </td>
-                                        <td class="px-4 py-3 text-end font-monospace fw-bold text-danger border-secondary">
+                                        <td class="px-4 py-3 text-end font-monospace fw-bold text-warning border-secondary">
                                             {{ number_format($account['unbudgeted_fuel'], 2) }} L
                                         </td>
                                         <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary">
@@ -134,7 +134,7 @@
                                                 <td class="px-4 py-2 text-end font-monospace small fw-bold text-success border-secondary">
                                                     {{ number_format($subAccount['budgeted_fuel'], 2) }} L
                                                 </td>
-                                                <td class="px-4 py-2 text-end font-monospace small fw-bold text-danger border-secondary">
+                                                <td class="px-4 py-2 text-end font-monospace small fw-bold text-warning border-secondary">
                                                     {{ number_format($subAccount['unbudgeted_fuel'], 2) }} L
                                                 </td>
                                                 <td class="px-4 py-2 text-end font-monospace small fw-bold border-secondary">
@@ -184,7 +184,7 @@
                                         <td class="px-4 py-4 text-end font-monospace fw-bold text-success border-secondary">
                                             {{ number_format($grandTotalBudgeted, 2) }} L
                                         </td>
-                                        <td class="px-4 py-4 text-end font-monospace fw-bold text-danger border-secondary">
+                                        <td class="px-4 py-4 text-end font-monospace fw-bold text-warning border-secondary">
                                             {{ number_format($grandTotalUnbudgeted, 2) }} L
                                         </td>
                                         <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary">
