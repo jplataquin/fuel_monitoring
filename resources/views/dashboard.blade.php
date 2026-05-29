@@ -112,16 +112,16 @@
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
                                                 <span class="text-secondary small fw-medium text-uppercase tracking-wider">Unbudgeted Consumed</span>
-                                                <span class="text-info font-monospace fw-bold">{{ number_format($unbudgeted, 2) }} L</span>
+                                                <span class="font-monospace fw-bold" style="color: #8b5cf6;">{{ number_format($unbudgeted, 2) }} L</span>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center pb-2">
                                                 <span class="text-secondary small fw-medium text-uppercase tracking-wider">Remaining</span>
-                                                <span class="text-primary font-monospace fw-bold">{{ number_format($remaining, 2) }} L</span>
+                                                <span class="font-monospace fw-bold" style="color: rgba(150, 150, 150, 0.8);">{{ number_format($remaining, 2) }} L</span>
                                             </div>
                                             @if($overage > 0)
                                                 <div class="d-flex justify-content-between align-items-center pt-2 border-top border-danger border-opacity-25">
                                                     <span class="text-danger small fw-bold text-uppercase tracking-wider">Overage</span>
-                                                    <span class="text-danger font-monospace fw-bold">{{ number_format($overage, 2) }} L</span>
+                                                    <span class="font-monospace fw-bold" style="color: #7f1d1d;">{{ number_format($overage, 2) }} L</span>
                                                 </div>
                                             @endif
                                         </div>
