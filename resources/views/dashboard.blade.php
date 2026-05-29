@@ -69,10 +69,13 @@
                             @foreach($chartData as $index => $data)
                                 @php
                                     $totalBudget = $data['total_budget'];
+                                    $budgeted = $data['budgeted_fuel'];
+                                    $unbudgeted = $data['unbudgeted_fuel'];
                                     $consumed = $data['total_calculated_fuel'];
-                                    $remaining = max(0, $totalBudget - $consumed);
-                                    $overage = max(0, $consumed - $totalBudget);
-                                    $utilizationPercent = $totalBudget > 0 ? min(100, ($consumed / $totalBudget) * 100) : ($consumed > 0 ? 100 : 0);
+                                    
+                                    $remaining = max(0, $totalBudget - $budgeted);
+                                    $overage = max(0, $budgeted - $totalBudget);
+                                    $utilizationPercent = $totalBudget > 0 ? min(100, ($budgeted / $totalBudget) * 100) : ($budgeted > 0 ? 100 : 0);
                                     
                                     // Colors based on utilization
                                     $statusColor = '#34d399'; // Green
@@ -104,8 +107,12 @@
                                                 <span class="text-light font-monospace fw-bold">{{ number_format($totalBudget, 2) }} L</span>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
-                                                <span class="text-secondary small fw-medium text-uppercase tracking-wider">Consumed</span>
-                                                <span class="font-monospace fw-bold" style="color: {{ $statusColor }};">{{ number_format($consumed, 2) }} L</span>
+                                                <span class="text-secondary small fw-medium text-uppercase tracking-wider">Budgeted Consumed</span>
+                                                <span class="font-monospace fw-bold" style="color: {{ $statusColor }};">{{ number_format($budgeted, 2) }} L</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
+                                                <span class="text-secondary small fw-medium text-uppercase tracking-wider">Unbudgeted Consumed</span>
+                                                <span class="text-info font-monospace fw-bold">{{ number_format($unbudgeted, 2) }} L</span>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center pb-2">
                                                 <span class="text-secondary small fw-medium text-uppercase tracking-wider">Remaining</span>
@@ -148,41 +155,64 @@
                     const ctx = document.getElementById('chart-' + index).getContext('2d');
                     
                     const totalBudget = data.total_budget;
-                    const consumed = data.total_calculated_fuel;
+                    const budgeted = data.budgeted_fuel;
+                    const unbudgeted = data.unbudgeted_fuel;
                     
-                    // Cap consumed for visualization if it exceeds budget so doughnut completes at 100%
-                    // Overage will be shown as a separate segment
-                    let remaining = Math.max(0, totalBudget - consumed);
-                    let displayConsumed = Math.min(totalBudget, consumed);
-                    let overage = Math.max(0, consumed - totalBudget);
+                    // Cap budgeted for visualization if it exceeds budget
+                    let displayBudgeted = Math.min(totalBudget, budgeted);
+                    let remaining = Math.max(0, totalBudget - budgeted);
+                    let overage = Math.max(0, budgeted - totalBudget);
 
                     let datasetsData = [];
                     let backgroundColor = [];
                     let labels = [];
 
-                    const utilPercent = totalBudget > 0 ? (consumed / totalBudget) * 100 : (consumed > 0 ? 100 : 0);
+                    const utilPercent = totalBudget > 0 ? (budgeted / totalBudget) * 100 : (budgeted > 0 ? 100 : 0);
                     
-                    let consumedColor = '#34d399'; // Emerald 400 (Good)
+                    let budgetedColor = '#34d399'; // Emerald 400 (Good)
                     if (utilPercent >= 90) {
-                        consumedColor = '#ef4444'; // Red 500 (Critical)
+                        budgetedColor = '#ef4444'; // Red 500 (Critical)
                     } else if (utilPercent >= 75) {
-                        consumedColor = '#f59e0b'; // Amber 500 (Warning)
+                        budgetedColor = '#f59e0b'; // Amber 500 (Warning)
                     }
 
-                    if (totalBudget === 0 && consumed > 0) {
-                        // Unbudgeted consumption
-                        datasetsData = [consumed];
-                        backgroundColor = ['#ef4444'];
-                        labels = ['Unbudgeted Consumed'];
+                    if (totalBudget === 0 && (budgeted > 0 || unbudgeted > 0)) {
+                        // Entirely unbudgeted or budgeted without a set budget
+                        if (budgeted > 0) {
+                            datasetsData.push(budgeted);
+                            backgroundColor.push(budgetedColor);
+                            labels.push('Budgeted Consumed (No Limit)');
+                        }
+                        if (unbudgeted > 0) {
+                            datasetsData.push(unbudgeted);
+                            backgroundColor.push('#8b5cf6'); // Purple for unbudgeted
+                            labels.push('Unbudgeted Consumed');
+                        }
                     } else {
+                        // Consumed within budget
+                        datasetsData.push(displayBudgeted);
+                        backgroundColor.push(budgetedColor);
+                        labels.push('Budgeted Consumed');
+
+                        // Remaining budget
+                        if (remaining > 0) {
+                            datasetsData.push(remaining);
+                            backgroundColor.push('rgba(73, 69, 79, 0.3)');
+                            labels.push('Remaining Budget');
+                        }
+
+                        // Overage
                         if (overage > 0) {
-                            datasetsData = [displayConsumed, overage];
-                            backgroundColor = [consumedColor, '#7f1d1d']; // Dark red for overage
-                            labels = ['Consumed (Within Budget)', 'Overage'];
-                        } else {
-                            datasetsData = [consumed, remaining];
-                            backgroundColor = [consumedColor, 'rgba(73, 69, 79, 0.3)']; // Gray for remaining
-                            labels = ['Consumed', 'Remaining Budget'];
+                            datasetsData.push(overage);
+                            backgroundColor.push('#7f1d1d'); // Dark red for overage
+                            labels.push('Overage');
+                        }
+
+                        // Unbudgeted
+                        if (unbudgeted > 0) {
+                            datasetsData.push(unbudgeted);
+                            backgroundColor.push('#8b5cf6'); // Purple for unbudgeted
+                            labels.push('Unbudgeted Consumed');
                         }
                     }
 

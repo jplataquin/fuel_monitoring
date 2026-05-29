@@ -416,11 +416,18 @@ class ReportController extends Controller
                         'name' => $accountName,
                         'total_budget' => $totalBudget,
                         'actual_fuel' => 0,
+                        'budgeted_fuel' => 0,
+                        'unbudgeted_fuel' => 0,
                         'total_calculated_fuel' => 0,
                     ];
                 }
 
                 $entryCalcQty = $entry->_calculated_qty;
+                if ($entry->unbudgeted) {
+                    $accountSummaries[$accountName]['unbudgeted_fuel'] += $entryCalcQty;
+                } else {
+                    $accountSummaries[$accountName]['budgeted_fuel'] += $entryCalcQty;
+                }
                 $accountSummaries[$accountName]['total_calculated_fuel'] += $entryCalcQty;
 
                 $proratedActual = 0;
@@ -455,6 +462,8 @@ class ReportController extends Controller
                         'name' => $accountName,
                         'total_budget' => $totalBudget,
                         'actual_fuel' => 0,
+                        'budgeted_fuel' => 0,
+                        'unbudgeted_fuel' => 0,
                         'total_calculated_fuel' => 0,
                     ];
                 }
