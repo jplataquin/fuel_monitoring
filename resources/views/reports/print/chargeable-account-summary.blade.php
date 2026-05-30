@@ -57,18 +57,18 @@
                             @endphp
                             <tr class="table-active fw-bold">
                                 <td>{{ $account['name'] }}</td>
-                                <td class="text-end">{{ number_format($account['total_km'], 1) }}</td>
-                                <td class="text-end">{{ number_format($account['total_hours'], 1) }}</td>
-                                <td class="text-end">{{ number_format($account['budgeted_fuel'], 1) }}</td>
-                                <td class="text-end">{{ number_format($account['unbudgeted_fuel'], 1) }}</td>
-                                <td class="text-end">{{ number_format($account['total_calculated_fuel'], 1) }}</td>
-                                <td class="text-end">{{ number_format($account['total_budget'], 1) }}</td>
+                                <td class="text-end">{{ number_format($account['total_km'], 2) }}</td>
+                                <td class="text-end">{{ number_format($account['total_hours'], 2) }}</td>
+                                <td class="text-end">{{ number_format($account['budgeted_fuel'], 2) }}</td>
+                                <td class="text-end">{{ number_format($account['unbudgeted_fuel'], 2) }}</td>
+                                <td class="text-end">{{ number_format($account['total_calculated_fuel'], 2) }}</td>
+                                <td class="text-end">{{ number_format($account['total_budget'], 2) }}</td>
                                 <td class="text-end">
                                     @php $remaining = ($account['total_budget'] - $account['total_calculated_fuel']); @endphp
                                     @if($account['total_budget'] > 0)
-                                        {{ number_format($remaining, 1) }}
+                                        {{ number_format($remaining, 2) }}
                                         @php $grandTotalRemaining += $remaining; @endphp
-                                    @else 0.0 @endif
+                                    @else 0.00 @endif
                                 </td>
                             </tr>
 
@@ -76,15 +76,15 @@
                                 @foreach($account['sub_accounts'] as $subAccount)
                                     <tr style="font-size: 8px !important;">
                                         <td class="ps-3">└ {{ $subAccount['name'] }}</td>
-                                        <td class="text-end">{{ number_format($subAccount['total_km'], 1) }}</td>
-                                        <td class="text-end">{{ number_format($subAccount['total_hours'], 1) }}</td>
-                                        <td class="text-end">{{ number_format($subAccount['budgeted_fuel'], 1) }}</td>
-                                        <td class="text-end">{{ number_format($subAccount['unbudgeted_fuel'], 1) }}</td>
-                                        <td class="text-end">{{ number_format($subAccount['total_calculated_fuel'], 1) }}</td>
-                                        <td class="text-end">{{ number_format($subAccount['total_budget'], 1) }}</td>
+                                        <td class="text-end">{{ number_format($subAccount['total_km'], 2) }}</td>
+                                        <td class="text-end">{{ number_format($subAccount['total_hours'], 2) }}</td>
+                                        <td class="text-end">{{ number_format($subAccount['budgeted_fuel'], 2) }}</td>
+                                        <td class="text-end">{{ number_format($subAccount['unbudgeted_fuel'], 2) }}</td>
+                                        <td class="text-end">{{ number_format($subAccount['total_calculated_fuel'], 2) }}</td>
+                                        <td class="text-end">{{ number_format($subAccount['total_budget'], 2) }}</td>
                                         <td class="text-end">
                                             @php $subRemaining = ($subAccount['total_budget'] - $subAccount['total_calculated_fuel']); @endphp
-                                            {{ $subAccount['total_budget'] > 0 ? number_format($subRemaining, 1) : '0.0' }}
+                                            {{ $subAccount['total_budget'] > 0 ? number_format($subRemaining, 2) : '0.00' }}
                                         </td>
                                     </tr>
                                 @endforeach
@@ -96,13 +96,13 @@
                         @if(count($accountSummaries) > 0)
                             <tr class="table-primary fw-bold">
                                 <td class="text-end">GRAND TOTAL:</td>
-                                <td class="text-end">{{ number_format($grandTotalKm, 1) }}</td>
-                                <td class="text-end">{{ number_format($grandTotalHours, 1) }}</td>
-                                <td class="text-end">{{ number_format($grandTotalBudgeted, 1) }}</td>
-                                <td class="text-end">{{ number_format($grandTotalUnbudgeted, 1) }}</td>
-                                <td class="text-end">{{ number_format($grandTotalTotalCalc, 1) }}</td>
-                                <td class="text-end">{{ number_format($grandTotalTotalBudget, 1) }}</td>
-                                <td class="text-end">{{ number_format($grandTotalRemaining, 1) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalKm, 2) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalHours, 2) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalBudgeted, 2) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalUnbudgeted, 2) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalTotalCalc, 2) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalTotalBudget, 2) }}</td>
+                                <td class="text-end">{{ number_format($grandTotalRemaining, 2) }}</td>
                             </tr>
                         @endif
                     </tbody>

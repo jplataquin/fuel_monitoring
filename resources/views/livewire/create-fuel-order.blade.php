@@ -179,12 +179,12 @@
                                                 <div class="small text-primary fw-bold text-truncate" style="max-width: 120px;" title="{{ $entry['charged_to'] }}">{{ $entry['charged_to'] }}</div>
                                             </td>
                                             <td class="px-4 py-3 small text-light">{{ $entry['calculation_type'] }}</td>
-                                            <td class="px-4 py-3 small text-primary font-monospace text-end fw-bold">{{ number_format($entry['start_kilometer_reading'], 1) }}</td>
-                                            <td class="px-4 py-3 small text-primary font-monospace text-end fw-bold">{{ number_format($entry['end_kilometer_reading'], 1) }}</td>
-                                            <td class="px-4 py-3 small text-primary font-monospace text-end fw-bold">{{ number_format($entry['start_hour_reading'], 1) }}</td>
-                                            <td class="px-4 py-3 small text-primary font-monospace text-end fw-bold">{{ number_format($entry['end_hour_reading'], 1) }}</td>
-                                            <td class="px-4 py-3 small text-success font-monospace text-end fw-bold">{{ number_format($entry['calculated_kilometers'] ?? 0, 1) }}</td>
-                                            <td class="px-4 py-3 small text-success font-monospace text-end fw-bold">{{ number_format($entry['calculated_hours'] ?? 0, 1) }}</td>
+                                            <td class="px-4 py-3 small text-primary font-monospace text-end fw-bold">{{ number_format($entry['start_kilometer_reading'], 2) }}</td>
+                                            <td class="px-4 py-3 small text-primary font-monospace text-end fw-bold">{{ number_format($entry['end_kilometer_reading'], 2) }}</td>
+                                            <td class="px-4 py-3 small text-primary font-monospace text-end fw-bold">{{ number_format($entry['start_hour_reading'], 2) }}</td>
+                                            <td class="px-4 py-3 small text-primary font-monospace text-end fw-bold">{{ number_format($entry['end_hour_reading'], 2) }}</td>
+                                            <td class="px-4 py-3 small text-success font-monospace text-end fw-bold">{{ number_format($entry['calculated_kilometers'] ?? 0, 2) }}</td>
+                                            <td class="px-4 py-3 small text-success font-monospace text-end fw-bold">{{ number_format($entry['calculated_hours'] ?? 0, 2) }}</td>
                                             <td class="pe-4 py-3 small text-success font-monospace text-end fw-bold">{{ number_format($entry['calculated_quantity'] ?? 0, 2) }}</td>
                                         </tr>
                                     @endforeach

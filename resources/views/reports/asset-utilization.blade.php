@@ -274,7 +274,7 @@
                                                 <p class="small text-secondary opacity-75 mb-3">(Total Dispensed / Total Calc. KM)</p>
                                                 <p class="h2 font-monospace fw-bold text-success mb-0">
                                                     @if($grandTotalKm > 0)
-                                                        {{ number_format($grandTotalActual / $grandTotalKm, 4) }}
+                                                        {{ number_format($grandTotalActual / $grandTotalKm, 2) }}
                                                     @else
                                                         -
                                                     @endif
@@ -309,7 +309,7 @@
                                                 <p class="small text-secondary opacity-75 mb-3">(Total Dispensed / Total Calc. Hours)</p>
                                                 <p class="h2 font-monospace fw-bold text-success mb-0">
                                                     @if($grandTotalHours > 0)
-                                                        {{ number_format($grandTotalActual / $grandTotalHours, 4) }}
+                                                        {{ number_format($grandTotalActual / $grandTotalHours, 2) }}
                                                     @else
                                                         -
                                                     @endif

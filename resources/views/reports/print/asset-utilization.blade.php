@@ -48,7 +48,7 @@
                             <span class="text-secondary small" style="font-size: 7px;">Fleet:</span> {{ $selectedAsset->fleet_no }}
                         </div>
                         <div class="col-3">
-                            <span class="text-secondary small" style="font-size: 7px;">Fuel/Cap:</span> {{ $selectedAsset->fuel_type }} ({{ $selectedAsset->tank_capacity ? number_format($selectedAsset->tank_capacity, 1) . 'L' : 'N/A' }})
+                            <span class="text-secondary small" style="font-size: 7px;">Fuel/Cap:</span> {{ $selectedAsset->fuel_type }} ({{ $selectedAsset->tank_capacity ? number_format($selectedAsset->tank_capacity, 2) . 'L' : 'N/A' }})
                         </div>
                         <div class="col-3 text-end">
                             <span class="text-secondary small" style="font-size: 7px;">Factors:</span> {{ number_format($selectedAsset->fuel_factor_km, 2) }} / {{ number_format($selectedAsset->fuel_factor_hr, 2) }}
@@ -123,20 +123,20 @@
                                     <td>{{ $entry->particulars }}</td>
                                     <td>{{ $entry->chargeableAccount->name ?? '—' }}</td>
                                     <td class="text-center small">{{ $entry->calculation_type }}</td>
-                                    <td class="text-end">{{ $calcKm > 0 ? number_format($calcKm, 1) : '-' }}</td>
-                                    <td class="text-end">{{ $calcHours > 0 ? number_format($calcHours, 1) : '-' }}</td>
-                                    <td class="text-end fw-bold">{{ number_format($qty, 1) }}</td>
+                                    <td class="text-end">{{ $calcKm > 0 ? number_format($calcKm, 2) : '-' }}</td>
+                                    <td class="text-end">{{ $calcHours > 0 ? number_format($calcHours, 2) : '-' }}</td>
+                                    <td class="text-end fw-bold">{{ number_format($qty, 2) }}</td>
                                     <td></td>
                                     <td></td>
                                 </tr>
                             @endforeach
                             <tr class="fw-bold bg-light">
                                 <td colspan="4" class="text-end">Sub-Total:</td>
-                                <td class="text-end">{{ $groupTotalKm > 0 ? number_format($groupTotalKm, 1) : '-' }}</td>
-                                <td class="text-end">{{ $groupTotalHours > 0 ? number_format($groupTotalHours, 1) : '-' }}</td>
-                                <td class="text-end">{{ number_format($groupTotalQty, 1) }} L</td>
-                                <td class="text-end">{{ number_format($fuelOrder->say_quantity, 1) }} L</td>
-                                <td class="text-end">{{ number_format($fuelOrder->actual_quantity, 1) }} L</td>
+                                <td class="text-end">{{ $groupTotalKm > 0 ? number_format($groupTotalKm, 2) : '-' }}</td>
+                                <td class="text-end">{{ $groupTotalHours > 0 ? number_format($groupTotalHours, 2) : '-' }}</td>
+                                <td class="text-end">{{ number_format($groupTotalQty, 2) }} L</td>
+                                <td class="text-end">{{ number_format($fuelOrder->say_quantity, 2) }} L</td>
+                                <td class="text-end">{{ number_format($fuelOrder->actual_quantity, 2) }} L</td>
                             </tr>
                         @empty
                             <tr><td colspan="9" class="text-center py-4">No records found.</td></tr>
@@ -145,11 +145,11 @@
                         @if($entries->count() > 0)
                             <tr class="table-primary fw-bold" style="background-color: #f0f7ff !important;">
                                 <td colspan="4" class="text-end">GRAND TOTAL:</td>
-                                <td class="text-end">{{ $grandTotalKm > 0 ? number_format($grandTotalKm, 1) : '-' }}</td>
-                                <td class="text-end">{{ $grandTotalHours > 0 ? number_format($grandTotalHours, 1) : '-' }}</td>
-                                <td class="text-end">{{ number_format($grandTotalKm > 0 || $grandTotalHours > 0 ? $grandTotalKm / max(1, $selectedAsset->fuel_factor_km ?? 1) + ($grandTotalHours * ($selectedAsset->fuel_factor_hr ?? 0)) : 0, 1) }} L</td>
-                                <td class="text-end">{{ number_format($grandTotalSay, 1) }} L</td>
-                                <td class="text-end">{{ number_format($grandTotalActual, 1) }} L</td>
+                                <td class="text-end">{{ $grandTotalKm > 0 ? number_format($grandTotalKm, 2) : '-' }}</td>
+                                <td class="text-end">{{ $grandTotalHours > 0 ? number_format($grandTotalHours, 2) : '-' }}</td>
+                                <td class="text-end">{{ number_format($grandTotalKm > 0 || $grandTotalHours > 0 ? $grandTotalKm / max(1, $selectedAsset->fuel_factor_km ?? 1) + ($grandTotalHours * ($selectedAsset->fuel_factor_hr ?? 0)) : 0, 2) }} L</td>
+                                <td class="text-end">{{ number_format($grandTotalSay, 2) }} L</td>
+                                <td class="text-end">{{ number_format($grandTotalActual, 2) }} L</td>
                             </tr>
                         @endif
                     </tbody>
@@ -161,13 +161,13 @@
                     <div class="col-6">
                         <div class="border p-1">
                             <span class="small text-secondary text-uppercase" style="font-size: 7px;">Actual KM Factor</span>
-                            <p class="h6 mb-0">@if($grandTotalKm > 0) {{ number_format($grandTotalActual / $grandTotalKm, 4) }} @else - @endif</p>
+                            <p class="h6 mb-0">@if($grandTotalKm > 0) {{ number_format($grandTotalActual / $grandTotalKm, 2) }} @else - @endif</p>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="border p-1">
                             <span class="small text-secondary text-uppercase" style="font-size: 7px;">Actual HR Factor</span>
-                            <p class="h6 mb-0">@if($grandTotalHours > 0) {{ number_format($grandTotalActual / $grandTotalHours, 4) }} @else - @endif</p>
+                            <p class="h6 mb-0">@if($grandTotalHours > 0) {{ number_format($grandTotalActual / $grandTotalHours, 2) }} @else - @endif</p>
                         </div>
                     </div>
                 </div>

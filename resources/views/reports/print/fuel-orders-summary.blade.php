@@ -47,8 +47,8 @@
                                 <td class="font-monospace fw-bold">#{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</td>
                                 <td>{{ $order->asset->fleet_no ?? 'N/A' }} <span class="text-secondary small" style="font-size: 7px;">({{ $order->asset->plate_no ?? 'N/A' }})</span></td>
                                 <td>{{ Carbon\Carbon::parse($order->date_from)->format('M d') }} - {{ Carbon\Carbon::parse($order->date_to)->format('M d, Y') }}</td>
-                                <td class="text-end">{{ number_format($order->say_quantity, 1) }}</td>
-                                <td class="text-end fw-bold text-success">{{ number_format($order->actual_quantity, 1) }}</td>
+                                <td class="text-end">{{ number_format($order->say_quantity, 2) }}</td>
+                                <td class="text-end fw-bold text-success">{{ number_format($order->actual_quantity, 2) }}</td>
                             </tr>
                         @empty
                             <tr><td colspan="5" class="text-center">No data found.</td></tr>
@@ -57,8 +57,8 @@
                         @if($fuelOrders->count() > 0)
                             <tr class="table-primary fw-bold">
                                 <td colspan="3" class="text-end">GRAND TOTAL:</td>
-                                <td class="text-end">{{ number_format($totalSay, 1) }} L</td>
-                                <td class="text-end text-success">{{ number_format($totalActual, 1) }} L</td>
+                                <td class="text-end">{{ number_format($totalSay, 2) }} L</td>
+                                <td class="text-end text-success">{{ number_format($totalActual, 2) }} L</td>
                             </tr>
                         @endif
                     </tbody>
