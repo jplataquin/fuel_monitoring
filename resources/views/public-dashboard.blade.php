@@ -5,12 +5,58 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ __('Fuel Budget Dashboard') }} - {{ config('app.name', 'Laravel') }}</title>
 
+        <!-- PWA Meta Tags -->
+        <meta name="theme-color" content="#D0BCFF">
+        <link rel="manifest" href="{{ route('public.dashboard.manifest', $link->slug) }}">
+        <link rel="apple-touch-icon" href="{{ asset('images/logo.svg') }}">
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts & Styles -->
         @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+        
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js');
+                });
+            }
+
+            // PWA Install Prompt Logic
+            let deferredPrompt;
+            const installBtn = document.getElementById('install-button');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevent the mini-infobar from appearing on mobile
+                e.preventDefault();
+                // Stash the event so it can be triggered later.
+                deferredPrompt = e;
+                // Update UI notify the user they can install the PWA
+                installBtn.classList.remove('d-none');
+            });
+
+            installBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                // Show the install prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                // We've used the prompt, and can't use it again, throw it away
+                deferredPrompt = null;
+                // Hide the install button
+                installBtn.classList.add('d-none');
+            });
+
+            window.addEventListener('appinstalled', () => {
+                // Clear the deferredPrompt so it can be garbage collected
+                deferredPrompt = null;
+                // Hide the install button
+                installBtn.classList.add('d-none');
+                console.log('PWA was installed');
+            });
+        </script>
         
         <style>
             body {
@@ -36,9 +82,16 @@
             <header class="public-header py-4 mb-5 shadow-sm">
                 <div class="container-xl">
                     <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h1 class="h3 fw-bold mb-0 tracking-tight">Fuel Budget Monitoring</h1>
-                            <p class="small fw-medium mb-0 opacity-75">Live Public Dashboard: {{ $link->name ?? 'Shared Overview' }}</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <div>
+                                <h1 class="h3 fw-bold mb-0 tracking-tight">Fuel Budget Monitoring</h1>
+                                <p class="small fw-medium mb-0 opacity-75">Live Public Dashboard: {{ $link->name ?? 'Shared Overview' }}</p>
+                            </div>
+                            <!-- Install Button (Hidden by default) -->
+                            <button id="install-button" class="btn btn-dark rounded-pill px-3 py-1 fw-bold text-uppercase small shadow-sm ms-3 d-none">
+                                <svg width="14" height="14" class="me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                Install App
+                            </button>
                         </div>
                         <div class="d-none d-sm-block">
                             <x-application-logo style="width: 40px; height: 40px;" class="fill-current text-dark" />

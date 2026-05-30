@@ -100,3 +100,4 @@ require __DIR__.'/auth.php';
 
 // Public Shared Dashboard
 Route::get('/shared/dashboard/{slug}', [App\Http\Controllers\PublicDashboardController::class, 'show'])->name('public.dashboard');
+Route::get('/shared/dashboard/{slug}/manifest.json', [App\Http\Controllers\PublicDashboardController::class, 'manifest'])->name('public.dashboard.manifest');

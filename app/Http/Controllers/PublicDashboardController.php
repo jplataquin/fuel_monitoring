@@ -34,4 +34,38 @@ class PublicDashboardController extends Controller
 
         return view('public-dashboard', compact('chartData', 'assetVarianceData', 'dateFrom', 'dateTo', 'link'));
     }
+
+    public function manifest(string $slug)
+    {
+        $link = PublicDashboardLink::where('slug', $slug)
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        $manifest = [
+            'name' => 'Fuel Budget - ' . ($link->name ?? 'Shared Overview'),
+            'short_name' => 'Fuel Budget',
+            'description' => 'Live fuel budget and asset performance monitoring dashboard.',
+            'start_url' => route('public.dashboard', $link->slug),
+            'display' => 'standalone',
+            'background_color' => '#1c1b1f',
+            'theme_color' => '#D0BCFF',
+            'orientation' => 'any',
+            'icons' => [
+                [
+                    'src' => asset('images/logo.svg'),
+                    'sizes' => '192x192',
+                    'type' => 'image/svg+xml',
+                    'purpose' => 'any maskable'
+                ],
+                [
+                    'src' => asset('images/logo.svg'),
+                    'sizes' => '512x512',
+                    'type' => 'image/svg+xml',
+                    'purpose' => 'any maskable'
+                ]
+            ]
+        ];
+
+        return response()->json($manifest);
+    }
 }
