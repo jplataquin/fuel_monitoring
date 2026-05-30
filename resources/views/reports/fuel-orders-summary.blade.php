@@ -98,6 +98,7 @@
                                             {{ ($variance > 0 ? '+' : '') . number_format($variancePercent, 2) }}%
                                         </td>
                                     </tr>
+                                    
                                 @empty
                                     <tr>
                                         <td colspan="6" class="px-4 py-5 text-center border-secondary">
