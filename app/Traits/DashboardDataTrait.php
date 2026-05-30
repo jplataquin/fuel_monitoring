@@ -143,4 +143,42 @@ trait DashboardDataTrait
 
         return array_values($accountSummaries);
     }
+
+    /**
+     * Get asset variance data for asset cards.
+     */
+    protected function getAssetVarianceData(string $dateFrom, string $dateTo, ?int $assetId = null): Collection
+    {
+        $query = \App\Models\Asset::with(['fuelOrders' => function($q) use ($dateFrom, $dateTo) {
+            $q->where('status', 'DONE')
+              ->whereDate('created_at', '>=', $dateFrom)
+              ->whereDate('created_at', '<=', $dateTo);
+        }]);
+
+        if ($assetId) {
+            $query->where('id', $assetId);
+        }
+
+        $assets = $query->orderBy('fleet_no')->get();
+
+        return $assets->map(function($asset) {
+            $totalSay = $asset->fuelOrders->sum('say_quantity');
+            $totalActual = $asset->fuelOrders->sum('actual_quantity');
+            
+            $variancePercent = 0;
+            if ($totalSay > 0) {
+                $variancePercent = (($totalActual - $totalSay) / $totalSay) * 100;
+            }
+
+            return [
+                'id' => $asset->id,
+                'fleet_no' => $asset->fleet_no,
+                'plate_no' => $asset->plate_no,
+                'total_say' => $totalSay,
+                'total_actual' => $totalActual,
+                'variance_percent' => $variancePercent,
+                'order_count' => $asset->fuelOrders->count()
+            ];
+        });
+    }
 }

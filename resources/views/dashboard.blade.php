@@ -31,7 +31,6 @@
                             </span>
                         </div>
                     </div>
-                    <!-- Decorative element -->
                     <div class="position-absolute top-0 end-0 mt-n5 me-n5 bg-white bg-opacity-25 rounded-circle" style="width: 320px; height: 320px; filter: blur(80px);"></div>
                     <div class="position-absolute bottom-0 end-0 mb-4 me-5 d-none d-lg-block opacity-25">
                         <x-application-logo class="fill-current text-dark" style="width: 200px; height: 200px;" />
@@ -40,8 +39,6 @@
 
                 <!-- Budget Dashboard Section -->
                 <div class="vstack gap-4">
-                    
-                    <!-- Filter Form -->
                     <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
                         <div class="card-body p-4">
                             <form action="{{ route('dashboard') }}" method="GET" class="row g-3 align-items-end">
@@ -71,206 +68,162 @@
                         </div>
                     </div>
 
-                    <!-- Charts Grid -->
-                    @if(count($chartData) > 0)
-                        <div class="row g-4">
-                            @foreach($chartData as $index => $data)
-                                @php
-                                    $totalBudget = $data['total_budget'];
-                                    $budgeted = $data['budgeted_fuel'];
-                                    $unbudgeted = $data['unbudgeted_fuel'];
-                                    $consumed = $data['total_calculated_fuel'];
-                                    
-                                    $remaining = max(0, $totalBudget - $budgeted);
-                                    $overage = max(0, $budgeted - $totalBudget);
-                                    $utilizationPercent = $totalBudget > 0 ? min(100, ($budgeted / $totalBudget) * 100) : ($budgeted > 0 ? 100 : 0);
-                                    
-                                    // Colors based on utilization
-                                    $statusColor = '#34d399'; // Green
-                                    if ($utilizationPercent >= 90) {
-                                        $statusColor = '#ef4444'; // Red
-                                    } elseif ($utilizationPercent >= 75) {
-                                        $statusColor = '#f59e0b'; // Orange
-                                    }
-                                @endphp
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="card h-100 bg-dark border-secondary border-opacity-50 rounded-4 p-4 shadow-sm">
-                                        <h3 class="h5 fw-bold text-light mb-3 text-center text-truncate" title="{{ $data['name'] }}">
-                                            {{ $data['name'] }}
-                                        </h3>
-                                        
-                                        <div class="position-relative d-flex justify-content-center align-items-center mb-4" style="height: 200px;">
-                                            <canvas id="chart-{{ $index }}"></canvas>
-                                            <div class="position-absolute d-flex flex-column justify-content-center align-items-center" style="pointer-events: none;">
-                                                <span class="fs-4 fw-bold" style="color: {{ $statusColor }};">
-                                                    {{ number_format($utilizationPercent, 0) }}%
-                                                </span>
-                                                <span class="small text-secondary text-uppercase tracking-widest" style="font-size: 0.65rem;">Used</span>
-                                            </div>
-                                        </div>
+                    <div id="budget-grid-container">
+                        @include('partials.dashboard-grid')
+                    </div>
+                </div>
 
-                                        <div class="vstack gap-2">
-                                            <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
-                                                <span class="text-secondary small fw-medium text-uppercase tracking-wider">Total Budget</span>
-                                                <span class="text-light font-monospace fw-bold">{{ number_format($totalBudget, 2) }} L</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
-                                                <span class="text-secondary small fw-medium text-uppercase tracking-wider">Budgeted Consumed</span>
-                                                <span class="font-monospace fw-bold" style="color: {{ $statusColor }};">{{ number_format($budgeted, 2) }} L</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
-                                                <span class="text-secondary small fw-medium text-uppercase tracking-wider">Unbudgeted Consumed</span>
-                                                <span class="font-monospace fw-bold" style="color: #8b5cf6;">{{ number_format($unbudgeted, 2) }} L</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center pb-2">
-                                                <span class="text-secondary small fw-medium text-uppercase tracking-wider">Remaining</span>
-                                                <span class="font-monospace fw-bold" style="color: rgba(150, 150, 150, 0.8);">{{ number_format($remaining, 2) }} L</span>
-                                            </div>
-                                            @if($overage > 0)
-                                                <div class="d-flex justify-content-between align-items-center pt-2 border-top border-danger border-opacity-25">
-                                                    <span class="text-danger small fw-bold text-uppercase tracking-wider">Overage</span>
-                                                    <span class="font-monospace fw-bold" style="color: #7f1d1d;">{{ number_format($overage, 2) }} L</span>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="card bg-dark border-secondary shadow-sm rounded-4">
-                            <div class="card-body text-center py-5">
-                                <div class="bg-secondary bg-opacity-10 d-inline-flex p-3 rounded-4 mb-3">
-                                    <svg width="32" height="32" class="text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                </div>
-                                <h3 class="h5 fw-bold text-light mb-1">No Data Available</h3>
-                                <p class="text-secondary mb-0">There are no budgets or consumption records for the selected parameters.</p>
-                            </div>
-                        </div>
-                    @endif
+                <!-- Asset Variance Section -->
+                <div class="vstack gap-4 mt-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <h3 class="h5 fw-bold text-light mb-0 text-uppercase tracking-widest">Asset Performance</h3>
+                        <div class="flex-grow-1 border-top border-secondary border-opacity-25"></div>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 text-uppercase fw-bold tracking-widest" style="font-size: 0.6rem;">
+                            Live Variance
+                        </span>
+                    </div>
+                    
+                    <div id="asset-grid-container">
+                        @include('partials.asset-grid')
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    @if(count($chartData) > 0)
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const chartData = @json($chartData);
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function renderDashboardCharts(chartData) {
+            chartData.forEach((data, index) => {
+                const canvas = document.getElementById('chart-' + index);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
                 
-                chartData.forEach((data, index) => {
-                    const ctx = document.getElementById('chart-' + index).getContext('2d');
-                    
-                    const totalBudget = data.total_budget;
-                    const budgeted = data.budgeted_fuel;
-                    const unbudgeted = data.unbudgeted_fuel;
-                    
-                    // Cap budgeted for visualization if it exceeds budget
-                    let displayBudgeted = Math.min(totalBudget, budgeted);
-                    let remaining = Math.max(0, totalBudget - budgeted);
-                    let overage = Math.max(0, budgeted - totalBudget);
+                const totalBudget = data.total_budget;
+                const budgeted = data.budgeted_fuel;
+                const unbudgeted = data.unbudgeted_fuel;
+                
+                let displayBudgeted = Math.min(totalBudget, budgeted);
+                let remaining = Math.max(0, totalBudget - budgeted);
+                let overage = Math.max(0, budgeted - totalBudget);
 
-                    let datasetsData = [];
-                    let backgroundColor = [];
-                    let labels = [];
+                let datasetsData = [];
+                let backgroundColor = [];
+                let labels = [];
 
-                    const utilPercent = totalBudget > 0 ? (budgeted / totalBudget) * 100 : (budgeted > 0 ? 100 : 0);
-                    
-                    let budgetedColor = '#34d399'; // Emerald 400 (Good)
-                    if (utilPercent >= 90) {
-                        budgetedColor = '#ef4444'; // Red 500 (Critical)
-                    } else if (utilPercent >= 75) {
-                        budgetedColor = '#f59e0b'; // Amber 500 (Warning)
-                    }
+                const utilPercent = totalBudget > 0 ? (budgeted / totalBudget) * 100 : (budgeted > 0 ? 100 : 0);
+                
+                let budgetedColor = '#34d399';
+                if (utilPercent >= 90) {
+                    budgetedColor = '#ef4444';
+                } else if (utilPercent >= 75) {
+                    budgetedColor = '#f59e0b';
+                }
 
-                    if (totalBudget === 0 && (budgeted > 0 || unbudgeted > 0)) {
-                        // Entirely unbudgeted or budgeted without a set budget
-                        if (budgeted > 0) {
-                            datasetsData.push(budgeted);
-                            backgroundColor.push(budgetedColor);
-                            labels.push('Budgeted Consumed (No Limit)');
-                        }
-                        if (unbudgeted > 0) {
-                            datasetsData.push(unbudgeted);
-                            backgroundColor.push('#8b5cf6'); // Purple for unbudgeted
-                            labels.push('Unbudgeted Consumed');
-                        }
-                    } else {
-                        // Consumed within budget
-                        datasetsData.push(displayBudgeted);
+                if (totalBudget === 0 && (budgeted > 0 || unbudgeted > 0)) {
+                    if (budgeted > 0) {
+                        datasetsData.push(budgeted);
                         backgroundColor.push(budgetedColor);
-                        labels.push('Budgeted Consumed');
+                        labels.push('Budgeted Consumed (No Limit)');
+                    }
+                    if (unbudgeted > 0) {
+                        datasetsData.push(unbudgeted);
+                        backgroundColor.push('#8b5cf6');
+                        labels.push('Unbudgeted Consumed');
+                    }
+                } else {
+                    datasetsData.push(displayBudgeted);
+                    backgroundColor.push(budgetedColor);
+                    labels.push('Budgeted Consumed');
 
-                        // Remaining budget
-                        if (remaining > 0) {
-                            datasetsData.push(remaining);
-                            backgroundColor.push('rgba(73, 69, 79, 0.3)');
-                            labels.push('Remaining Budget');
-                        }
-
-                        // Overage
-                        if (overage > 0) {
-                            datasetsData.push(overage);
-                            backgroundColor.push('#7f1d1d'); // Dark red for overage
-                            labels.push('Overage');
-                        }
-
-                        // Unbudgeted
-                        if (unbudgeted > 0) {
-                            datasetsData.push(unbudgeted);
-                            backgroundColor.push('#8b5cf6'); // Purple for unbudgeted
-                            labels.push('Unbudgeted Consumed');
-                        }
+                    if (remaining > 0) {
+                        datasetsData.push(remaining);
+                        backgroundColor.push('rgba(73, 69, 79, 0.3)');
+                        labels.push('Remaining Budget');
                     }
 
-                    new Chart(ctx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                data: datasetsData,
-                                backgroundColor: backgroundColor,
-                                borderWidth: 0,
-                                hoverOffset: 4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            cutout: '75%',
-                            plugins: {
-                                legend: {
-                                    display: false // Hide legend to save space
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            let label = context.label || '';
-                                            if (label) {
-                                                label += ': ';
-                                            }
-                                            if (context.parsed !== null) {
-                                                label += context.parsed.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' L';
-                                            }
-                                            return label;
+                    if (overage > 0) {
+                        datasetsData.push(overage);
+                        backgroundColor.push('#7f1d1d');
+                        labels.push('Overage');
+                    }
+
+                    if (unbudgeted > 0) {
+                        datasetsData.push(unbudgeted);
+                        backgroundColor.push('#8b5cf6');
+                        labels.push('Unbudgeted Consumed');
+                    }
+                }
+
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: datasetsData,
+                            backgroundColor: backgroundColor,
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) label += ': ';
+                                        if (context.parsed !== null) {
+                                            label += context.parsed.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' L';
                                         }
+                                        return label;
                                     }
                                 }
                             }
                         }
-                    });
+                    }
                 });
             });
-        </script>
-    @endif
-            </div>
-        </div>
-    </div>
+        }
+
+        async function updateDashboard() {
+            try {
+                const url = new URL(window.location.href);
+                const response = await fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('budget-grid-container').innerHTML = data.budget_html;
+                    document.getElementById('asset-grid-container').innerHTML = data.asset_html;
+                    renderDashboardCharts(data.chart_data);
+                    console.log('Dashboard auto-updated at ' + new Date().toLocaleTimeString());
+                }
+            } catch (error) {
+                console.error('Dashboard update failed:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderDashboardCharts(@json($chartData));
+            // Update every 5 minutes (300,000 ms)
+            setInterval(updateDashboard, 300000);
+        });
+    </script>
 
     <style>
-        .hover-opacity:hover {
-            opacity: 0.85;
+        .hover-bg-light:hover {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+        }
+        .transition-all {
+            transition: all 0.2s ease-in-out;
         }
     </style>
 </x-app-layout>

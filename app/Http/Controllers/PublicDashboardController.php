@@ -11,7 +11,7 @@ class PublicDashboardController extends Controller
 {
     use DashboardDataTrait;
 
-    public function show(string $slug)
+    public function show(string $slug, Request $request)
     {
         $link = PublicDashboardLink::where('slug', $slug)
             ->where('is_active', true)
@@ -22,7 +22,16 @@ class PublicDashboardController extends Controller
         $dateTo = Carbon::now()->format('Y-m-d');
 
         $chartData = $this->getBudgetDashboardData($dateFrom, $dateTo);
+        $assetVarianceData = $this->getAssetVarianceData($dateFrom, $dateTo);
 
-        return view('public-dashboard', compact('chartData', 'dateFrom', 'dateTo', 'link'));
+        if ($request->ajax()) {
+            return response()->json([
+                'budget_html' => view('partials.dashboard-grid', compact('chartData'))->render(),
+                'asset_html' => view('partials.asset-grid', compact('assetVarianceData'))->render(),
+                'chart_data' => $chartData
+            ]);
+        }
+
+        return view('public-dashboard', compact('chartData', 'assetVarianceData', 'dateFrom', 'dateTo', 'link'));
     }
 }

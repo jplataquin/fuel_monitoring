@@ -356,9 +356,18 @@ class ReportController extends Controller
         $accountId = $request->input('account_id');
 
         $chartData = $this->getBudgetDashboardData($dateFrom, $dateTo, $accountId);
+        $assetVarianceData = $this->getAssetVarianceData($dateFrom, $dateTo);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'budget_html' => view('partials.dashboard-grid', compact('chartData'))->render(),
+                'asset_html' => view('partials.asset-grid', compact('assetVarianceData'))->render(),
+                'chart_data' => $chartData
+            ]);
+        }
 
         $accounts = ChargeableAccount::orderBy('name')->get();
 
-        return view('dashboard', compact('chartData', 'dateFrom', 'dateTo', 'accounts', 'accountId'));
+        return view('dashboard', compact('chartData', 'assetVarianceData', 'dateFrom', 'dateTo', 'accounts', 'accountId'));
     }
 }
