@@ -74,6 +74,7 @@
                                         $totalSay += $order->say_quantity;
                                         $totalActual += $order->actual_quantity;
                                         $variance = $order->actual_quantity - $order->say_quantity;
+                                        $variancePercent = $order->say_quantity > 0 ? ($variance / $order->say_quantity) * 100 : 0;
                                         $totalVariance += $variance;
                                     @endphp
                                     <tr>
@@ -93,8 +94,8 @@
                                         <td class="px-4 py-3 text-end font-monospace fw-bold text-success border-secondary">
                                             {{ number_format($order->actual_quantity, 2) }} L
                                         </td>
-                                        <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary {{ $variance > 0 ? 'text-danger' : ($variance < 0 ? 'text-info' : 'text-secondary') }}">
-                                            {{ ($variance > 0 ? '+' : '') . number_format($variance, 2) }} L
+                                        <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary {{ $variance > 0 ? 'text-danger' : ($variance < 0 ? 'text-info' : 'text-secondary') }}" style="{{ $variance < 0 ? 'color: #3b82f6 !important;' : '' }}">
+                                            {{ ($variance > 0 ? '+' : '') . number_format($variancePercent, 2) }}%
                                         </td>
                                     </tr>
                                 @empty
@@ -122,8 +123,9 @@
                                         <td class="px-4 py-4 text-end font-monospace h5 fw-bold text-success border-secondary mb-0">
                                             {{ number_format($totalActual, 2) }} L
                                         </td>
-                                        <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary {{ $totalVariance > 0 ? 'text-danger' : ($totalVariance < 0 ? 'text-info' : 'text-secondary') }}">
-                                            {{ ($totalVariance > 0 ? '+' : '') . number_format($totalVariance, 2) }} L
+                                        @php $totalVariancePercent = $totalSay > 0 ? ($totalVariance / $totalSay) * 100 : 0; @endphp
+                                        <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary {{ $totalVariance > 0 ? 'text-danger' : ($totalVariance < 0 ? 'text-info' : 'text-secondary') }}" style="{{ $totalVariance < 0 ? 'color: #3b82f6 !important;' : '' }}">
+                                            {{ ($totalVariance > 0 ? '+' : '') . number_format($totalVariancePercent, 2) }}%
                                         </td>
                                     </tr>
                                 @endif
