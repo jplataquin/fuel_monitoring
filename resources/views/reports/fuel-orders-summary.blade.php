@@ -60,17 +60,21 @@
                                     <th class="px-4 py-3 border-secondary">Period</th>
                                     <th class="px-4 py-3 border-secondary text-end">Say Qty</th>
                                     <th class="px-4 py-3 border-secondary text-end">Actual Qty</th>
+                                    <th class="px-4 py-3 border-secondary text-end">Variance</th>
                                 </tr>
                             </thead>
                             <tbody class="border-secondary">
                                 @php
                                     $totalSay = 0;
                                     $totalActual = 0;
+                                    $totalVariance = 0;
                                 @endphp
                                 @forelse($fuelOrders as $order)
                                     @php
                                         $totalSay += $order->say_quantity;
                                         $totalActual += $order->actual_quantity;
+                                        $variance = $order->actual_quantity - $order->say_quantity;
+                                        $totalVariance += $variance;
                                     @endphp
                                     <tr>
                                         <td class="px-4 py-3 font-monospace fw-bold text-primary border-secondary">
@@ -89,10 +93,13 @@
                                         <td class="px-4 py-3 text-end font-monospace fw-bold text-success border-secondary">
                                             {{ number_format($order->actual_quantity, 2) }} L
                                         </td>
+                                        <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary {{ $variance > 0 ? 'text-danger' : ($variance < 0 ? 'text-info' : 'text-secondary') }}">
+                                            {{ ($variance > 0 ? '+' : '') . number_format($variance, 2) }} L
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-4 py-5 text-center border-secondary">
+                                        <td colspan="6" class="px-4 py-5 text-center border-secondary">
                                             <div class="py-5">
                                                 <div class="bg-secondary bg-opacity-10 d-inline-flex p-3 rounded-4 mb-3">
                                                     <svg width="32" height="32" class="text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -114,6 +121,9 @@
                                         </td>
                                         <td class="px-4 py-4 text-end font-monospace h5 fw-bold text-success border-secondary mb-0">
                                             {{ number_format($totalActual, 2) }} L
+                                        </td>
+                                        <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary {{ $totalVariance > 0 ? 'text-danger' : ($totalVariance < 0 ? 'text-info' : 'text-secondary') }}">
+                                            {{ ($totalVariance > 0 ? '+' : '') . number_format($totalVariance, 2) }} L
                                         </td>
                                     </tr>
                                 @endif
