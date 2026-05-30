@@ -37,6 +37,12 @@
 
                 @if(Auth::user()->role === 'administrator')
                 <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('public-dashboard-links.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('public-dashboard-links.index') }}">{{ __('Shared Links') }}</a>
+                </li>
+                @endif
+
+                @if(Auth::user()->role === 'administrator')
+                <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('asset-types.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('asset-types.index') }}">{{ __('Classifications') }}</a>
                 </li>
                 @endif

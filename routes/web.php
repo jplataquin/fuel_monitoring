@@ -27,6 +27,12 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::get('reports/fuel-orders', [ReportController::class, 'fuelOrdersSummary'])->name('reports.fuel-orders');
     Route::get('reports/chargeable-accounts', [ReportController::class, 'chargeableAccountSummary'])->name('reports.chargeable-accounts');
 
+    // Shared Dashboard Management
+    Route::get('shared-links', [App\Http\Controllers\PublicDashboardLinkController::class, 'index'])->name('public-dashboard-links.index');
+    Route::post('shared-links', [App\Http\Controllers\PublicDashboardLinkController::class, 'store'])->name('public-dashboard-links.store');
+    Route::patch('shared-links/{link}/toggle', [App\Http\Controllers\PublicDashboardLinkController::class, 'toggleStatus'])->name('public-dashboard-links.toggle');
+    Route::delete('shared-links/{link}', [App\Http\Controllers\PublicDashboardLinkController::class, 'destroy'])->name('public-dashboard-links.destroy');
+
     // Assets
     Route::resource('assets', AssetController::class);
     Route::get('assets/{asset}/logs', [UtilizationEntryController::class, 'logs'])->name('assets.logs');
@@ -91,3 +97,6 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Public Shared Dashboard
+Route::get('/shared/dashboard/{slug}', [App\Http\Controllers\PublicDashboardController::class, 'show'])->name('public.dashboard');
