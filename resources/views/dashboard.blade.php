@@ -75,12 +75,20 @@
 
                 <!-- Asset Variance Section -->
                 <div class="vstack gap-4 mt-2">
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
                         <h3 class="h5 fw-bold text-light mb-0 text-uppercase tracking-widest">Asset Performance</h3>
-                        <div class="flex-grow-1 border-top border-secondary border-opacity-25"></div>
-                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 text-uppercase fw-bold tracking-widest" style="font-size: 0.6rem;">
-                            Live Variance
-                        </span>
+                        <div class="flex-grow-1 border-top border-secondary border-opacity-25 d-none d-md-block"></div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" onclick="toggleAssetFilter('red', this)" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold text-uppercase tracking-widest asset-filter-btn" style="font-size: 0.6rem;">
+                                Critical (≥10%)
+                            </button>
+                            <button type="button" onclick="toggleAssetFilter('blue', this)" class="btn btn-sm btn-outline-info rounded-pill px-3 fw-bold text-uppercase tracking-widest asset-filter-btn" style="font-size: 0.6rem;">
+                                Under (<0%)
+                            </button>
+                            <button type="button" onclick="toggleAssetFilter('all', this)" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold text-uppercase tracking-widest asset-filter-btn active" style="font-size: 0.6rem;">
+                                Show All
+                            </button>
+                        </div>
                     </div>
                     
                     <div id="asset-grid-container">
@@ -93,6 +101,38 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        let currentAssetFilter = 'all';
+
+        function applyAssetFilter() {
+            const cards = document.querySelectorAll('.asset-card-item');
+            cards.forEach(card => {
+                if (currentAssetFilter === 'all' || card.dataset.varianceType === currentAssetFilter) {
+                    card.classList.remove('d-none');
+                } else {
+                    card.classList.add('d-none');
+                }
+            });
+        }
+
+        function toggleAssetFilter(type, btn) {
+            currentAssetFilter = type;
+            
+            document.querySelectorAll('.asset-filter-btn').forEach(b => {
+                b.classList.remove('active', 'btn-primary', 'btn-danger', 'btn-info');
+                b.classList.add('btn-outline-secondary');
+                if (b.innerText.toLowerCase().includes('critical')) b.classList.replace('btn-outline-secondary', 'btn-outline-danger');
+                if (b.innerText.toLowerCase().includes('under')) b.classList.replace('btn-outline-secondary', 'btn-outline-info');
+                if (b.innerText.toLowerCase().includes('show all')) b.classList.replace('btn-outline-secondary', 'btn-outline-primary');
+            });
+
+            btn.classList.remove('btn-outline-danger', 'btn-outline-info', 'btn-outline-primary', 'btn-outline-secondary');
+            if (type === 'red') btn.classList.add('btn-danger', 'active');
+            else if (type === 'blue') btn.classList.add('btn-info', 'active');
+            else btn.classList.add('btn-primary', 'active');
+
+            applyAssetFilter();
+        }
+
         function renderDashboardCharts(chartData) {
             chartData.forEach((data, index) => {
                 const canvas = document.getElementById('chart-' + index);
@@ -204,6 +244,7 @@
                     document.getElementById('budget-grid-container').innerHTML = data.budget_html;
                     document.getElementById('asset-grid-container').innerHTML = data.asset_html;
                     renderDashboardCharts(data.chart_data);
+                    applyAssetFilter();
                     console.log('Dashboard auto-updated at ' + new Date().toLocaleTimeString());
                 }
             } catch (error) {
@@ -213,7 +254,6 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             renderDashboardCharts(@json($chartData));
-            // Update every 5 minutes (300,000 ms)
             setInterval(updateDashboard, 300000);
         });
     </script>

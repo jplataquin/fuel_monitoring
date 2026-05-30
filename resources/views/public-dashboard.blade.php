@@ -29,31 +29,24 @@
             const installBtn = document.getElementById('install-button');
 
             window.addEventListener('beforeinstallprompt', (e) => {
-                // Prevent the mini-infobar from appearing on mobile
                 e.preventDefault();
-                // Stash the event so it can be triggered later.
                 deferredPrompt = e;
-                // Update UI notify the user they can install the PWA
-                installBtn.classList.remove('d-none');
+                if (installBtn) installBtn.classList.remove('d-none');
             });
 
-            installBtn.addEventListener('click', async () => {
-                if (!deferredPrompt) return;
-                // Show the install prompt
-                deferredPrompt.prompt();
-                // Wait for the user to respond to the prompt
-                const { outcome } = await deferredPrompt.userChoice;
-                // We've used the prompt, and can't use it again, throw it away
-                deferredPrompt = null;
-                // Hide the install button
-                installBtn.classList.add('d-none');
-            });
+            if (installBtn) {
+                installBtn.addEventListener('click', async () => {
+                    if (!deferredPrompt) return;
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                    installBtn.classList.add('d-none');
+                });
+            }
 
             window.addEventListener('appinstalled', () => {
-                // Clear the deferredPrompt so it can be garbage collected
                 deferredPrompt = null;
-                // Hide the install button
-                installBtn.classList.add('d-none');
+                if (installBtn) installBtn.classList.add('d-none');
                 console.log('PWA was installed');
             });
         </script>
@@ -87,7 +80,6 @@
                                 <h1 class="h3 fw-bold mb-0 tracking-tight">Fuel Budget Monitoring</h1>
                                 <p class="small fw-medium mb-0 opacity-75">Live Public Dashboard: {{ $link->name ?? 'Shared Overview' }}</p>
                             </div>
-                            <!-- Install Button (Hidden by default) -->
                             <button id="install-button" class="btn btn-dark rounded-pill px-3 py-1 fw-bold text-uppercase small shadow-sm ms-3 d-none">
                                 <svg width="14" height="14" class="me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                                 Install App
@@ -118,12 +110,20 @@
 
                     <!-- Asset Variance Section -->
                     <div class="vstack gap-4 mt-2">
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
                             <h3 class="h5 fw-bold text-light mb-0 text-uppercase tracking-widest">Asset Performance</h3>
-                            <div class="flex-grow-1 border-top border-secondary border-opacity-25"></div>
-                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 text-uppercase fw-bold tracking-widest" style="font-size: 0.6rem;">
-                                Live Variance
-                            </span>
+                            <div class="flex-grow-1 border-top border-secondary border-opacity-25 d-none d-md-block"></div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" onclick="toggleAssetFilter('red', this)" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold text-uppercase tracking-widest asset-filter-btn" style="font-size: 0.6rem;">
+                                    Critical (≥10%)
+                                </button>
+                                <button type="button" onclick="toggleAssetFilter('blue', this)" class="btn btn-sm btn-outline-info rounded-pill px-3 fw-bold text-uppercase tracking-widest asset-filter-btn" style="font-size: 0.6rem;">
+                                    Under (<0%)
+                                </button>
+                                <button type="button" onclick="toggleAssetFilter('all', this)" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold text-uppercase tracking-widest asset-filter-btn active" style="font-size: 0.6rem;">
+                                    Show All
+                                </button>
+                            </div>
                         </div>
                         
                         <div id="asset-grid-container">
@@ -140,6 +140,38 @@
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
+            let currentAssetFilter = 'all';
+
+            function applyAssetFilter() {
+                const cards = document.querySelectorAll('.asset-card-item');
+                cards.forEach(card => {
+                    if (currentAssetFilter === 'all' || card.dataset.varianceType === currentAssetFilter) {
+                        card.classList.remove('d-none');
+                    } else {
+                        card.classList.add('d-none');
+                    }
+                });
+            }
+
+            function toggleAssetFilter(type, btn) {
+                currentAssetFilter = type;
+                
+                document.querySelectorAll('.asset-filter-btn').forEach(b => {
+                    b.classList.remove('active', 'btn-primary', 'btn-danger', 'btn-info');
+                    b.classList.add('btn-outline-secondary');
+                    if (b.innerText.toLowerCase().includes('critical')) b.classList.replace('btn-outline-secondary', 'btn-outline-danger');
+                    if (b.innerText.toLowerCase().includes('under')) b.classList.replace('btn-outline-secondary', 'btn-outline-info');
+                    if (b.innerText.toLowerCase().includes('show all')) b.classList.replace('btn-outline-secondary', 'btn-outline-primary');
+                });
+
+                btn.classList.remove('btn-outline-danger', 'btn-outline-info', 'btn-outline-primary', 'btn-outline-secondary');
+                if (type === 'red') btn.classList.add('btn-danger', 'active');
+                else if (type === 'blue') btn.classList.add('btn-info', 'active');
+                else btn.classList.add('btn-primary', 'active');
+
+                applyAssetFilter();
+            }
+
             function renderDashboardCharts(chartData) {
                 chartData.forEach((data, index) => {
                     const canvas = document.getElementById('chart-' + index);
@@ -250,6 +282,7 @@
                         document.getElementById('budget-grid-container').innerHTML = data.budget_html;
                         document.getElementById('asset-grid-container').innerHTML = data.asset_html;
                         renderDashboardCharts(data.chart_data);
+                        applyAssetFilter();
                         console.log('Public dashboard auto-updated at ' + new Date().toLocaleTimeString());
                     }
                 } catch (error) {
@@ -259,6 +292,7 @@
 
             document.addEventListener('DOMContentLoaded', function() {
                 renderDashboardCharts(@json($chartData));
+                applyAssetFilter();
                 setInterval(updateDashboard, 300000);
             });
         </script>

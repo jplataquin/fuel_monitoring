@@ -4,13 +4,16 @@
             @php
                 $variance = $asset['variance_percent'];
                 $statusColor = 'text-secondary';
+                $varianceType = 'normal';
                 if ($variance >= 10) {
                     $statusColor = 'text-danger';
+                    $varianceType = 'red';
                 } elseif ($variance < 0) {
                     $statusColor = 'text-info'; // Using info for teal in current theme
+                    $varianceType = 'blue';
                 }
             @endphp
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 asset-card-item" data-variance-type="{{ $varianceType }}">
                 <div class="card h-100 bg-dark border-secondary border-opacity-25 rounded-4 shadow-sm hover-bg-light hover-bg-opacity-5 transition-all">
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-start mb-3">
