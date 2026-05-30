@@ -21,6 +21,9 @@
                 @if($dateFrom || $dateTo)
                     <span class="badge border text-dark">Period: {{ $dateFrom ?? 'Start' }} to {{ $dateTo ?? 'End' }}</span>
                 @endif
+                @if($assetId && $selectedAsset = $assets->firstWhere('id', $assetId))
+                    <span class="badge border text-dark">Asset: {{ $selectedAsset->fleet_no }} ({{ $selectedAsset->plate_no ?? 'N/A' }})</span>
+                @endif
             </div>
             
             <div class="table-responsive">
@@ -53,7 +56,7 @@
                                 <td>{{ Carbon\Carbon::parse($order->date_from)->format('M d') }} - {{ Carbon\Carbon::parse($order->date_to)->format('M d, Y') }}</td>
                                 <td class="text-end">{{ number_format($order->say_quantity, 2) }}</td>
                                 <td class="text-end fw-bold text-success">{{ number_format($order->actual_quantity, 2) }}</td>
-                                <td class="text-end font-monospace {{ $variance > 0 ? 'text-danger' : ($variance < 0 ? 'text-primary' : 'text-secondary') }}" style="{{ $variance < 0 ? 'color: #0d47a1 !important;' : '' }}">
+                                <td class="text-end font-monospace {{ $variancePercent >= 10 ? 'text-danger' : ($variance < 0 ? 'text-primary' : 'text-secondary') }}" style="{{ $variance < 0 ? 'color: #0d47a1 !important;' : '' }}">
                                     {{ ($variance > 0 ? '+' : '') . number_format($variancePercent, 2) }}%
                                 </td>
                             </tr>
@@ -67,7 +70,7 @@
                                 <td class="text-end">{{ number_format($totalSay, 2) }} L</td>
                                 <td class="text-end text-success">{{ number_format($totalActual, 2) }} L</td>
                                 @php $totalVariancePercent = $totalSay > 0 ? ($totalVariance / $totalSay) * 100 : 0; @endphp
-                                <td class="text-end {{ $totalVariance > 0 ? 'text-danger' : ($totalVariance < 0 ? 'text-primary' : 'text-secondary') }}" style="{{ $totalVariance < 0 ? 'color: #0d47a1 !important;' : '' }}">
+                                <td class="text-end {{ $totalVariancePercent >= 10 ? 'text-danger' : ($totalVariance < 0 ? 'text-primary' : 'text-secondary') }}" style="{{ $totalVariance < 0 ? 'color: #0d47a1 !important;' : '' }}">
                                     {{ ($totalVariance > 0 ? '+' : '') . number_format($totalVariancePercent, 2) }}%
                                 </td>
                             </tr>

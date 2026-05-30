@@ -21,18 +21,28 @@
         <div class="container-xl" style="max-width: 1280px;">
             <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
                 
-                <!-- Report Filter Form -->
                 <div class="card-header bg-dark border-secondary p-4 d-print-none">
                     <form action="{{ route('reports.fuel-orders') }}" method="GET" class="row g-3 align-items-end">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label for="asset_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Filter by Asset</label>
+                            <select name="asset_id" id="asset_id" class="form-select bg-dark text-light border-secondary">
+                                <option value="">All Assets</option>
+                                @foreach($assets as $asset)
+                                    <option value="{{ $asset->id }}" {{ $assetId == $asset->id ? 'selected' : '' }}>
+                                        {{ $asset->fleet_no }} ({{ $asset->plate_no ?? 'N/A' }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
                             <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}" class="form-control bg-dark text-light border-secondary" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="date_to" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date To</label>
                             <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}" class="form-control bg-dark text-light border-secondary" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold text-uppercase small shadow-sm py-2">
                                 Generate
                             </button>
@@ -94,11 +104,11 @@
                                         <td class="px-4 py-3 text-end font-monospace fw-bold text-success border-secondary">
                                             {{ number_format($order->actual_quantity, 2) }} L
                                         </td>
-                                        <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary {{ $variance > 0 ? 'text-danger' : ($variance < 0 ? 'text-info' : 'text-secondary') }}" style="{{ $variance < 0 ? 'color: #20a7c9 !important;' : '' }}">
+                                        <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary {{ $variancePercent >= 10 ? 'text-danger' : ($variance < 0 ? 'text-info' : 'text-secondary') }}" style="{{ $variance < 0 ? 'color: #20a7c9 !important;' : '' }}">
                                             {{ ($variance > 0 ? '+' : '') . number_format($variancePercent, 2) }}%
                                         </td>
                                     </tr>
-                                    
+
                                 @empty
                                     <tr>
                                         <td colspan="6" class="px-4 py-5 text-center border-secondary">
@@ -114,7 +124,7 @@
                                 @endforelse
                                 
                                 @if($fuelOrders->count() > 0)
-                                    <tr class="table-primary border-top border-secondary">
+                                    <tr class="border-top border-secondary">
                                         <td colspan="3" class="px-4 py-4 text-end h6 fw-bold text-uppercase tracking-widest mb-0 border-secondary">
                                             Grand Total:
                                         </td>
@@ -125,7 +135,7 @@
                                             {{ number_format($totalActual, 2) }} L
                                         </td>
                                         @php $totalVariancePercent = $totalSay > 0 ? ($totalVariance / $totalSay) * 100 : 0; @endphp
-                                        <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary {{ $totalVariance > 0 ? 'text-danger' : ($totalVariance < 0 ? 'text-info' : 'text-secondary') }}" style="{{ $totalVariance < 0 ? 'color: #20c997 !important;' : '' }}">
+                                        <td class="px-4 py-4 text-end font-monospace fw-bold border-secondary {{ $totalVariancePercent >= 10 ? 'text-danger' : ($totalVariance < 0 ? 'text-info' : 'text-secondary') }}" style="{{ $totalVariance < 0 ? 'color: #20a7c9 !important;' : '' }}">
                                             {{ ($totalVariance > 0 ? '+' : '') . number_format($totalVariancePercent, 2) }}%
                                         </td>
                                     </tr>

@@ -56,6 +56,7 @@ class ReportController extends Controller
     {
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
+        $assetId = $request->input('asset_id');
         $isPrint = $request->boolean('print');
 
         $query = \App\Models\FuelOrder::with('asset.assetType')
@@ -70,8 +71,12 @@ class ReportController extends Controller
             $query->whereDate('created_at', '<=', $dateTo);
         }
 
+        if ($assetId) {
+            $query->where('asset_id', $assetId);
+        }
+
         $fuelOrders = collect();
-        if ($dateFrom || $dateTo) {
+        if ($dateFrom || $dateTo || $assetId) {
             $fuelOrders = $query->get();
         }
 
@@ -164,9 +169,11 @@ class ReportController extends Controller
             return $order->asset->fleet_no ?? '';
         })->values();
 
+        $assets = Asset::orderBy('fleet_no')->get();
+
         $view = $isPrint ? 'reports.print.fuel-orders-summary' : 'reports.fuel-orders-summary';
 
-        return view($view, compact('fuelOrders', 'dateFrom', 'dateTo', 'chartData', 'isPrint'));
+        return view($view, compact('fuelOrders', 'dateFrom', 'dateTo', 'assetId', 'assets', 'chartData', 'isPrint'));
     }
 
     public function chargeableAccountSummary(Request $request)
