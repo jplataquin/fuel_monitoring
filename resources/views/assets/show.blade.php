@@ -220,7 +220,7 @@
                         </div>
                         <div class="col-md-6 d-flex align-items-end pb-3">
                              <div class="form-check">
-                                <input type="checkbox" name="unbudgeted" value="1" id="unbudgeted" class="form-check-input bg-dark border-primary">
+                                <input type="checkbox" name="unbudgeted" value="1" id="unbudgeted" class="form-check-input bg-dark border-primary" onchange="toggleSubAccount()">
                                 <label class="form-check-label text-secondary text-uppercase small fw-bold tracking-widest ms-2" for="unbudgeted">
                                     {{ __('Unbudgeted') }}
                                 </label>
@@ -347,8 +347,27 @@
         let loading = false;
         let hasMore = true;
 
+        function toggleSubAccount() {
+            const unbudgetedCheckbox = document.getElementById('unbudgeted');
+            const subAccountSelect = document.getElementById('sub_account_id');
+            
+            if (unbudgetedCheckbox.checked) {
+                subAccountSelect.value = '';
+                subAccountSelect.disabled = true;
+                subAccountSelect.required = false;
+            } else {
+                const accountId = document.getElementById('chargeable_account_id').value;
+                if (accountId) {
+                    subAccountSelect.disabled = false;
+                }
+                subAccountSelect.required = true;
+            }
+        }
+
         async function fetchSubAccounts(accountId) {
             const subAccountSelect = document.getElementById('sub_account_id');
+            const unbudgetedCheckbox = document.getElementById('unbudgeted');
+            
             subAccountSelect.innerHTML = '<option value="">-- Select Sub Account --</option>';
             
             if (!accountId) {
@@ -371,7 +390,9 @@
                     subAccountSelect.appendChild(option);
                 });
                 
-                subAccountSelect.disabled = false;
+                if (!unbudgetedCheckbox.checked) {
+                    subAccountSelect.disabled = false;
+                }
             } catch (error) {
                 console.error('Error fetching sub-accounts:', error);
                 subAccountSelect.innerHTML = '<option value="">Error loading sub-accounts</option>';
@@ -424,6 +445,7 @@
 
                     // Reset form
                     form.reset();
+                    toggleSubAccount();
 
                     // Restore persisted values
                     document.getElementById('date').value = dateVal;
@@ -637,6 +659,7 @@
             }
         };
 
+        toggleSubAccount();
         loadLogs();
     </script>
 </x-app-layout>
