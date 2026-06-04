@@ -1,9 +1,6 @@
 // Bootstrap
 @import "bootstrap/scss/bootstrap";
 
-// Bootstrap Icons
-@import "bootstrap-icons/font/bootstrap-icons.css";
-
 /* Material 3 Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
@@ -37,10 +34,6 @@ h1, h2, h3, h4, h5, h6 {
 
 input[type="date"], input[type="time"] {
     color-scheme: dark;
-}
-
-div, section, main {
-    padding: 0.5rem; // Equivalent to tailwind p-2
 }
 
 /* Global cursor pointers for clickable elements */
