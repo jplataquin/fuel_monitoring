@@ -53,7 +53,7 @@ class UtilizationEntryController extends Controller
             'end_time' => 'required|date_format:H:i|after:start_time',
             'driver_operator_name' => 'required|string|max:255',
             'chargeable_account_id' => 'required|exists:chargeable_accounts,id',
-            'sub_account_id' => 'required|exists:sub_accounts,id',
+            'sub_account_id' => 'required_unless:unbudgeted,1|nullable|exists:sub_accounts,id',
             'reference' => 'nullable|string|max:255',
             'calculation_type' => 'required|string|in:Kilometer Reading,Hour Reading,Actual Operation Hours',
             'unbudgeted' => 'nullable',
@@ -82,6 +82,9 @@ class UtilizationEntryController extends Controller
         $validated = $request->validate($rules);
 
         $validated['unbudgeted'] = $request->has('unbudgeted');
+        if ($validated['unbudgeted']) {
+            $validated['sub_account_id'] = null;
+        }
         $validated['created_by'] = Auth::id();
         $validated['start_kilometer_reading'] = $validated['start_kilometer_reading'] ?? 0;
         $validated['end_kilometer_reading'] = $validated['end_kilometer_reading'] ?? 0;
@@ -251,7 +254,7 @@ class UtilizationEntryController extends Controller
             ],
             'driver_operator_name' => 'required|string|max:255',
             'chargeable_account_id' => 'required|exists:chargeable_accounts,id',
-            'sub_account_id' => 'required|exists:sub_accounts,id',
+            'sub_account_id' => 'required_unless:unbudgeted,1|nullable|exists:sub_accounts,id',
             'reference' => 'nullable|string|max:255',
             'calculation_type' => 'required|string|in:Kilometer Reading,Hour Reading,Actual Operation Hours',
             'unbudgeted' => 'nullable',
@@ -306,6 +309,9 @@ class UtilizationEntryController extends Controller
         $validated = $request->validate($rules);
 
         $validated['unbudgeted'] = $request->has('unbudgeted');
+        if ($validated['unbudgeted']) {
+            $validated['sub_account_id'] = null;
+        }
         $validated['updated_by'] = Auth::id();
         $validated['start_kilometer_reading'] = $validated['start_kilometer_reading'] ?? 0;
         $validated['end_kilometer_reading'] = $validated['end_kilometer_reading'] ?? 0;
