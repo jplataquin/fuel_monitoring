@@ -171,63 +171,65 @@
                             </button>
                         </div>
                     </form>
+
+                    <div class="mt-3 card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover mb-0">
+                                    <thead>
+                                        <tr class="bg-secondary bg-opacity-10">
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Sub Accounts</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($chargeableAccount->subAccounts as $subAccount)
+                                            <tr>
+                                                <td class="px-4 py-3 align-middle">
+                                                    <div class="d-flex align-items-center">
+                                                        <svg class="text-secondary me-3" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                                        <span class="text-light fw-medium">{{ $subAccount->name }}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end">
+                                                    <div class="btn-group">
+                                                        <a href="{{ route('sub-accounts.show', $subAccount) }}" class="btn btn-link text-info p-2 rounded-circle" title="View Sub-Account Details">
+                                                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                        </a>
+                                                        @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
+                                                            <a href="{{ route('sub-accounts.edit', $subAccount) }}" class="btn btn-link text-warning p-2 rounded-circle" title="Edit Sub-Account">
+                                                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                            </a>
+                                                            <form action="{{ route('sub-accounts.destroy', $subAccount) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-link text-danger p-2 rounded-circle" onclick="return confirm('Are you sure you want to delete this sub-account?')" title="Delete Sub-Account">
+                                                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="2" class="px-4 py-5 text-center text-secondary">
+                                                    <svg class="mb-2" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                    </svg>
+                                                    <h3 class="h6 text-white">No sub-accounts found</h3>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @endif
             
-            <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-dark table-hover mb-0">
-                            <thead>
-                                <tr class="bg-secondary bg-opacity-10">
-                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Sub Accounts</th>
-                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($chargeableAccount->subAccounts as $subAccount)
-                                    <tr>
-                                        <td class="px-4 py-3 align-middle">
-                                            <div class="d-flex align-items-center">
-                                                <svg class="text-secondary me-3" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                                                <span class="text-light fw-medium">{{ $subAccount->name }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-3 align-middle text-end">
-                                            <div class="btn-group">
-                                                <a href="{{ route('sub-accounts.show', $subAccount) }}" class="btn btn-link text-info p-2 rounded-circle" title="View Sub-Account Details">
-                                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                                </a>
-                                                @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
-                                                    <a href="{{ route('sub-accounts.edit', $subAccount) }}" class="btn btn-link text-warning p-2 rounded-circle" title="Edit Sub-Account">
-                                                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                                    </a>
-                                                    <form action="{{ route('sub-accounts.destroy', $subAccount) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-link text-danger p-2 rounded-circle" onclick="return confirm('Are you sure you want to delete this sub-account?')" title="Delete Sub-Account">
-                                                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="2" class="px-4 py-5 text-center text-secondary">
-                                            <svg class="mb-2" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                            </svg>
-                                            <h3 class="h6 text-white">No sub-accounts found</h3>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+          
         </div>
     </div>
 </x-app-layout>
