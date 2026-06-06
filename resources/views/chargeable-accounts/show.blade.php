@@ -77,7 +77,7 @@
                     </form>
 
                     <!-- Offsets Section -->
-                    <div class="mt-3 card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden mb-4">
+                    <div class="mt-5 card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden mb-4">
                         <div class="card-header bg-secondary bg-opacity-10 border-bottom border-secondary d-flex justify-content-between align-items-center p-3">
                             <h4 class="h5 fw-bold text-white mb-0">Initial Budget Offsets</h4>
                         </div>
@@ -172,7 +172,7 @@
                         </div>
                     </form>
 
-                    <div class="mt-3 card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
+                    <div class="mt-5 card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-dark table-hover mb-0">
@@ -187,7 +187,9 @@
                                             <tr>
                                                 <td class="px-4 py-3 align-middle">
                                                     <div class="d-flex align-items-center">
+                                                        <!--
                                                         <svg class="text-secondary me-3" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                                        -->
                                                         <span class="text-light fw-medium">{{ $subAccount->name }}</span>
                                                     </div>
                                                 </td>
