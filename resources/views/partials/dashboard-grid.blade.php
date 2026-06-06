@@ -50,7 +50,7 @@
                         @endif
                         <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
                             <span class="text-secondary small fw-medium text-uppercase tracking-wider">Budgeted Consumed</span>
-                            <span class="font-monospace fw-bold" style="color: {{ $statusColor }};">{{ number_format($budgeted, 2) }} L</span>
+                            <span class="font-monospace fw-bold" style="color: #34d399;">{{ number_format($budgeted, 2) }} L</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
                             <span class="text-secondary small fw-medium text-uppercase tracking-wider">Unbudgeted Consumed</span>

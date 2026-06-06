@@ -197,11 +197,12 @@
 
                     const utilPercent = totalBudget > 0 ? (totalConsumed / totalBudget) * 100 : (totalConsumed > 0 ? 100 : 0);
                     
-                    let budgetedColor = '#34d399';
+                    const budgetedColor = '#34d399';
+                    let statusColor = '#34d399';
                     if (utilPercent >= 90) {
-                        budgetedColor = '#ef4444';
+                        statusColor = '#ef4444';
                     } else if (utilPercent >= 75) {
-                        budgetedColor = '#f59e0b';
+                        statusColor = '#f59e0b';
                     }
 
                     if (totalBudget === 0 && (budgeted > 0 || unbudgeted > 0 || offsetFuel > 0)) {
