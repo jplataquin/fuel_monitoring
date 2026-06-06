@@ -353,9 +353,9 @@ class ReportController extends Controller
 
     public function accountBudgetDashboard(Request $request)
     {
-        // Provide default dates for the dashboard if not set
-        $dateFrom = $request->input('date_from', Carbon::now()->startOfMonth()->format('Y-m-d'));
-        $dateTo = $request->input('date_to', Carbon::now()->format('Y-m-d'));
+        // Dates are now optional for lifetime dashboard data
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
         $accountId = $request->input('account_id');
 
         $chartData = $this->getBudgetDashboardData($dateFrom, $dateTo, $accountId);

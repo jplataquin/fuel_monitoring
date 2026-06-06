@@ -13,7 +13,7 @@ trait DashboardDataTrait
     /**
      * Get dashboard data for budget cards.
      */
-    protected function getBudgetDashboardData(string $dateFrom, string $dateTo, ?int $accountId = null): array
+    protected function getBudgetDashboardData(?string $dateFrom = null, ?string $dateTo = null, ?int $accountId = null): array
     {
         $query = FuelOrder::with(['utilizationEntries.chargeableAccount', 'utilizationEntries.subAccount'])
             ->where('status', 'DONE')
@@ -123,16 +123,20 @@ trait DashboardDataTrait
             $accountName = $account->name;
             if (!isset($accountSummaries[$accountName])) {
                 $totalBudget = 0;
+                $offsetFuel = 0;
                 foreach ($account->subAccounts as $sa) {
                     $totalBudget += SubAccountBudget::where('sub_account_id', $sa->id)
                         ->where('status', 'Approved')
                         ->sum('budget_quantity');
                 }
                 
-                if ($totalBudget > 0) {
+                $offsetFuel = $account->offsets()->sum('quantity');
+
+                if ($totalBudget > 0 || $offsetFuel > 0) {
                     $accountSummaries[$accountName] = [
                         'name' => $accountName,
                         'total_budget' => $totalBudget,
+                        'offset_fuel' => $offsetFuel,
                         'actual_fuel' => 0,
                         'budgeted_fuel' => 0,
                         'unbudgeted_fuel' => 0,
@@ -150,12 +154,18 @@ trait DashboardDataTrait
     /**
      * Get asset variance data for asset cards.
      */
-    protected function getAssetVarianceData(string $dateFrom, string $dateTo, ?int $assetId = null): Collection
+    protected function getAssetVarianceData(?string $dateFrom = null, ?string $dateTo = null, ?int $assetId = null): Collection
     {
         $query = \App\Models\Asset::with(['fuelOrders' => function($q) use ($dateFrom, $dateTo) {
-            $q->where('status', 'DONE')
-              ->whereDate('created_at', '>=', $dateFrom)
-              ->whereDate('created_at', '<=', $dateTo);
+            $q->where('status', 'DONE');
+            
+            if ($dateFrom) {
+                $q->whereDate('created_at', '>=', $dateFrom);
+            }
+            
+            if ($dateTo) {
+                $q->whereDate('created_at', '<=', $dateTo);
+            }
         }]);
 
         if ($assetId) {

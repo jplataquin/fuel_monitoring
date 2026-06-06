@@ -42,25 +42,17 @@
                     <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
                         <div class="card-body p-4">
                             <form action="{{ route('dashboard') }}" method="GET" class="row g-3 align-items-end">
-                                <div class="col-md-3">
-                                    <label for="account_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Chargeable Account</label>
-                                    <select name="account_id" id="account_id" class="form-select bg-dark text-light border-secondary">
-                                        <option value="">All Accounts</option>
+                                <div class="col-md-9">
+                                    <label for="account_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Filter By Chargeable Account</label>
+                                    <select name="account_id" id="account_id" class="form-select bg-dark text-light border-secondary p-3 rounded-3">
+                                        <option value="">All Accounts (Lifetime Data)</option>
                                         @foreach($accounts as $acc)
                                             <option value="{{ $acc->id }}" {{ $accountId == $acc->id ? 'selected' : '' }}>{{ $acc->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
-                                    <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}" class="form-control bg-dark text-light border-secondary" required>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="date_to" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date To</label>
-                                    <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}" class="form-control bg-dark text-light border-secondary" required>
-                                </div>
-                                <div class="col-md-3">
-                                    <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold text-uppercase small shadow-sm py-2">
+                                    <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold text-uppercase small shadow-sm py-3">
                                         Filter Dashboard
                                     </button>
                                 </div>

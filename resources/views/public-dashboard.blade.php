@@ -95,14 +95,6 @@
             <div class="container-xl">
                 <div class="vstack gap-5">
                     
-                    <!-- Info Alert -->
-                    <div class="alert bg-primary bg-opacity-10 border-primary border-opacity-25 text-primary small d-flex align-items-center gap-3 rounded-4 px-4 py-3">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <div>
-                            Showing data for the period of <strong>{{ Carbon\Carbon::parse($dateFrom)->format('M d, Y') }}</strong> to <strong>{{ Carbon\Carbon::parse($dateTo)->format('M d, Y') }}</strong>.
-                        </div>
-                    </div>
-
                     <!-- Budget Cards Grid -->
                     <div id="budget-grid-container">
                         @include('partials.dashboard-grid')
