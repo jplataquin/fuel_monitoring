@@ -14,7 +14,7 @@
     </x-slot>
 
     <div class="py-5">
-        <div class="container" style="max-width: 900px;">
+        <div class="container" style="max-width: 1000px;">
             <!-- Sub-Account Info -->
             <div class="card bg-dark border-secondary shadow-lg rounded-4 p-4 mb-5">
                 <div class="row align-items-center">
@@ -71,67 +71,70 @@
                             </button>
                         </div>
                     </form>
+
+
+                     <!-- Budget History -->
+                    <div class="mt-3 card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
+                        <div class="card-header bg-secondary bg-opacity-10 border-secondary border-opacity-25 p-4">
+                            <h3 class="h5 fw-bold text-white mb-0">Budget Allocation History</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover mb-0">
+                                    <thead>
+                                        <tr class="bg-secondary bg-opacity-5">
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Date</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Quantity</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-center">Status</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Remarks</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($subAccount->budgets()->orderBy('created_at', 'desc')->get() as $budget)
+                                            <tr>
+                                                <td class="px-4 py-3 align-middle">
+                                                    <span class="text-white small">{{ $budget->created_at->format('M d, Y') }}</span>
+                                                    <span class="d-block text-secondary smaller fw-bold text-uppercase">{{ $budget->created_at->format('h:i A') }}</span>
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end font-monospace fw-bold text-info">
+                                                    {{ number_format($budget->budget_quantity, 2) }} L
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-center">
+                                                    <span class="badge rounded-pill fw-bold text-uppercase smaller 
+                                                        {{ $budget->status === 'Approved' ? 'bg-success' : 
+                                                        ($budget->status === 'Rejected' ? 'bg-danger' : 'bg-warning text-dark') }}">
+                                                        {{ $budget->status }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-4 py-3 align-middle small text-secondary">
+                                                    {{ Str::limit($budget->remarks, 50) ?: '—' }}
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end">
+                                                    <a href="{{ route('account-budgets.show', $budget) }}" class="btn btn-link text-info p-2 rounded-circle" title="View Budget Details">
+                                                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="5" class="px-4 py-5 text-center text-secondary">
+                                                    <svg class="mb-2" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <h3 class="h6 text-white">No budget history found</h3>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @endif
 
-            <!-- Budget History -->
-            <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
-                <div class="card-header bg-secondary bg-opacity-10 border-secondary border-opacity-25 p-4">
-                    <h3 class="h5 fw-bold text-white mb-0">Budget Allocation History</h3>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-dark table-hover mb-0">
-                            <thead>
-                                <tr class="bg-secondary bg-opacity-5">
-                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Date</th>
-                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Quantity</th>
-                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-center">Status</th>
-                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Remarks</th>
-                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($subAccount->budgets()->orderBy('created_at', 'desc')->get() as $budget)
-                                    <tr>
-                                        <td class="px-4 py-3 align-middle">
-                                            <span class="text-white small">{{ $budget->created_at->format('M d, Y') }}</span>
-                                            <span class="d-block text-secondary smaller fw-bold text-uppercase">{{ $budget->created_at->format('h:i A') }}</span>
-                                        </td>
-                                        <td class="px-4 py-3 align-middle text-end font-monospace fw-bold text-info">
-                                            {{ number_format($budget->budget_quantity, 2) }} L
-                                        </td>
-                                        <td class="px-4 py-3 align-middle text-center">
-                                            <span class="badge rounded-pill fw-bold text-uppercase smaller 
-                                                {{ $budget->status === 'Approved' ? 'bg-success' : 
-                                                   ($budget->status === 'Rejected' ? 'bg-danger' : 'bg-warning text-dark') }}">
-                                                {{ $budget->status }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3 align-middle small text-secondary">
-                                            {{ Str::limit($budget->remarks, 50) ?: '—' }}
-                                        </td>
-                                        <td class="px-4 py-3 align-middle text-end">
-                                            <a href="{{ route('account-budgets.show', $budget) }}" class="btn btn-link text-info p-2 rounded-circle" title="View Budget Details">
-                                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="px-4 py-5 text-center text-secondary">
-                                            <svg class="mb-2" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <h3 class="h6 text-white">No budget history found</h3>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+           
         </div>
     </div>
 </x-app-layout>
