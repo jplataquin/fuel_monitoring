@@ -60,6 +60,8 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
         
         // Chargeable Account Offsets
         Route::post('chargeable-accounts/{chargeable_account}/offsets', [App\Http\Controllers\ChargeableAccountOffsetController::class, 'store'])->name('chargeable-accounts.offsets.store');
+        Route::get('chargeable-accounts/{chargeable_account}/offsets/{offset}/edit', [App\Http\Controllers\ChargeableAccountOffsetController::class, 'edit'])->name('chargeable-accounts.offsets.edit');
+        Route::patch('chargeable-accounts/{chargeable_account}/offsets/{offset}', [App\Http\Controllers\ChargeableAccountOffsetController::class, 'update'])->name('chargeable-accounts.offsets.update');
         Route::delete('chargeable-accounts/{chargeable_account}/offsets/{offset}', [App\Http\Controllers\ChargeableAccountOffsetController::class, 'destroy'])->name('chargeable-accounts.offsets.destroy');
     });
 

@@ -117,6 +117,19 @@ class ChargeableAccountFeatureTest extends TestCase
 
         $offset = \App\Models\ChargeableAccountOffset::first();
 
+        // Test updating offset
+        $updateResponse = $this->actingAs($admin)->patch("/chargeable-accounts/{$account->id}/offsets/{$offset->id}", [
+            'quantity' => 200.00,
+            'remarks' => 'Updated remarks',
+        ]);
+
+        $updateResponse->assertRedirect("/chargeable-accounts/{$account->id}");
+        $this->assertDatabaseHas('chargeable_account_offsets', [
+            'id' => $offset->id,
+            'quantity' => 200.00,
+            'remarks' => 'Updated remarks',
+        ]);
+
         // Test deleting offset
         $deleteResponse = $this->actingAs($admin)->delete("/chargeable-accounts/{$account->id}/offsets/{$offset->id}");
         
