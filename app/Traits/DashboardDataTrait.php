@@ -73,17 +73,20 @@ trait DashboardDataTrait
 
                 if (!isset($accountSummaries[$accountName])) {
                     $totalBudget = 0;
+                    $offsetFuel = 0;
                     if ($account) {
                         foreach ($account->subAccounts as $sa) {
                             $totalBudget += SubAccountBudget::where('sub_account_id', $sa->id)
                                 ->where('status', 'Approved')
                                 ->sum('budget_quantity');
                         }
+                        $offsetFuel = $account->offsets()->sum('quantity');
                     }
 
                     $accountSummaries[$accountName] = [
                         'name' => $accountName,
                         'total_budget' => $totalBudget,
+                        'offset_fuel' => $offsetFuel,
                         'actual_fuel' => 0,
                         'budgeted_fuel' => 0,
                         'unbudgeted_fuel' => 0,

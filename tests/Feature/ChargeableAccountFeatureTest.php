@@ -94,4 +94,48 @@ class ChargeableAccountFeatureTest extends TestCase
             'id' => $account->id,
         ]);
     }
+
+    public function test_administrator_can_add_and_delete_offsets(): void
+    {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'Offset Account', 'status' => 'Active']);
+
+        // Test storing offset
+        $response = $this->actingAs($admin)->post("/chargeable-accounts/{$account->id}/offsets", [
+            'quantity' => 150.50,
+            'remarks' => 'Pre-system fuel',
+        ]);
+
+        $response->assertRedirect("/chargeable-accounts/{$account->id}");
+        $this->assertDatabaseHas('chargeable_account_offsets', [
+            'chargeable_account_id' => $account->id,
+            'quantity' => 150.50,
+            'remarks' => 'Pre-system fuel',
+            'created_by' => $admin->id,
+        ]);
+
+        $offset = \App\Models\ChargeableAccountOffset::first();
+
+        // Test deleting offset
+        $deleteResponse = $this->actingAs($admin)->delete("/chargeable-accounts/{$account->id}/offsets/{$offset->id}");
+        
+        $deleteResponse->assertRedirect("/chargeable-accounts/{$account->id}");
+        $this->assertDatabaseMissing('chargeable_account_offsets', [
+            'id' => $offset->id,
+        ]);
+    }
+
+    public function test_non_administrator_cannot_manage_offsets(): void
+    {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $user = User::factory()->create(['role' => 'data_logger']);
+        $account = ChargeableAccount::create(['name' => 'Another Account', 'status' => 'Active']);
+
+        $response = $this->actingAs($user)->post("/chargeable-accounts/{$account->id}/offsets", [
+            'quantity' => 150.50,
+        ]);
+
+        $response->assertForbidden();
+    }
 }

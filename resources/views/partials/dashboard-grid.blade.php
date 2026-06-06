@@ -3,13 +3,15 @@
         @foreach($chartData as $index => $data)
             @php
                 $totalBudget = $data['total_budget'];
+                $offsetFuel = $data['offset_fuel'] ?? 0;
                 $budgeted = $data['budgeted_fuel'];
                 $unbudgeted = $data['unbudgeted_fuel'];
                 $consumed = $data['total_calculated_fuel'];
                 
-                $remaining = max(0, $totalBudget - $budgeted);
-                $overage = max(0, $budgeted - $totalBudget);
-                $utilizationPercent = $totalBudget > 0 ? min(100, ($budgeted / $totalBudget) * 100) : ($budgeted > 0 ? 100 : 0);
+                $totalConsumed = $budgeted + $offsetFuel;
+                $remaining = max(0, $totalBudget - $totalConsumed);
+                $overage = max(0, $totalConsumed - $totalBudget);
+                $utilizationPercent = $totalBudget > 0 ? min(100, ($totalConsumed / $totalBudget) * 100) : ($totalConsumed > 0 ? 100 : 0);
                 
                 // Colors based on utilization
                 $statusColor = '#34d399'; // Green
@@ -40,6 +42,12 @@
                             <span class="text-secondary small fw-medium text-uppercase tracking-wider">Total Budget</span>
                             <span class="text-light font-monospace fw-bold">{{ number_format($totalBudget, 2) }} L</span>
                         </div>
+                        @if($offsetFuel > 0)
+                        <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
+                            <span class="text-secondary small fw-medium text-uppercase tracking-wider">Pre-System Offset</span>
+                            <span class="font-monospace fw-bold text-warning">{{ number_format($offsetFuel, 2) }} L</span>
+                        </div>
+                        @endif
                         <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
                             <span class="text-secondary small fw-medium text-uppercase tracking-wider">Budgeted Consumed</span>
                             <span class="font-monospace fw-bold" style="color: {{ $statusColor }};">{{ number_format($budgeted, 2) }} L</span>

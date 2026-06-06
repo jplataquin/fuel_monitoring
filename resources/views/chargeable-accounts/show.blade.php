@@ -69,6 +69,99 @@
                 </div>
             @endif
             
+            <!-- Offsets Section -->
+            <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-secondary bg-opacity-10 border-bottom border-secondary d-flex justify-content-between align-items-center p-3">
+                    <h4 class="h5 fw-bold text-white mb-0">Initial Budget Offsets</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead>
+                                <tr class="bg-secondary bg-opacity-10">
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Quantity</th>
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Remarks</th>
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Added By</th>
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Date</th>
+                                    @if(Auth::user()->role === 'administrator')
+                                        <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Actions</th>
+                                    @endif
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($chargeableAccount->offsets as $offset)
+                                    <tr>
+                                        <td class="px-4 py-3 align-middle font-monospace text-warning fw-bold">
+                                            {{ number_format($offset->quantity, 2) }} L
+                                        </td>
+                                        <td class="px-4 py-3 align-middle text-light">
+                                            {{ $offset->remarks ?: '-' }}
+                                        </td>
+                                        <td class="px-4 py-3 align-middle text-secondary small">
+                                            {{ $offset->creator?->name ?? 'System' }}
+                                        </td>
+                                        <td class="px-4 py-3 align-middle text-secondary small">
+                                            {{ $offset->created_at->format('M d, Y') }}
+                                        </td>
+                                        @if(Auth::user()->role === 'administrator')
+                                            <td class="px-4 py-3 align-middle text-end">
+                                                <form action="{{ route('chargeable-accounts.offsets.destroy', [$chargeableAccount, $offset]) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-link text-danger p-2 rounded-circle" onclick="return confirm('Are you sure you want to delete this offset?')" title="Delete Offset">
+                                                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        @endif
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-4 py-4 text-center text-secondary">
+                                            <span class="small">No budget offsets recorded.</span>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            @if(Auth::user()->role === 'administrator')
+                <!-- Add Offset Form Card -->
+                <div class="card bg-dark border-secondary border-start border-4 border-warning shadow-lg rounded-4 p-4 mb-4">
+                    <h4 class="h5 fw-bold text-white mb-4">Add Budget Offset (Pre-System Consumption)</h4>
+                    <form action="{{ route('chargeable-accounts.offsets.store', $chargeableAccount) }}" method="POST">
+                        @csrf
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label for="quantity" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Quantity (Liters)</label>
+                                <input type="number" step="0.01" name="quantity" id="quantity" placeholder="0.00" required class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-warning">
+                            </div>
+                            <div class="col-md-8">
+                                <label for="remarks" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Remarks (Optional)</label>
+                                <input type="text" name="remarks" id="remarks" placeholder="e.g. Disbursements before system go-live" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-warning">
+                            </div>
+                        </div>
+                        @if ($errors->any())
+                            <div class="text-danger small fw-bold mt-2 mb-3">
+                                <ul class="list-unstyled mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        <div class="d-flex justify-content-end pt-3 border-top border-secondary border-opacity-25">
+                            <button type="submit" class="btn btn-warning px-4 py-2 rounded-pill fw-bold small text-uppercase tracking-wider shadow">
+                                Add Offset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            @endif
+            
             <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
                 <div class="card-body p-0">
                     <div class="table-responsive">

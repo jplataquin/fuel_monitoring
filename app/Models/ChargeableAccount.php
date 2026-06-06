@@ -28,4 +28,9 @@ class ChargeableAccount extends Model
     {
         return $this->hasMany(SubAccount::class);
     }
+
+    public function offsets(): HasMany
+    {
+        return $this->hasMany(ChargeableAccountOffset::class);
+    }
 }
