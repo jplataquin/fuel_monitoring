@@ -65,7 +65,7 @@
                             </div>
                         </div>
                         
-                        <div class="d-flex justify-content-end pt-3 border-bottom border-secondary border-opacity-25">
+                        <div class="d-flex justify-content-end pt-1 pb-3 border-bottom border-secondary border-opacity-25">
                             <button type="submit" class="btn btn-info px-4 py-2 rounded-pill fw-bold small text-uppercase tracking-wider shadow">
                                 Submit for Approval
                             </button>
