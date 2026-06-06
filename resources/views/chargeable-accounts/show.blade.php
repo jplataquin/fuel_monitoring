@@ -42,6 +42,42 @@
                 </div>
             </div>
 
+
+            
+            @if(Auth::user()->role === 'administrator')
+                <!-- Add Offset Form Card -->
+                <div class="card bg-dark border-secondary border-start border-4 border-warning shadow-lg rounded-4 p-4 mb-4">
+                    <h4 class="h5 fw-bold text-white mb-4">Add Budget Offset (Pre-System Consumption)</h4>
+                    <form action="{{ route('chargeable-accounts.offsets.store', $chargeableAccount) }}" method="POST">
+                        @csrf
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label for="quantity" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Quantity (Liters)</label>
+                                <input type="number" step="0.01" name="quantity" id="quantity" placeholder="0.00" required class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-warning">
+                            </div>
+                            <div class="col-md-8">
+                                <label for="remarks" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Remarks (Optional)</label>
+                                <input type="text" name="remarks" id="remarks" placeholder="e.g. Disbursements before system go-live" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-warning">
+                            </div>
+                        </div>
+                        @if ($errors->any())
+                            <div class="text-danger small fw-bold mt-2 mb-3">
+                                <ul class="list-unstyled mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        <div class="d-flex justify-content-end pt-3 border-top border-secondary border-opacity-25">
+                            <button type="submit" class="btn btn-warning px-4 py-2 rounded-pill fw-bold small text-uppercase tracking-wider shadow">
+                                Add Offset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            @endif
+            
             <!-- Offsets Section -->
             <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden mb-4">
                 <div class="card-header bg-secondary bg-opacity-10 border-bottom border-secondary d-flex justify-content-between align-items-center p-3">
@@ -106,39 +142,6 @@
                 </div>
             </div>
 
-            @if(Auth::user()->role === 'administrator')
-                <!-- Add Offset Form Card -->
-                <div class="card bg-dark border-secondary border-start border-4 border-warning shadow-lg rounded-4 p-4 mb-4">
-                    <h4 class="h5 fw-bold text-white mb-4">Add Budget Offset (Pre-System Consumption)</h4>
-                    <form action="{{ route('chargeable-accounts.offsets.store', $chargeableAccount) }}" method="POST">
-                        @csrf
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-4">
-                                <label for="quantity" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Quantity (Liters)</label>
-                                <input type="number" step="0.01" name="quantity" id="quantity" placeholder="0.00" required class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-warning">
-                            </div>
-                            <div class="col-md-8">
-                                <label for="remarks" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Remarks (Optional)</label>
-                                <input type="text" name="remarks" id="remarks" placeholder="e.g. Disbursements before system go-live" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-warning">
-                            </div>
-                        </div>
-                        @if ($errors->any())
-                            <div class="text-danger small fw-bold mt-2 mb-3">
-                                <ul class="list-unstyled mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                        <div class="d-flex justify-content-end pt-3 border-top border-secondary border-opacity-25">
-                            <button type="submit" class="btn btn-warning px-4 py-2 rounded-pill fw-bold small text-uppercase tracking-wider shadow">
-                                Add Offset
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            @endif
             
 
             
