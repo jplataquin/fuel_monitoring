@@ -369,7 +369,7 @@ class ReportController extends Controller
             ]);
         }
 
-        $accounts = ChargeableAccount::orderBy('name')->get();
+        $accounts = ChargeableAccount::where('status', 'Active')->orderBy('name')->get();
 
         return view('dashboard', compact('chartData', 'assetVarianceData', 'dateFrom', 'dateTo', 'accounts', 'accountId'));
     }

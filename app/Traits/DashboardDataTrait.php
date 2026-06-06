@@ -17,6 +17,9 @@ trait DashboardDataTrait
     {
         $query = FuelOrder::with(['utilizationEntries.chargeableAccount', 'utilizationEntries.subAccount'])
             ->where('status', 'DONE')
+            ->whereHas('utilizationEntries.chargeableAccount', function ($q) {
+                $q->where('status', 'Active');
+            })
             ->orderBy('created_at', 'desc');
 
         if ($dateFrom) {
@@ -113,7 +116,7 @@ trait DashboardDataTrait
         }
 
         // Add accounts that have budget but no fuel orders yet in this period
-        $allAccountsQuery = ChargeableAccount::with('subAccounts');
+        $allAccountsQuery = ChargeableAccount::with('subAccounts')->where('status', 'Active');
         if ($accountId) {
             $allAccountsQuery->where('id', $accountId);
         }
