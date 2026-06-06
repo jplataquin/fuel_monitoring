@@ -42,33 +42,6 @@
                 </div>
             </div>
 
-            @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
-                <!-- Add Sub-Account Form Card -->
-                <div class="card bg-dark border-secondary border-start border-4 border-info shadow-lg rounded-4 p-4 mb-4">
-                    <h4 class="h5 fw-bold text-white mb-4">Create Sub-Account</h4>
-                    <form action="{{ route('chargeable-accounts.sub-accounts.store', $chargeableAccount) }}" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <input type="text" name="name" placeholder="e.g. Project Alpha" required class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-info">
-                            @if ($errors->any())
-                                <div class="text-danger small fw-bold mt-2">
-                                    <ul class="list-unstyled mb-0">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
-                        </div>
-                        <div class="d-flex justify-content-end pt-3 border-top border-secondary border-opacity-25">
-                            <button type="submit" class="btn btn-info px-4 py-2 rounded-pill fw-bold small text-uppercase tracking-wider shadow">
-                                Add
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            @endif
-            
             <!-- Offsets Section -->
             <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden mb-4">
                 <div class="card-header bg-secondary bg-opacity-10 border-bottom border-secondary d-flex justify-content-between align-items-center p-3">
@@ -161,6 +134,35 @@
                         <div class="d-flex justify-content-end pt-3 border-top border-secondary border-opacity-25">
                             <button type="submit" class="btn btn-warning px-4 py-2 rounded-pill fw-bold small text-uppercase tracking-wider shadow">
                                 Add Offset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            @endif
+            
+
+            
+            @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
+                <!-- Add Sub-Account Form Card -->
+                <div class="card bg-dark border-secondary border-start border-4 border-info shadow-lg rounded-4 p-4 mb-4">
+                    <h4 class="h5 fw-bold text-white mb-4">Create Sub-Account</h4>
+                    <form action="{{ route('chargeable-accounts.sub-accounts.store', $chargeableAccount) }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <input type="text" name="name" placeholder="e.g. Project Alpha" required class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-info">
+                            @if ($errors->any())
+                                <div class="text-danger small fw-bold mt-2">
+                                    <ul class="list-unstyled mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="d-flex justify-content-end pt-3 border-top border-secondary border-opacity-25">
+                            <button type="submit" class="btn btn-info px-4 py-2 rounded-pill fw-bold small text-uppercase tracking-wider shadow">
+                                Add
                             </button>
                         </div>
                     </form>
