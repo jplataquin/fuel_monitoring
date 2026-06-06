@@ -20,8 +20,8 @@
         </div>
     </x-slot>
 
-    <div class="py-3">
-        <div class="container" style="max-width: 900px;">
+    <div class="py-5">
+        <div class="container" style="max-width: 1000px;">
             <!-- Account Info -->
             <div class="card bg-dark border-secondary shadow-lg rounded-4 p-4 mb-5">
                 <div class="row align-items-center">
