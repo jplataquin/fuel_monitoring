@@ -64,7 +64,7 @@
             </ul>
 
             <!-- Settings Dropdown -->
-            <div class="d-flex align-items-center mt-3 mt-lg-0 ms-lg-3 pt-3 pt-lg-0 border-top border-secondary border-lg-0">
+            <div class="d-flex align-items-center mt-3 mt-lg-0 ms-lg-3 pt-3 pt-lg-0 border-secondary border-lg-0">
                 <div class="dropdown">
                     <button class="btn btn-link p-0 border-0 dropdown-toggle d-flex align-items-center text-decoration-none shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="bg-secondary bg-opacity-25 border border-secondary rounded-circle d-flex align-items-center justify-content-center text-primary fw-black" style="width: 40px; height: 40px; font-size: 0.75rem;">

@@ -21,7 +21,7 @@
                         <table class="table table-dark table-hover mb-0">
                             <thead>
                                 <tr class="bg-secondary bg-opacity-10">
-                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Account / Sub-Account Name</th>
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Account</th>
                                     <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Status</th>
                                     <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end" style="width: 200px;">Actions</th>
                                 </tr>
