@@ -77,7 +77,7 @@
                     </form>
 
                     <!-- Offsets Section -->
-                    <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden mb-4">
+                    <div class="mt-3 card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden mb-4">
                         <div class="card-header bg-secondary bg-opacity-10 border-bottom border-secondary d-flex justify-content-between align-items-center p-3">
                             <h4 class="h5 fw-bold text-white mb-0">Initial Budget Offsets</h4>
                         </div>
