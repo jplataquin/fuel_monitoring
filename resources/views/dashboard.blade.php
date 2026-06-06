@@ -144,9 +144,11 @@
                 const unbudgeted = data.unbudgeted_fuel;
                 const offsetFuel = data.offset_fuel || 0;
                 
-                const totalConsumed = budgeted + offsetFuel;
+                const totalConsumed = budgeted + offsetFuel + unbudgeted;
                 let displayBudgeted = Math.min(totalBudget, budgeted);
                 let displayOffset = Math.min(Math.max(0, totalBudget - budgeted), offsetFuel);
+                let displayUnbudgeted = Math.min(Math.max(0, totalBudget - (budgeted + offsetFuel)), unbudgeted);
+                
                 let remaining = Math.max(0, totalBudget - totalConsumed);
                 let overage = Math.max(0, totalConsumed - totalBudget);
 
@@ -190,6 +192,11 @@
                         backgroundColor.push(budgetedColor);
                         labels.push('Budgeted Consumed');
                     }
+                    if (displayUnbudgeted > 0) {
+                        datasetsData.push(displayUnbudgeted);
+                        backgroundColor.push('#8b5cf6');
+                        labels.push('Unbudgeted Consumed');
+                    }
 
                     if (remaining > 0) {
                         datasetsData.push(remaining);
@@ -201,12 +208,6 @@
                         datasetsData.push(overage);
                         backgroundColor.push('#7f1d1d');
                         labels.push('Overage');
-                    }
-
-                    if (unbudgeted > 0) {
-                        datasetsData.push(unbudgeted);
-                        backgroundColor.push('#8b5cf6');
-                        labels.push('Unbudgeted Consumed');
                     }
                 }
 

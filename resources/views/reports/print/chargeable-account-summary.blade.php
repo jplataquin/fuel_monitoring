@@ -54,9 +54,15 @@
                                 $grandTotalUnbudgeted += $account['unbudgeted_fuel'];
                                 $grandTotalTotalCalc += $account['total_calculated_fuel'];
                                 $grandTotalTotalBudget += $account['total_budget'];
+                                $accountOffset = $account['offset_fuel'] ?? 0;
                             @endphp
                             <tr class="table-active fw-bold">
-                                <td>{{ $account['name'] }}</td>
+                                <td>
+                                    {{ $account['name'] }}
+                                    @if($accountOffset > 0)
+                                        <div style="font-size: 7px; color: #666;">Off: {{ number_format($accountOffset, 2) }}</div>
+                                    @endif
+                                </td>
                                 <td class="text-end">{{ number_format($account['total_km'], 2) }}</td>
                                 <td class="text-end">{{ number_format($account['total_hours'], 2) }}</td>
                                 <td class="text-end">{{ number_format($account['budgeted_fuel'], 2) }}</td>
@@ -64,7 +70,7 @@
                                 <td class="text-end">{{ number_format($account['total_calculated_fuel'], 2) }}</td>
                                 <td class="text-end">{{ number_format($account['total_budget'], 2) }}</td>
                                 <td class="text-end">
-                                    @php $remaining = ($account['total_budget'] - $account['total_calculated_fuel']); @endphp
+                                    @php $remaining = ($account['total_budget'] - ($account['total_calculated_fuel'] + $accountOffset)); @endphp
                                     @if($account['total_budget'] > 0)
                                         {{ number_format($remaining, 2) }}
                                         @php $grandTotalRemaining += $remaining; @endphp

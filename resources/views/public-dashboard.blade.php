@@ -181,16 +181,21 @@
                     const totalBudget = data.total_budget;
                     const budgeted = data.budgeted_fuel;
                     const unbudgeted = data.unbudgeted_fuel;
+                    const offsetFuel = data.offset_fuel || 0;
                     
+                    const totalConsumed = budgeted + offsetFuel + unbudgeted;
                     let displayBudgeted = Math.min(totalBudget, budgeted);
-                    let remaining = Math.max(0, totalBudget - budgeted);
-                    let overage = Math.max(0, budgeted - totalBudget);
+                    let displayOffset = Math.min(Math.max(0, totalBudget - budgeted), offsetFuel);
+                    let displayUnbudgeted = Math.min(Math.max(0, totalBudget - (budgeted + offsetFuel)), unbudgeted);
+                    
+                    let remaining = Math.max(0, totalBudget - totalConsumed);
+                    let overage = Math.max(0, totalConsumed - totalBudget);
 
                     let datasetsData = [];
                     let backgroundColor = [];
                     let labels = [];
 
-                    const utilPercent = totalBudget > 0 ? (budgeted / totalBudget) * 100 : (budgeted > 0 ? 100 : 0);
+                    const utilPercent = totalBudget > 0 ? (totalConsumed / totalBudget) * 100 : (totalConsumed > 0 ? 100 : 0);
                     
                     let budgetedColor = '#34d399';
                     if (utilPercent >= 90) {
@@ -199,7 +204,12 @@
                         budgetedColor = '#f59e0b';
                     }
 
-                    if (totalBudget === 0 && (budgeted > 0 || unbudgeted > 0)) {
+                    if (totalBudget === 0 && (budgeted > 0 || unbudgeted > 0 || offsetFuel > 0)) {
+                        if (offsetFuel > 0) {
+                            datasetsData.push(offsetFuel);
+                            backgroundColor.push('#fbbf24');
+                            labels.push('Pre-System Offset');
+                        }
                         if (budgeted > 0) {
                             datasetsData.push(budgeted);
                             backgroundColor.push(budgetedColor);
@@ -211,9 +221,21 @@
                             labels.push('Unbudgeted Consumed');
                         }
                     } else {
-                        datasetsData.push(displayBudgeted);
-                        backgroundColor.push(budgetedColor);
-                        labels.push('Budgeted Consumed');
+                        if (displayOffset > 0) {
+                            datasetsData.push(displayOffset);
+                            backgroundColor.push('#fbbf24');
+                            labels.push('Pre-System Offset');
+                        }
+                        if (displayBudgeted > 0) {
+                            datasetsData.push(displayBudgeted);
+                            backgroundColor.push(budgetedColor);
+                            labels.push('Budgeted Consumed');
+                        }
+                        if (displayUnbudgeted > 0) {
+                            datasetsData.push(displayUnbudgeted);
+                            backgroundColor.push('#8b5cf6');
+                            labels.push('Unbudgeted Consumed');
+                        }
 
                         if (remaining > 0) {
                             datasetsData.push(remaining);
@@ -225,12 +247,6 @@
                             datasetsData.push(overage);
                             backgroundColor.push('#7f1d1d');
                             labels.push('Overage');
-                        }
-
-                        if (unbudgeted > 0) {
-                            datasetsData.push(unbudgeted);
-                            backgroundColor.push('#8b5cf6');
-                            labels.push('Unbudgeted Consumed');
                         }
                     }
 

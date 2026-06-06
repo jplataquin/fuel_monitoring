@@ -8,7 +8,7 @@
                 $unbudgeted = $data['unbudgeted_fuel'];
                 $consumed = $data['total_calculated_fuel'];
                 
-                $totalConsumed = $budgeted + $offsetFuel;
+                $totalConsumed = $budgeted + $offsetFuel + $unbudgeted;
                 $remaining = max(0, $totalBudget - $totalConsumed);
                 $overage = max(0, $totalConsumed - $totalBudget);
                 $utilizationPercent = $totalBudget > 0 ? min(100, ($totalConsumed / $totalBudget) * 100) : ($totalConsumed > 0 ? 100 : 0);
