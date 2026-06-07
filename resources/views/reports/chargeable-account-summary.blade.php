@@ -25,20 +25,18 @@
                 <div class="card-header bg-dark border-secondary p-4 d-print-none">
                     <form action="{{ route('reports.chargeable-accounts') }}" method="GET" class="row g-3 align-items-end">
                         <div class="col-md-3">
-                            <label for="account_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Chargeable Account</label>
-                            <select name="account_id" id="account_id" class="form-select bg-dark text-light border-secondary">
-                                <option value="" data-classification="Running">All Accounts</option>
+                            <label for="account_search" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Chargeable Account</label>
+                            <input type="text" id="account_search" class="form-control bg-dark text-light border-secondary" placeholder="All Accounts / Search..." list="account_suggestions" autocomplete="off" value="{{ $accountId && $accounts->firstWhere('id', $accountId) ? $accounts->firstWhere('id', $accountId)->name : '' }}">
+                            <input type="hidden" name="account_id" id="account_id" value="{{ $accountId }}">
+                            <datalist id="account_suggestions">
                                 @foreach($accounts as $acc)
-                                    <option value="{{ $acc->id }}" 
-                                            data-classification="{{ $acc->classification }}"
-                                            {{ $accountId == $acc->id ? 'selected' : '' }}>
-                                        {{ $acc->name }}
+                                    <option value="{{ $acc->name }}" data-id="{{ $acc->id }}" data-classification="{{ $acc->classification }}">
                                         @if($acc->classification === 'Scoped')
-                                            ({{ $acc->start_date ? $acc->start_date->format('M d, Y') : 'N/A' }} - {{ $acc->end_date ? $acc->end_date->format('M d, Y') : 'N/A' }})
+                                            Scoped Account ({{ $acc->start_date ? $acc->start_date->format('M d, Y') : 'N/A' }} - {{ $acc->end_date ? $acc->end_date->format('M d, Y') : 'N/A' }})
                                         @endif
                                     </option>
                                 @endforeach
-                            </select>
+                            </datalist>
                         </div>
                         <div class="col-md-3" id="date_from_col">
                             <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
@@ -219,15 +217,25 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const accountSelect = document.getElementById('account_id');
+            const searchInput = document.getElementById('account_search');
+            const hiddenInput = document.getElementById('account_id');
+            const datalist = document.getElementById('account_suggestions');
             const dateFromCol = document.getElementById('date_from_col');
             const dateToCol = document.getElementById('date_to_col');
             const dateFromInput = document.getElementById('date_from');
             const dateToInput = document.getElementById('date_to');
 
-            function toggleDateFilters() {
-                const selectedOption = accountSelect.options[accountSelect.selectedIndex];
-                const classification = selectedOption ? selectedOption.getAttribute('data-classification') : '';
+            function toggleDateFilters(classification) {
+                if (!classification) {
+                    const val = searchInput.value;
+                    const options = datalist.options;
+                    for (let i = 0; i < options.length; i++) {
+                        if (options[i].value === val) {
+                            classification = options[i].getAttribute('data-classification');
+                            break;
+                        }
+                    }
+                }
 
                 if (classification === 'Scoped') {
                     dateFromCol.classList.add('d-none');
@@ -242,7 +250,25 @@
                 }
             }
 
-            accountSelect.addEventListener('change', toggleDateFilters);
+            searchInput.addEventListener('input', function() {
+                const val = searchInput.value;
+                const options = datalist.options;
+                let foundId = '';
+                let foundClassification = 'Running';
+
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].value === val) {
+                        foundId = options[i].getAttribute('data-id');
+                        foundClassification = options[i].getAttribute('data-classification') || 'Running';
+                        break;
+                    }
+                }
+
+                hiddenInput.value = foundId;
+                toggleDateFilters(foundClassification);
+            });
+
+            // Run on load
             toggleDateFilters();
         });
     </script>
