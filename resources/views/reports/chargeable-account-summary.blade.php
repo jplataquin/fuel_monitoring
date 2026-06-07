@@ -26,7 +26,7 @@
                     <form action="{{ route('reports.chargeable-accounts') }}" method="GET" class="row g-3 align-items-end">
                         <div class="col-md-3">
                             <label for="account_search" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Chargeable Account</label>
-                            <input type="text" id="account_search" class="form-control bg-dark text-light border-secondary" placeholder="All Accounts / Search..." list="account_suggestions" autocomplete="off" value="{{ $accountId && $accounts->firstWhere('id', $accountId) ? $accounts->firstWhere('id', $accountId)->name : '' }}">
+                            <input type="text" id="account_search" class="form-control bg-dark text-light border-secondary" placeholder="Search account..." list="account_suggestions" autocomplete="off" value="{{ $accountId && $accounts->firstWhere('id', $accountId) ? $accounts->firstWhere('id', $accountId)->name : '' }}" required>
                             <input type="hidden" name="account_id" id="account_id" value="{{ $accountId }}">
                             <datalist id="account_suggestions">
                                 @foreach($accounts as $acc)
@@ -233,6 +233,7 @@
             const dateToCol = document.getElementById('date_to_col');
             const dateFromInput = document.getElementById('date_from');
             const dateToInput = document.getElementById('date_to');
+            const form = searchInput.closest('form');
 
             function toggleDateFilters(classification) {
                 if (!classification) {
@@ -276,6 +277,17 @@
                 hiddenInput.value = foundId;
                 toggleDateFilters(foundClassification);
             });
+
+            // Prevent submitting invalid account name
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    if (!hiddenInput.value) {
+                        e.preventDefault();
+                        alert('Please select a valid Chargeable Account from the suggestions list.');
+                        searchInput.focus();
+                    }
+                });
+            }
 
             // Run on load
             toggleDateFilters();
