@@ -176,6 +176,24 @@
                 const labels = @json(collect($subAccountData)->pluck('name'));
                 const budgetValues = @json(collect($subAccountData)->pluck('total_budget'));
                 const consumedValues = @json(collect($subAccountData)->pluck('consumed'));
+                const remainingValues = @json(collect($subAccountData)->pluck('remaining'));
+
+                const percentages = budgetValues.map((budget, index) => {
+                    const consumed = consumedValues[index];
+                    return budget > 0 ? Math.round((consumed / budget) * 100) : (consumed > 0 ? 100 : 0);
+                });
+
+                const backgroundColors = percentages.map(percent => {
+                    if (percent >= 100) return 'rgba(239, 68, 68, 0.75)'; // Red for Exhausted
+                    if (percent >= 75) return 'rgba(245, 158, 11, 0.75)';  // Orange for Warning
+                    return 'rgba(52, 211, 153, 0.75)';                    // Green for Healthy
+                });
+
+                const borderColors = percentages.map(percent => {
+                    if (percent >= 100) return 'rgb(239, 68, 68)';
+                    if (percent >= 75) return 'rgb(245, 158, 11)';
+                    return 'rgb(52, 211, 153)';
+                });
 
                 new Chart(ctx, {
                     type: 'bar',
@@ -183,18 +201,10 @@
                         labels: labels,
                         datasets: [
                             {
-                                label: 'Budget (L)',
-                                data: budgetValues,
-                                backgroundColor: 'rgba(56, 189, 248, 0.75)', // Light Blue / Primary
-                                borderColor: 'rgb(56, 189, 248)',
-                                borderWidth: 1,
-                                borderRadius: 4
-                            },
-                            {
-                                label: 'Consumed (L)',
-                                data: consumedValues,
-                                backgroundColor: 'rgba(245, 158, 11, 0.75)', // Orange / Warning
-                                borderColor: 'rgb(245, 158, 11)',
+                                label: 'Budget Utilization (%)',
+                                data: percentages,
+                                backgroundColor: backgroundColors,
+                                borderColor: borderColors,
                                 borderWidth: 1,
                                 borderRadius: 4
                             }
@@ -206,19 +216,23 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                display: true,
-                                position: 'top',
-                                labels: {
-                                    color: '#f1f5f9',
-                                    font: {
-                                        weight: 'bold'
-                                    }
-                                }
+                                display: false
                             },
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return `${context.dataset.label}: ${context.parsed.x.toLocaleString()} L`;
+                                        const idx = context.dataIndex;
+                                        const percent = percentages[idx];
+                                        const budget = budgetValues[idx].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                        const consumed = consumedValues[idx].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                        const remaining = remainingValues[idx].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                        
+                                        return [
+                                            `Utilization: ${percent}%`,
+                                            `Budget: ${budget} L`,
+                                            `Consumed: ${consumed} L`,
+                                            `Remaining: ${remaining} L`
+                                        ];
                                     }
                                 },
                                 backgroundColor: '#1e293b',
@@ -236,13 +250,13 @@
                                 },
                                 ticks: {
                                     color: '#94a3b8',
-                                    font: {
-                                        family: 'monospace'
+                                    callback: function(value) {
+                                        return value + '%';
                                     }
                                 },
                                 title: {
                                     display: true,
-                                    text: 'Liters (L)',
+                                    text: 'Utilization Percentage (%)',
                                     color: '#94a3b8'
                                 }
                             },
