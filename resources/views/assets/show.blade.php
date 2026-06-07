@@ -178,6 +178,7 @@
                         <div class="col-md-4">
                             <label for="date" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Date</label>
                             <input id="date" name="date" type="date" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('Y-m-d') }}" required>
+                            <div id="date-scope-error" class="text-danger small fw-bold mt-1 ps-1 d-none"></div>
                             <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-date"></p>
                         </div>
                         <div class="col-md-4">
@@ -196,7 +197,12 @@
                             <select id="chargeable_account_id" name="chargeable_account_id" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required onchange="fetchSubAccounts(this.value)">
                                 <option value="">-- Select Account --</option>
                                 @foreach($chargeableAccounts as $account)
-                                    <option value="{{ $account->id }}">{{ $account->name }}</option>
+                                    <option value="{{ $account->id }}"
+                                            data-classification="{{ $account->classification }}"
+                                            data-start-date="{{ $account->start_date ? $account->start_date->format('Y-m-d') : '' }}"
+                                            data-end-date="{{ $account->end_date ? $account->end_date->format('Y-m-d') : '' }}">
+                                        {{ $account->name }}
+                                    </option>
                                 @endforeach
                             </select>
                             <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-chargeable_account_id"></p>
@@ -470,6 +476,9 @@
                     document.getElementById('logs-body-mobile').innerHTML = '';
                     loadLogs();
                     
+                    // Re-validate restored values
+                    validateDateScope();
+                    
                     alert(data.message);
                 } else {
                     // Show errors
@@ -659,7 +668,85 @@
             }
         };
 
+        function parseLocalDate(dateStr) {
+            if (!dateStr) return null;
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return null;
+            return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        }
+
+        function validateDateScope() {
+            const dateInput = document.getElementById('date');
+            const accountSelect = document.getElementById('chargeable_account_id');
+            const errorDiv = document.getElementById('date-scope-error');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            if (!dateInput.value || !accountSelect.value) {
+                errorDiv.classList.add('d-none');
+                errorDiv.textContent = '';
+                submitBtn.disabled = false;
+                return;
+            }
+
+            const selectedOption = accountSelect.options[accountSelect.selectedIndex];
+            const classification = selectedOption.getAttribute('data-classification');
+            const startDateStr = selectedOption.getAttribute('data-start-date');
+            const endDateStr = selectedOption.getAttribute('data-end-date');
+
+            if (classification && classification.toLowerCase() === 'scoped') {
+                const selectedDate = parseLocalDate(dateInput.value);
+                if (!selectedDate) return;
+                
+                let isInvalid = false;
+                let message = '';
+
+                if (startDateStr) {
+                    const startDate = parseLocalDate(startDateStr);
+                    if (startDate && selectedDate < startDate) {
+                        isInvalid = true;
+                        message = `The date must be on or after ${formatDate(startDateStr)}.`;
+                    }
+                }
+
+                if (endDateStr && !isInvalid) {
+                    const endDate = parseLocalDate(endDateStr);
+                    if (endDate && selectedDate > endDate) {
+                        isInvalid = true;
+                        message = `The date must be on or before ${formatDate(endDateStr)}.`;
+                    }
+                }
+
+                if (isInvalid) {
+                    errorDiv.textContent = message;
+                    errorDiv.classList.remove('d-none');
+                    submitBtn.disabled = true;
+                } else {
+                    errorDiv.classList.add('d-none');
+                    errorDiv.textContent = '';
+                    submitBtn.disabled = false;
+                }
+            } else {
+                errorDiv.classList.add('d-none');
+                errorDiv.textContent = '';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function formatDate(dateStr) {
+            const date = parseLocalDate(dateStr);
+            if (!date) return '';
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        const dateInput = document.getElementById('date');
+        const accountSelect = document.getElementById('chargeable_account_id');
+        
+        dateInput.addEventListener('input', validateDateScope);
+        dateInput.addEventListener('change', validateDateScope);
+        accountSelect.addEventListener('change', validateDateScope);
+
         toggleSubAccount();
         loadLogs();
+        validateDateScope();
     </script>
 </x-app-layout>
