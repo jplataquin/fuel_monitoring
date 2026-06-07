@@ -117,7 +117,7 @@
                                     <tbody class="border-secondary">
                                         @forelse($subAccountData as $sa)
                                             @php
-                                                $saPercent = $sa['total_budget'] > 0 ? ($sa['consumed'] / $sa['total_budget']) * 100 : 0;
+                                                $saPercent = $sa['total_budget'] > 0 ? ($sa['consumed'] / $sa['total_budget']) * 100 : ($sa['consumed'] > 0 ? 100 : 0);
                                                 $saStatus = 'Healthy';
                                                 $saStatusBg = 'bg-success bg-opacity-10 text-success';
                                                 if ($saPercent >= 100) {

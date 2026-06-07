@@ -115,4 +115,49 @@ class SubAccountDashboardTest extends TestCase
         $this->assertEquals(4.0, $subAccountData[0]['consumed']);
         $this->assertEquals(996.0, $subAccountData[0]['remaining']);
     }
+
+    public function test_zero_budget_with_non_zero_consumption_is_exhausted(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Zero Budget Project',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Sub Unbudgeted',
+        ]);
+
+        $order = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'status' => 'DONE',
+            'actual_quantity' => 100,
+        ]);
+
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'fuel_factor_hr' => 2.0,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'fuel_order_id' => $order->id,
+            'calculation_type' => 'Actual Operation Hours',
+            'driver_operator_name' => 'Operator',
+            'reference' => 'REF-YY',
+            'particulars' => 'Overage work',
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account));
+
+        $response->assertStatus(200);
+        $subAccountData = $response->viewData('subAccountData');
+        
+        $this->assertEquals(0.0, $subAccountData[0]['total_budget']);
+        $this->assertEquals(4.0, $subAccountData[0]['consumed']);
+        
+        $response->assertSee('Exhausted');
+    }
 }
