@@ -173,34 +173,32 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const ctx = document.getElementById('subAccountChart').getContext('2d');
-                const labels = @json($chartLabels);
-                const dataValues = @json($remainingBalances);
-
-                // Dynamically assign bar colors based on remaining values
-                const backgroundColors = dataValues.map(value => {
-                    if (value <= 0) return 'rgba(239, 68, 68, 0.7)';  // Red
-                    if (value < 500) return 'rgba(245, 158, 11, 0.7)'; // Orange
-                    return 'rgba(56, 189, 248, 0.7)';                 // Light Blue
-                });
-
-                const borderColors = dataValues.map(value => {
-                    if (value <= 0) return 'rgb(239, 68, 68)';
-                    if (value < 500) return 'rgb(245, 158, 11)';
-                    return 'rgb(56, 189, 248)';
-                });
+                const labels = @json(collect($subAccountData)->pluck('name'));
+                const budgetValues = @json(collect($subAccountData)->pluck('total_budget'));
+                const consumedValues = @json(collect($subAccountData)->pluck('consumed'));
 
                 new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: labels,
-                        datasets: [{
-                            label: 'Remaining Balance (L)',
-                            data: dataValues,
-                            backgroundColor: backgroundColors,
-                            borderColor: borderColors,
-                            borderWidth: 1,
-                            borderRadius: 4
-                        }]
+                        datasets: [
+                            {
+                                label: 'Budget (L)',
+                                data: budgetValues,
+                                backgroundColor: 'rgba(56, 189, 248, 0.75)', // Light Blue / Primary
+                                borderColor: 'rgb(56, 189, 248)',
+                                borderWidth: 1,
+                                borderRadius: 4
+                            },
+                            {
+                                label: 'Consumed (L)',
+                                data: consumedValues,
+                                backgroundColor: 'rgba(245, 158, 11, 0.75)', // Orange / Warning
+                                borderColor: 'rgb(245, 158, 11)',
+                                borderWidth: 1,
+                                borderRadius: 4
+                            }
+                        ]
                     },
                     options: {
                         indexAxis: 'y', // Makes the bar chart horizontal!
@@ -208,12 +206,19 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                display: false
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: '#f1f5f9',
+                                    font: {
+                                        weight: 'bold'
+                                    }
+                                }
                             },
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return `Remaining: ${context.parsed.x.toLocaleString()} L`;
+                                        return `${context.dataset.label}: ${context.parsed.x.toLocaleString()} L`;
                                     }
                                 },
                                 backgroundColor: '#1e293b',
