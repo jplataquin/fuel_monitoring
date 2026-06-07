@@ -120,6 +120,9 @@
                                                     data-end-date="{{ $account->end_date ? $account->end_date->format('Y-m-d') : '' }}"
                                                     {{ old('chargeable_account_id') == $account->id ? 'selected' : '' }}>
                                                 {{ $account->name }}
+                                                @if($account->classification === 'Scoped')
+                                                    ({{ $account->start_date ? $account->start_date->format('M d, Y') : 'N/A' }} - {{ $account->end_date ? $account->end_date->format('M d, Y') : 'N/A' }})
+                                                @endif
                                             </option>
                                         @endforeach
                                     </select>

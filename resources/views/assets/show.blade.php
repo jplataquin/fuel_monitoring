@@ -202,6 +202,9 @@
                                             data-start-date="{{ $account->start_date ? $account->start_date->format('Y-m-d') : '' }}"
                                             data-end-date="{{ $account->end_date ? $account->end_date->format('Y-m-d') : '' }}">
                                         {{ $account->name }}
+                                        @if($account->classification === 'Scoped')
+                                            ({{ $account->start_date ? $account->start_date->format('M d, Y') : 'N/A' }} - {{ $account->end_date ? $account->end_date->format('M d, Y') : 'N/A' }})
+                                        @endif
                                     </option>
                                 @endforeach
                             </select>
