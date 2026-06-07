@@ -59,8 +59,17 @@
                             <tr class="table-active fw-bold">
                                 <td>
                                     {{ $account['name'] }}
+                                    @if(isset($account['classification']) && $account['classification'] === 'Scoped')
+                                        <div style="font-size: 7px; color: #666; font-weight: normal;">
+                                            Scope: {{ $account['start_date'] ? \Carbon\Carbon::parse($account['start_date'])->format('M d, Y') : 'N/A' }} - {{ $account['end_date'] ? \Carbon\Carbon::parse($account['end_date'])->format('M d, Y') : 'N/A' }}
+                                        </div>
+                                    @else
+                                        <div style="font-size: 7px; color: #666; font-weight: normal;">
+                                            Period: {{ $dateFrom ? \Carbon\Carbon::parse($dateFrom)->format('M d, Y') : 'Start' }} - {{ $dateTo ? \Carbon\Carbon::parse($dateTo)->format('M d, Y') : 'End' }}
+                                        </div>
+                                    @endif
                                     @if($accountOffset > 0)
-                                        <div style="font-size: 7px; color: #666;">Off: {{ number_format($accountOffset, 2) }}</div>
+                                        <div style="font-size: 7px; color: #666; font-weight: normal;">Off: {{ number_format($accountOffset, 2) }}</div>
                                     @endif
                                 </td>
                                 <td class="text-end">{{ number_format($account['total_km'], 2) }}</td>

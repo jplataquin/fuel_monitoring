@@ -273,6 +273,9 @@ class ReportController extends Controller
 
                     $accountSummaries[$accountName] = [
                         'name' => $accountName,
+                        'classification' => $account ? $account->classification : null,
+                        'start_date' => $account && $account->start_date ? $account->start_date->format('Y-m-d') : null,
+                        'end_date' => $account && $account->end_date ? $account->end_date->format('Y-m-d') : null,
                         'total_budget' => $totalBudget,
                         'offset_fuel' => $offsetFuel,
                         'total_km' => 0,
