@@ -221,6 +221,13 @@
             }
         }
 
+        function parseLocalDate(dateStr) {
+            if (!dateStr) return null;
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return null;
+            return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        }
+
         function validateDateScope() {
             const dateInput = document.getElementById('date');
             const accountSelect = document.getElementById('chargeable_account_id');
@@ -239,26 +246,24 @@
             const startDateStr = selectedOption.getAttribute('data-start-date');
             const endDateStr = selectedOption.getAttribute('data-end-date');
 
-            if (classification === 'Scoped') {
-                const selectedDate = new Date(dateInput.value);
-                selectedDate.setHours(0,0,0,0);
+            if (classification && classification.toLowerCase() === 'scoped') {
+                const selectedDate = parseLocalDate(dateInput.value);
+                if (!selectedDate) return;
                 
                 let isInvalid = false;
                 let message = '';
 
                 if (startDateStr) {
-                    const startDate = new Date(startDateStr);
-                    startDate.setHours(0,0,0,0);
-                    if (selectedDate < startDate) {
+                    const startDate = parseLocalDate(startDateStr);
+                    if (startDate && selectedDate < startDate) {
                         isInvalid = true;
                         message = `The date must be on or after ${formatDate(startDateStr)}.`;
                     }
                 }
 
                 if (endDateStr && !isInvalid) {
-                    const endDate = new Date(endDateStr);
-                    endDate.setHours(0,0,0,0);
-                    if (selectedDate > endDate) {
+                    const endDate = parseLocalDate(endDateStr);
+                    if (endDate && selectedDate > endDate) {
                         isInvalid = true;
                         message = `The date must be on or before ${formatDate(endDateStr)}.`;
                     }
@@ -281,7 +286,8 @@
         }
 
         function formatDate(dateStr) {
-            const date = new Date(dateStr);
+            const date = parseLocalDate(dateStr);
+            if (!date) return '';
             return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
@@ -299,6 +305,7 @@
             const dateInput = document.getElementById('date');
             const accountSelect = document.getElementById('chargeable_account_id');
             
+            dateInput.addEventListener('input', validateDateScope);
             dateInput.addEventListener('change', validateDateScope);
             accountSelect.addEventListener('change', validateDateScope);
 
