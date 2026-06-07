@@ -186,6 +186,14 @@ class ReportController extends Controller
         $accountId = $request->input('account_id');
         $isPrint = $request->boolean('print');
 
+        if ($accountId) {
+            $selectedAccount = \App\Models\ChargeableAccount::find($accountId);
+            if ($selectedAccount && $selectedAccount->classification === 'Scoped') {
+                $dateFrom = $selectedAccount->start_date ? $selectedAccount->start_date->format('Y-m-d') : null;
+                $dateTo = $selectedAccount->end_date ? $selectedAccount->end_date->format('Y-m-d') : null;
+            }
+        }
+
         $query = \App\Models\FuelOrder::with(['utilizationEntries.chargeableAccount'])
             ->where('status', 'DONE')
             ->orderBy('created_at', 'desc');

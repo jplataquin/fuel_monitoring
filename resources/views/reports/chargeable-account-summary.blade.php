@@ -27,17 +27,24 @@
                         <div class="col-md-3">
                             <label for="account_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Chargeable Account</label>
                             <select name="account_id" id="account_id" class="form-select bg-dark text-light border-secondary">
-                                <option value="">All Accounts</option>
+                                <option value="" data-classification="Running">All Accounts</option>
                                 @foreach($accounts as $acc)
-                                    <option value="{{ $acc->id }}" {{ $accountId == $acc->id ? 'selected' : '' }}>{{ $acc->name }}</option>
+                                    <option value="{{ $acc->id }}" 
+                                            data-classification="{{ $acc->classification }}"
+                                            {{ $accountId == $acc->id ? 'selected' : '' }}>
+                                        {{ $acc->name }}
+                                        @if($acc->classification === 'Scoped')
+                                            ({{ $acc->start_date ? $acc->start_date->format('M d, Y') : 'N/A' }} - {{ $acc->end_date ? $acc->end_date->format('M d, Y') : 'N/A' }})
+                                        @endif
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" id="date_from_col">
                             <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
                             <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}" class="form-control bg-dark text-light border-secondary" required>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" id="date_to_col">
                             <label for="date_to" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date To</label>
                             <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}" class="form-control bg-dark text-light border-secondary" required>
                         </div>
@@ -209,4 +216,34 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const accountSelect = document.getElementById('account_id');
+            const dateFromCol = document.getElementById('date_from_col');
+            const dateToCol = document.getElementById('date_to_col');
+            const dateFromInput = document.getElementById('date_from');
+            const dateToInput = document.getElementById('date_to');
+
+            function toggleDateFilters() {
+                const selectedOption = accountSelect.options[accountSelect.selectedIndex];
+                const classification = selectedOption ? selectedOption.getAttribute('data-classification') : '';
+
+                if (classification === 'Scoped') {
+                    dateFromCol.classList.add('d-none');
+                    dateToCol.classList.add('d-none');
+                    dateFromInput.required = false;
+                    dateToInput.required = false;
+                } else {
+                    dateFromCol.classList.remove('d-none');
+                    dateToCol.classList.remove('d-none');
+                    dateFromInput.required = true;
+                    dateToInput.required = true;
+                }
+            }
+
+            accountSelect.addEventListener('change', toggleDateFilters);
+            toggleDateFilters();
+        });
+    </script>
 </x-app-layout>
