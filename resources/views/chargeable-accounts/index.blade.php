@@ -22,6 +22,7 @@
                             <thead>
                                 <tr class="bg-secondary bg-opacity-10">
                                     <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Account</th>
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Type</th>
                                     <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Status</th>
                                     <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end" style="width: 200px;">Actions</th>
                                 </tr>
@@ -31,6 +32,16 @@
                                     <tr>
                                         <td class="px-4 py-3 align-middle">
                                             <span class="fw-bold text-light">{{ $account->name }}</span>
+                                        </td>
+                                        <td class="px-4 py-3 align-middle">
+                                            @if($account->classification === 'Scoped')
+                                                <span class="text-info small fw-bold">{{ $account->classification }}</span>
+                                                <div class="text-secondary small" style="font-size: 0.7rem;">
+                                                    {{ $account->start_date?->format('M d, Y') }} - {{ $account->end_date?->format('M d, Y') }}
+                                                </div>
+                                            @else
+                                                <span class="text-secondary small fw-bold">{{ $account->classification }}</span>
+                                            @endif
                                         </td>
                                         <td class="px-4 py-3 align-middle">
                                             <span class="badge rounded-pill {{ $account->status === 'Active' ? 'bg-success' : 'bg-danger' }}">

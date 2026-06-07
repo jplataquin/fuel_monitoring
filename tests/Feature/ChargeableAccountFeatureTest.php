@@ -35,26 +35,63 @@ class ChargeableAccountFeatureTest extends TestCase
         $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
 
+        // Test creating Running account
         $response = $this->actingAs($user)->post(route('chargeable-accounts.store'), [
             'name' => 'Project Alpha',
+            'classification' => 'Running',
             'status' => 'Active',
         ]);
 
         $response->assertRedirect(route('chargeable-accounts.index'));
         $this->assertDatabaseHas('chargeable_accounts', [
             'name' => 'Project Alpha',
+            'classification' => 'Running',
             'status' => 'Active',
         ]);
+
+        // Test creating Scoped account
+        $response = $this->actingAs($user)->post(route('chargeable-accounts.store'), [
+            'name' => 'Project Beta',
+            'classification' => 'Scoped',
+            'start_date' => now()->format('Y-m-d'),
+            'end_date' => now()->addMonth()->format('Y-m-d'),
+            'status' => 'Active',
+        ]);
+
+        $response->assertRedirect(route('chargeable-accounts.index'));
+        $this->assertDatabaseHas('chargeable_accounts', [
+            'name' => 'Project Beta',
+            'classification' => 'Scoped',
+            'start_date' => now()->format('Y-m-d') . ' 00:00:00',
+            'end_date' => now()->addMonth()->format('Y-m-d') . ' 00:00:00',
+        ]);
+    }
+
+    public function test_scoped_account_requires_dates()
+    {
+        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $user = User::factory()->create(['role' => 'administrator']);
+
+        $response = $this->actingAs($user)->post(route('chargeable-accounts.store'), [
+            'name' => 'Project Gamma',
+            'classification' => 'Scoped',
+            'status' => 'Active',
+        ]);
+
+        $response->assertSessionHasErrors(['start_date', 'end_date']);
     }
 
     public function test_administrator_can_update_chargeable_account()
     {
         $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
-        $account = ChargeableAccount::create(['name' => 'Old Name', 'status' => 'Active']);
+        $account = ChargeableAccount::create(['name' => 'Old Name', 'classification' => 'Running', 'status' => 'Active']);
 
         $response = $this->actingAs($user)->patch(route('chargeable-accounts.update', $account), [
             'name' => 'New Name',
+            'classification' => 'Scoped',
+            'start_date' => '2026-01-01',
+            'end_date' => '2026-12-31',
             'status' => 'Inactive',
         ]);
 
@@ -62,6 +99,9 @@ class ChargeableAccountFeatureTest extends TestCase
         $this->assertDatabaseHas('chargeable_accounts', [
             'id' => $account->id,
             'name' => 'New Name',
+            'classification' => 'Scoped',
+            'start_date' => '2026-01-01 00:00:00',
+            'end_date' => '2026-12-31 00:00:00',
             'status' => 'Inactive',
         ]);
     }

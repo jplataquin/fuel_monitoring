@@ -11,7 +11,12 @@ class ChargeableAccount extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'status'];
+    protected $fillable = ['name', 'classification', 'start_date', 'end_date', 'status'];
+
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
 
     protected static function booted(): void
     {

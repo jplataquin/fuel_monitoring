@@ -25,17 +25,26 @@
             <!-- Account Info -->
             <div class="card bg-dark border-secondary shadow-lg rounded-4 p-4 mb-5">
                 <div class="row align-items-center">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Name</h3>
                         <span class="h5 text-white fw-bold text-uppercase">{{ $chargeableAccount->name }}</span>
                     </div>
-                    <div class="col-md-4 text-md-center">
+                    <div class="col-md-3 text-md-center">
+                        <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Type</h3>
+                        <span class="h5 text-white fw-bold text-uppercase">{{ $chargeableAccount->classification }}</span>
+                        @if($chargeableAccount->classification === 'Scoped')
+                            <div class="text-secondary small">
+                                {{ $chargeableAccount->start_date?->format('M d, Y') }} - {{ $chargeableAccount->end_date?->format('M d, Y') }}
+                            </div>
+                        @endif
+                    </div>
+                    <div class="col-md-3 text-md-center">
                         <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Status</h3>
                         <span class="badge rounded-pill {{ $chargeableAccount->status === 'Active' ? 'bg-success' : 'bg-danger' }} px-3 py-2 fw-bold uppercase">
                             {{ $chargeableAccount->status }}
                         </span>
                     </div>
-                    <div class="col-md-4 text-md-end">
+                    <div class="col-md-3 text-md-end">
                         <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Total Sub-Accounts</h3>
                         <p class="display-6 fw-bold text-white mb-0">{{ $chargeableAccount->subAccounts->count() }}</p>
                     </div>

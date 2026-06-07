@@ -31,8 +31,16 @@ class ChargeableAccountController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:chargeable_accounts',
+            'classification' => 'required|in:Running,Scoped',
+            'start_date' => 'required_if:classification,Scoped|nullable|date',
+            'end_date' => 'required_if:classification,Scoped|nullable|date|after_or_equal:start_date',
             'status' => 'required|in:Active,Inactive',
         ]);
+
+        if ($validated['classification'] === 'Running') {
+            $validated['start_date'] = null;
+            $validated['end_date'] = null;
+        }
 
         ChargeableAccount::create($validated);
 
@@ -48,8 +56,16 @@ class ChargeableAccountController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:chargeable_accounts,name,'.$chargeableAccount->id,
+            'classification' => 'required|in:Running,Scoped',
+            'start_date' => 'required_if:classification,Scoped|nullable|date',
+            'end_date' => 'required_if:classification,Scoped|nullable|date|after_or_equal:start_date',
             'status' => 'required|in:Active,Inactive',
         ]);
+
+        if ($validated['classification'] === 'Running') {
+            $validated['start_date'] = null;
+            $validated['end_date'] = null;
+        }
 
         $chargeableAccount->update($validated);
 
