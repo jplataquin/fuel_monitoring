@@ -1,3 +1,21 @@
+<style>
+    .dashboard-card-link {
+        text-decoration: none !important;
+        color: inherit !important;
+        display: block;
+        height: 100%;
+        transition: transform 0.2s ease-in-out;
+        cursor: pointer !important;
+    }
+    .dashboard-card-link:hover {
+        transform: translateY(-5px);
+    }
+    .dashboard-card-link:hover .card {
+        border-color: var(--bs-primary) !important;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+</style>
+
 @if(count($chartData) > 0)
     <div class="row g-4">
         @foreach($chartData as $index => $data)
@@ -22,32 +40,33 @@
                 }
             @endphp
             <div class="col-12 col-md-6 col-lg-4">
-                <div class="card h-100 bg-dark border-secondary border-opacity-50 rounded-4 p-4 shadow-sm">
-                    <h3 class="h5 fw-bold text-light mb-1 text-center text-truncate" title="{{ $data['name'] }}">
-                        {{ $data['name'] }}
-                    </h3>
-                    @if(isset($data['classification']) && $data['classification'] === 'Scoped')
-                        <p class="text-secondary small fw-bold text-center text-uppercase tracking-wider mb-3" style="font-size: 0.7rem;">
-                            {{ $data['start_date'] ? \Carbon\Carbon::parse($data['start_date'])->format('M d, Y') : 'N/A' }} 
-                            - 
-                            {{ $data['end_date'] ? \Carbon\Carbon::parse($data['end_date'])->format('M d, Y') : 'N/A' }}
-                        </p>
-                    @else
-                        <div class="mb-4"></div>
-                    @endif
-                    
-                    <div class="position-relative d-flex justify-content-center align-items-center mb-4" style="height: 200px;">
-                        <canvas id="chart-{{ $index }}"></canvas>
-                        <div class="position-absolute d-flex flex-column justify-content-center align-items-center" style="pointer-events: none;">
-                            <span class="fs-4 fw-bold" style="color: {{ $statusColor }};">
-                                {{ number_format($utilizationPercent, 0) }}%
-                            </span>
-                            <span class="small text-secondary text-uppercase tracking-widest" style="font-size: 0.65rem;">Used</span>
+                <a href="{{ isset($data['account_id']) ? route('dashboard.sub-accounts', $data['account_id']) : '#' }}" class="dashboard-card-link">
+                    <div class="card h-100 bg-dark border-secondary border-opacity-50 rounded-4 p-4 shadow-sm" style="transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;">
+                        <h3 class="h5 fw-bold text-light mb-1 text-center text-truncate" title="{{ $data['name'] }}">
+                            {{ $data['name'] }}
+                        </h3>
+                        @if(isset($data['classification']) && $data['classification'] === 'Scoped')
+                            <p class="text-secondary small fw-bold text-center text-uppercase tracking-wider mb-3" style="font-size: 0.7rem;">
+                                {{ $data['start_date'] ? \Carbon\Carbon::parse($data['start_date'])->format('M d, Y') : 'N/A' }} 
+                                - 
+                                {{ $data['end_date'] ? \Carbon\Carbon::parse($data['end_date'])->format('M d, Y') : 'N/A' }}
+                            </p>
+                        @else
+                            <div class="mb-4"></div>
+                        @endif
+                        
+                        <div class="position-relative d-flex justify-content-center align-items-center mb-4" style="height: 200px;">
+                            <canvas id="chart-{{ $index }}"></canvas>
+                            <div class="position-absolute d-flex flex-column justify-content-center align-items-center" style="pointer-events: none;">
+                                <span class="fs-4 fw-bold" style="color: {{ $statusColor }};">
+                                    {{ number_format($utilizationPercent, 0) }}%
+                                </span>
+                                <span class="small text-secondary text-uppercase tracking-widest" style="font-size: 0.65rem;">Used</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="vstack gap-2">
-                        <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
+                        <div class="vstack gap-2">
+                            <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
                             <span class="text-secondary small fw-medium text-uppercase tracking-wider">Total Budget</span>
                             <span class="text-light font-monospace fw-bold">{{ number_format($totalBudget, 2) }} L</span>
                         </div>
@@ -77,6 +96,7 @@
                         @endif
                     </div>
                 </div>
+                </a>
             </div>
         @endforeach
     </div>

@@ -26,6 +26,7 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::get('reports/asset-utilization', [ReportController::class, 'assetUtilization'])->name('reports.asset-utilization');
     Route::get('reports/fuel-orders', [ReportController::class, 'fuelOrdersSummary'])->name('reports.fuel-orders');
     Route::get('reports/chargeable-accounts', [ReportController::class, 'chargeableAccountSummary'])->name('reports.chargeable-accounts');
+    Route::get('dashboard/account/{chargeable_account}/sub-accounts', [ReportController::class, 'subAccountDashboard'])->name('dashboard.sub-accounts');
 
     // Shared Dashboard Management
     Route::get('shared-links', [App\Http\Controllers\PublicDashboardLinkController::class, 'index'])->name('public-dashboard-links.index');
