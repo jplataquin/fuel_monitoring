@@ -28,7 +28,27 @@ class UtilizationEntryController extends Controller
 
         $rules = [
             'asset_id' => 'required|exists:assets,id',
-            'date' => 'required|date',
+            'date' => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->chargeable_account_id) {
+                        $account = \App\Models\ChargeableAccount::find($request->chargeable_account_id);
+                        if ($account && $account->classification === 'Scoped') {
+                            $entryDate = \Carbon\Carbon::parse($value)->startOfDay();
+                            $startDate = $account->start_date ? $account->start_date->startOfDay() : null;
+                            $endDate = $account->end_date ? $account->end_date->startOfDay() : null;
+
+                            if ($startDate && $entryDate->lt($startDate)) {
+                                $fail('The utilization date must be within the scoped period of the selected chargeable account (' . $startDate->format('M d, Y') . ' to ' . ($endDate ? $endDate->format('M d, Y') : 'N/A') . ').');
+                            }
+                            if ($endDate && $entryDate->gt($endDate)) {
+                                $fail('The utilization date must be within the scoped period of the selected chargeable account (' . ($startDate ? $startDate->format('M d, Y') : 'N/A') . ' to ' . $endDate->format('M d, Y') . ').');
+                            }
+                        }
+                    }
+                }
+            ],
             'start_time' => [
                 'required', 
                 'date_format:H:i',
@@ -211,7 +231,27 @@ class UtilizationEntryController extends Controller
             ->first();
 
         $rules = [
-            'date' => 'required|date',
+            'date' => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->chargeable_account_id) {
+                        $account = \App\Models\ChargeableAccount::find($request->chargeable_account_id);
+                        if ($account && $account->classification === 'Scoped') {
+                            $entryDate = \Carbon\Carbon::parse($value)->startOfDay();
+                            $startDate = $account->start_date ? $account->start_date->startOfDay() : null;
+                            $endDate = $account->end_date ? $account->end_date->startOfDay() : null;
+
+                            if ($startDate && $entryDate->lt($startDate)) {
+                                $fail('The utilization date must be within the scoped period of the selected chargeable account (' . $startDate->format('M d, Y') . ' to ' . ($endDate ? $endDate->format('M d, Y') : 'N/A') . ').');
+                            }
+                            if ($endDate && $entryDate->gt($endDate)) {
+                                $fail('The utilization date must be within the scoped period of the selected chargeable account (' . ($startDate ? $startDate->format('M d, Y') : 'N/A') . ' to ' . $endDate->format('M d, Y') . ').');
+                            }
+                        }
+                    }
+                }
+            ],
             'start_time' => [
                 'required', 
                 'date_format:H:i',

@@ -26,16 +26,18 @@ class BudgeteerAccessTest extends TestCase
         // Create
         $response = $this->actingAs($user)->post(route('chargeable-accounts.store'), [
             'name' => 'New Account',
+            'classification' => 'Running',
             'status' => 'Active',
         ]);
         $response->assertRedirect(route('chargeable-accounts.index'));
-        $this->assertDatabaseHas('chargeable_accounts', ['name' => 'New Account']);
+        $this->assertDatabaseHas('chargeable_accounts', ['name' => 'New Account', 'classification' => 'Running']);
 
         $account = ChargeableAccount::where('name', 'New Account')->first();
 
         // Edit
         $response = $this->actingAs($user)->patch(route('chargeable-accounts.update', $account), [
             'name' => 'Updated Account',
+            'classification' => 'Running',
             'status' => 'Active',
         ]);
         $response->assertRedirect(route('chargeable-accounts.index'));

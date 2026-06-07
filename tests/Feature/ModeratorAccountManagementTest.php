@@ -26,12 +26,14 @@ class ModeratorAccountManagementTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('chargeable-accounts.store'), [
             'name' => 'Moderator Account',
+            'classification' => 'Running',
             'status' => 'Active',
         ]);
 
         $response->assertRedirect(route('chargeable-accounts.index'));
         $this->assertDatabaseHas('chargeable_accounts', [
             'name' => 'Moderator Account',
+            'classification' => 'Running',
             'status' => 'Active',
         ]);
     }
@@ -40,10 +42,11 @@ class ModeratorAccountManagementTest extends TestCase
     {
         $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'moderator']);
-        $account = ChargeableAccount::create(['name' => 'Old Name', 'status' => 'Active']);
+        $account = ChargeableAccount::create(['name' => 'Old Name', 'classification' => 'Running', 'status' => 'Active']);
 
         $response = $this->actingAs($user)->patch(route('chargeable-accounts.update', $account), [
             'name' => 'Updated Name',
+            'classification' => 'Running',
             'status' => 'Inactive',
         ]);
 
@@ -51,6 +54,7 @@ class ModeratorAccountManagementTest extends TestCase
         $this->assertDatabaseHas('chargeable_accounts', [
             'id' => $account->id,
             'name' => 'Updated Name',
+            'classification' => 'Running',
             'status' => 'Inactive',
         ]);
     }

@@ -18,6 +18,7 @@
                                 <div class="col-md-6">
                                     <label for="date" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date</label>
                                     <input type="date" id="date" name="date" class="form-control bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" value="{{ old('date', date('Y-m-d')) }}" required>
+                                    <div id="date-scope-error" class="text-danger small fw-bold mt-1 d-none"></div>
                                     @error('date') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
                                 </div>
 
@@ -113,7 +114,11 @@
                                     <select id="chargeable_account_id" name="chargeable_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required onchange="fetchSubAccounts(this.value)">
                                         <option value="">-- Select Account --</option>
                                         @foreach($chargeableAccounts as $account)
-                                            <option value="{{ $account->id }}" {{ old('chargeable_account_id') == $account->id ? 'selected' : '' }}>
+                                            <option value="{{ $account->id }}" 
+                                                    data-classification="{{ $account->classification }}"
+                                                    data-start-date="{{ $account->start_date ? $account->start_date->format('Y-m-d') : '' }}"
+                                                    data-end-date="{{ $account->end_date ? $account->end_date->format('Y-m-d') : '' }}"
+                                                    {{ old('chargeable_account_id') == $account->id ? 'selected' : '' }}>
                                                 {{ $account->name }}
                                             </option>
                                         @endforeach
@@ -205,6 +210,70 @@
             }
         }
 
+        function validateDateScope() {
+            const dateInput = document.getElementById('date');
+            const accountSelect = document.getElementById('chargeable_account_id');
+            const errorDiv = document.getElementById('date-scope-error');
+            const submitBtn = document.querySelector('button[type="submit"]');
+            
+            if (!dateInput.value || !accountSelect.value) {
+                errorDiv.classList.add('d-none');
+                errorDiv.textContent = '';
+                submitBtn.disabled = false;
+                return;
+            }
+
+            const selectedOption = accountSelect.options[accountSelect.selectedIndex];
+            const classification = selectedOption.getAttribute('data-classification');
+            const startDateStr = selectedOption.getAttribute('data-start-date');
+            const endDateStr = selectedOption.getAttribute('data-end-date');
+
+            if (classification === 'Scoped') {
+                const selectedDate = new Date(dateInput.value);
+                selectedDate.setHours(0,0,0,0);
+                
+                let isInvalid = false;
+                let message = '';
+
+                if (startDateStr) {
+                    const startDate = new Date(startDateStr);
+                    startDate.setHours(0,0,0,0);
+                    if (selectedDate < startDate) {
+                        isInvalid = true;
+                        message = `The date must be on or after ${formatDate(startDateStr)}.`;
+                    }
+                }
+
+                if (endDateStr && !isInvalid) {
+                    const endDate = new Date(endDateStr);
+                    endDate.setHours(0,0,0,0);
+                    if (selectedDate > endDate) {
+                        isInvalid = true;
+                        message = `The date must be on or before ${formatDate(endDateStr)}.`;
+                    }
+                }
+
+                if (isInvalid) {
+                    errorDiv.textContent = message;
+                    errorDiv.classList.remove('d-none');
+                    submitBtn.disabled = true;
+                } else {
+                    errorDiv.classList.add('d-none');
+                    errorDiv.textContent = '';
+                    submitBtn.disabled = false;
+                }
+            } else {
+                errorDiv.classList.add('d-none');
+                errorDiv.textContent = '';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
         // Initialize sub-accounts on load (in case of validation error)
         document.addEventListener('DOMContentLoaded', function() {
             const accountId = document.getElementById('chargeable_account_id').value;
@@ -215,6 +284,14 @@
             if (accountId) {
                 fetchSubAccounts(accountId, selectedSubId);
             }
+
+            const dateInput = document.getElementById('date');
+            const accountSelect = document.getElementById('chargeable_account_id');
+            
+            dateInput.addEventListener('change', validateDateScope);
+            accountSelect.addEventListener('change', validateDateScope);
+
+            validateDateScope();
         });
     </script>
 </x-app-layout>
