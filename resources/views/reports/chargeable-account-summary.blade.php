@@ -106,34 +106,20 @@
                                                 <div class="small text-warning fw-normal">Offset: {{ number_format($accountOffset, 2) }} L</div>
                                             @endif
                                         </td>
-                                        <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary">
-                                            {{ number_format($account['total_km'], 2) }}
-                                        </td>
-                                        <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary">
-                                            {{ number_format($account['total_hours'], 2) }}
-                                        </td>
-                                        <td class="px-4 py-3 text-end font-monospace fw-bold text-success border-secondary">
-                                            {{ number_format($account['budgeted_fuel'], 2) }} L
-                                        </td>
-                                        <td class="px-4 py-3 text-end font-monospace fw-bold text-warning border-secondary">
-                                            {{ number_format($account['unbudgeted_fuel'], 2) }} L
-                                        </td>
-                                        <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary">
-                                            {{ number_format($account['total_calculated_fuel'], 2) }} L
-                                        </td>
-                                        <td class="px-4 py-3 text-end font-monospace fw-bold text-white border-secondary">
-                                            {{ number_format($account['total_budget'], 2) }} L
-                                        </td>
-                                        <td class="px-4 py-3 text-end font-monospace fw-bold text-white border-secondary">
+                                        <td class="px-4 py-3 text-end border-secondary">—</td>
+                                        <td class="px-4 py-3 text-end border-secondary">—</td>
+                                        <td class="px-4 py-3 text-end border-secondary">—</td>
+                                        <td class="px-4 py-3 text-end border-secondary">—</td>
+                                        <td class="px-4 py-3 text-end border-secondary">—</td>
+                                        <td class="px-4 py-3 text-end border-secondary">—</td>
+                                        <td class="px-4 py-3 text-end border-secondary">
                                             @php 
                                                 $remaining = ($account['total_budget'] - ($account['total_calculated_fuel'] + $accountOffset));
+                                                if ($account['total_budget'] > 0) {
+                                                    $grandTotalRemaining += $remaining;
+                                                }
                                             @endphp
-                                            @if($account['total_budget'] > 0)
-                                                {{ number_format($remaining, 2) }} L
-                                                @php $grandTotalRemaining += $remaining; @endphp
-                                            @else
-                                                0.00 L
-                                            @endif
+                                            —
                                         </td>
                                     </tr>
 

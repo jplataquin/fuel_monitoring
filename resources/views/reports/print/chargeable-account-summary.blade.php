@@ -72,18 +72,20 @@
                                         <div style="font-size: 7px; color: #666; font-weight: normal;">Off: {{ number_format($accountOffset, 2) }}</div>
                                     @endif
                                 </td>
-                                <td class="text-end">{{ number_format($account['total_km'], 2) }}</td>
-                                <td class="text-end">{{ number_format($account['total_hours'], 2) }}</td>
-                                <td class="text-end">{{ number_format($account['budgeted_fuel'], 2) }}</td>
-                                <td class="text-end">{{ number_format($account['unbudgeted_fuel'], 2) }}</td>
-                                <td class="text-end">{{ number_format($account['total_calculated_fuel'], 2) }}</td>
-                                <td class="text-end">{{ number_format($account['total_budget'], 2) }}</td>
+                                <td class="text-end">—</td>
+                                <td class="text-end">—</td>
+                                <td class="text-end">—</td>
+                                <td class="text-end">—</td>
+                                <td class="text-end">—</td>
+                                <td class="text-end">—</td>
                                 <td class="text-end">
-                                    @php $remaining = ($account['total_budget'] - ($account['total_calculated_fuel'] + $accountOffset)); @endphp
-                                    @if($account['total_budget'] > 0)
-                                        {{ number_format($remaining, 2) }}
-                                        @php $grandTotalRemaining += $remaining; @endphp
-                                    @else 0.00 @endif
+                                    @php 
+                                        $remaining = ($account['total_budget'] - ($account['total_calculated_fuel'] + $accountOffset)); 
+                                        if ($account['total_budget'] > 0) {
+                                            $grandTotalRemaining += $remaining; 
+                                        }
+                                    @endphp
+                                    —
                                 </td>
                             </tr>
 
