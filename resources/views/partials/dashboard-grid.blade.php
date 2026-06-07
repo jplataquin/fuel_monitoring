@@ -23,9 +23,18 @@
             @endphp
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100 bg-dark border-secondary border-opacity-50 rounded-4 p-4 shadow-sm">
-                    <h3 class="h5 fw-bold text-light mb-3 text-center text-truncate" title="{{ $data['name'] }}">
+                    <h3 class="h5 fw-bold text-light mb-1 text-center text-truncate" title="{{ $data['name'] }}">
                         {{ $data['name'] }}
                     </h3>
+                    @if(isset($data['classification']) && $data['classification'] === 'Scoped')
+                        <p class="text-secondary small fw-bold text-center text-uppercase tracking-wider mb-3" style="font-size: 0.7rem;">
+                            {{ $data['start_date'] ? \Carbon\Carbon::parse($data['start_date'])->format('M d, Y') : 'N/A' }} 
+                            - 
+                            {{ $data['end_date'] ? \Carbon\Carbon::parse($data['end_date'])->format('M d, Y') : 'N/A' }}
+                        </p>
+                    @else
+                        <div class="mb-4"></div>
+                    @endif
                     
                     <div class="position-relative d-flex justify-content-center align-items-center mb-4" style="height: 200px;">
                         <canvas id="chart-{{ $index }}"></canvas>

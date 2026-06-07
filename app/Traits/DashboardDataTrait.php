@@ -22,14 +22,6 @@ trait DashboardDataTrait
             })
             ->orderBy('created_at', 'desc');
 
-        if ($dateFrom) {
-            $query->whereDate('created_at', '>=', $dateFrom);
-        }
-
-        if ($dateTo) {
-            $query->whereDate('created_at', '<=', $dateTo);
-        }
-
         if ($accountId) {
             $query->whereHas('utilizationEntries', function ($q) use ($accountId) {
                 $q->where('chargeable_account_id', $accountId);
@@ -72,7 +64,40 @@ trait DashboardDataTrait
                 }
 
                 $account = $entry->chargeableAccount;
+                if (!$account || $account->status !== 'Active') {
+                    continue;
+                }
                 $accountName = $account->name ?? 'Unassigned';
+
+                // Automatically filter Scoped accounts by their dates, and Running by user-selected filters
+                if ($account->classification === 'Scoped') {
+                    $entryDate = $entry->date ? Carbon::parse($entry->date)->startOfDay() : null;
+                    $startDate = $account->start_date ? Carbon::parse($account->start_date)->startOfDay() : null;
+                    $endDate = $account->end_date ? Carbon::parse($account->end_date)->startOfDay() : null;
+
+                    if ($entryDate) {
+                        if ($startDate && $entryDate->lt($startDate)) {
+                            continue;
+                        }
+                        if ($endDate && $entryDate->gt($endDate)) {
+                            continue;
+                        }
+                    }
+                } else {
+                    $orderDate = Carbon::parse($order->created_at)->startOfDay();
+                    if ($dateFrom) {
+                        $dateFromBound = Carbon::parse($dateFrom)->startOfDay();
+                        if ($orderDate->lt($dateFromBound)) {
+                            continue;
+                        }
+                    }
+                    if ($dateTo) {
+                        $dateToBound = Carbon::parse($dateTo)->startOfDay();
+                        if ($orderDate->gt($dateToBound)) {
+                            continue;
+                        }
+                    }
+                }
 
                 if (!isset($accountSummaries[$accountName])) {
                     $totalBudget = 0;
@@ -88,6 +113,9 @@ trait DashboardDataTrait
 
                     $accountSummaries[$accountName] = [
                         'name' => $accountName,
+                        'classification' => $account->classification,
+                        'start_date' => $account->start_date ? $account->start_date->format('Y-m-d') : null,
+                        'end_date' => $account->end_date ? $account->end_date->format('Y-m-d') : null,
                         'total_budget' => $totalBudget,
                         'offset_fuel' => $offsetFuel,
                         'actual_fuel' => 0,
@@ -138,6 +166,9 @@ trait DashboardDataTrait
                 if ($totalBudget > 0 || $offsetFuel > 0) {
                     $accountSummaries[$accountName] = [
                         'name' => $accountName,
+                        'classification' => $account->classification,
+                        'start_date' => $account->start_date ? $account->start_date->format('Y-m-d') : null,
+                        'end_date' => $account->end_date ? $account->end_date->format('Y-m-d') : null,
                         'total_budget' => $totalBudget,
                         'offset_fuel' => $offsetFuel,
                         'actual_fuel' => 0,
