@@ -9,6 +9,7 @@ use App\Models\ChargeableAccount;
 use App\Models\FuelOrder;
 use App\Models\User;
 use App\Models\UtilizationEntry;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -298,16 +299,16 @@ class FuelOrderFeatureTest extends TestCase
             ->set('date_from', '2026-03-01')
             ->set('date_to', '2026-03-01')
             ->assertSet('unprocessed_entries_count', 1)
-            ->assertViewHas('unprocessed_entries', function($entries) {
-                return count($entries) === 1 && 
-                       $entries[0]['unbudgeted'] === true && 
-                       !isset($entries[0]['reference']);
+            ->assertViewHas('unprocessed_entries', function ($entries) {
+                return count($entries) === 1 &&
+                       $entries[0]['unbudgeted'] === true &&
+                       ! isset($entries[0]['reference']);
             });
     }
 
     public function test_user_can_actualize_fuel_order()
     {
-        $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+        $this->withoutMiddleware(ValidateCsrfToken::class);
         $user = User::factory()->create(['role' => 'administrator']);
         $type = AssetType::create(['name' => 'Vehicle']);
         $asset = Asset::create([
@@ -317,7 +318,7 @@ class FuelOrderFeatureTest extends TestCase
             'fuel_factor_hr' => 1.5,
             'tank_capacity' => 100,
         ]);
-        
+
         $fuelOrder = FuelOrder::create([
             'asset_id' => $asset->id,
             'calculated_quantity' => 80,
@@ -341,7 +342,7 @@ class FuelOrderFeatureTest extends TestCase
 
     public function test_administrator_can_edit_fuel_order()
     {
-        $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+        $this->withoutMiddleware(ValidateCsrfToken::class);
         $user = User::factory()->create(['role' => 'administrator']);
         $type = AssetType::create(['name' => 'Vehicle']);
         $asset = Asset::create([
@@ -350,7 +351,7 @@ class FuelOrderFeatureTest extends TestCase
             'fuel_factor_km' => 2.5,
             'tank_capacity' => 100,
         ]);
-        
+
         $fuelOrder = FuelOrder::create([
             'asset_id' => $asset->id,
             'calculated_quantity' => 80,
@@ -376,11 +377,11 @@ class FuelOrderFeatureTest extends TestCase
 
     public function test_updating_fuel_order_to_void_releases_utilization_entries()
     {
-        $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+        $this->withoutMiddleware(ValidateCsrfToken::class);
         $user = User::factory()->create(['role' => 'administrator']);
         $type = AssetType::create(['name' => 'Vehicle']);
         $account = ChargeableAccount::create(['name' => 'Account A', 'status' => 'Active']);
-        
+
         $asset = Asset::create([
             'fleet_no' => 'V-001',
             'asset_type_id' => $type->id,
@@ -388,7 +389,7 @@ class FuelOrderFeatureTest extends TestCase
             'fuel_factor_hr' => 0,
             'tank_capacity' => 100,
         ]);
-        
+
         $fuelOrder = FuelOrder::create([
             'asset_id' => $asset->id,
             'calculated_quantity' => 80,
@@ -424,5 +425,48 @@ class FuelOrderFeatureTest extends TestCase
         ]);
 
         $this->assertNull($entry->fresh()->fuel_order_id);
+    }
+
+    public function test_can_create_direct_fuel_order_without_asset()
+    {
+        $user = User::factory()->create(['role' => 'data_logger']);
+        $account = ChargeableAccount::create(['name' => 'General Overhead', 'status' => 'Active']);
+
+        Livewire::actingAs($user)
+            ->test(CreateFuelOrder::class)
+            ->set('asset_id', null)
+            ->set('chargeable_account_id', $account->id)
+            ->set('remarks', 'Monthly generator backup fuel replenishment')
+            ->set('say_quantity', 150)
+            ->call('submit')
+            ->assertRedirect(route('fuel-orders.index'));
+
+        $this->assertDatabaseHas('fuel_orders', [
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => null,
+            'unbudgeted' => false,
+            'remarks' => 'Monthly generator backup fuel replenishment',
+            'say_quantity' => 150,
+            'calculated_quantity' => 0,
+            'calculated_hours' => 0,
+            'calculated_kilometers' => 0,
+            'status' => 'PEND',
+        ]);
+    }
+
+    public function test_direct_fuel_order_requires_remarks_and_chargeable_account()
+    {
+        $user = User::factory()->create(['role' => 'data_logger']);
+
+        Livewire::actingAs($user)
+            ->test(CreateFuelOrder::class)
+            ->set('asset_id', null)
+            ->set('say_quantity', 150)
+            ->call('submit')
+            ->assertHasErrors([
+                'chargeable_account_id' => 'required_without',
+                'remarks' => 'required_without',
+            ]);
     }
 }

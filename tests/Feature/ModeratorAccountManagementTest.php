@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\ChargeableAccount;
-use App\Models\SubAccount;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -21,7 +21,7 @@ class ModeratorAccountManagementTest extends TestCase
 
     public function test_moderator_can_create_chargeable_account()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'moderator']);
 
         $response = $this->actingAs($user)->post(route('chargeable-accounts.store'), [
@@ -40,7 +40,7 @@ class ModeratorAccountManagementTest extends TestCase
 
     public function test_moderator_can_update_chargeable_account()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'moderator']);
         $account = ChargeableAccount::create(['name' => 'Old Name', 'classification' => 'Running', 'status' => 'Active']);
 
@@ -61,7 +61,7 @@ class ModeratorAccountManagementTest extends TestCase
 
     public function test_moderator_can_delete_chargeable_account()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'moderator']);
         $account = ChargeableAccount::create(['name' => 'To Delete']);
 
@@ -75,7 +75,7 @@ class ModeratorAccountManagementTest extends TestCase
 
     public function test_moderator_can_edit_sub_account()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'moderator']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
         $subAccount = $account->subAccounts()->create(['name' => 'Old Sub Name']);
@@ -93,7 +93,7 @@ class ModeratorAccountManagementTest extends TestCase
 
     public function test_moderator_can_delete_sub_account()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'moderator']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
         $subAccount = $account->subAccounts()->create(['name' => 'Sub to Delete']);

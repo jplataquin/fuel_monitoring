@@ -57,8 +57,21 @@
                                         <span class="text-primary fw-bold font-monospace small">#{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</span>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <div class="fw-bold text-light small tracking-tight">{{ $order->asset->fleet_no }}</div>
-                                        <div class="text-secondary small text-uppercase tracking-widest" style="font-size: 10px;">{{ $order->asset->plate_no ?? 'No Plate' }}</div>
+                                        @if($order->asset)
+                                            <div class="fw-bold text-light small tracking-tight">{{ $order->asset->fleet_no }}</div>
+                                            <div class="text-secondary small text-uppercase tracking-widest" style="font-size: 10px;">{{ $order->asset->plate_no ?? 'No Plate' }}</div>
+                                        @else
+                                            <div class="fw-bold text-primary small tracking-tight">Direct Account</div>
+                                            <div class="text-secondary small text-uppercase tracking-widest font-monospace" style="font-size: 10px;">
+                                                {{ $order->chargeableAccount->name ?? 'Unassigned' }}
+                                                @if($order->subAccount)
+                                                    - {{ $order->subAccount->name }}
+                                                @endif
+                                                @if($order->unbudgeted)
+                                                    <span class="badge bg-danger bg-opacity-10 text-danger ms-1" style="font-size: 8px; padding: 1px 4px;">UNBUDGETED</span>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-4 py-3">
                                         <span class="text-light font-monospace small">{{ number_format($order->calculated_quantity, 2) }} L</span>

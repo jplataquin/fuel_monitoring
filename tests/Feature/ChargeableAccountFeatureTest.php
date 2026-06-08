@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\ChargeableAccount;
+use App\Models\ChargeableAccountOffset;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -32,7 +34,7 @@ class ChargeableAccountFeatureTest extends TestCase
 
     public function test_administrator_can_create_chargeable_account()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
 
         // Test creating Running account
@@ -62,14 +64,14 @@ class ChargeableAccountFeatureTest extends TestCase
         $this->assertDatabaseHas('chargeable_accounts', [
             'name' => 'Project Beta',
             'classification' => 'Scoped',
-            'start_date' => now()->format('Y-m-d') . ' 00:00:00',
-            'end_date' => now()->addMonth()->format('Y-m-d') . ' 00:00:00',
+            'start_date' => now()->format('Y-m-d').' 00:00:00',
+            'end_date' => now()->addMonth()->format('Y-m-d').' 00:00:00',
         ]);
     }
 
     public function test_scoped_account_requires_dates()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
 
         $response = $this->actingAs($user)->post(route('chargeable-accounts.store'), [
@@ -83,7 +85,7 @@ class ChargeableAccountFeatureTest extends TestCase
 
     public function test_administrator_can_update_chargeable_account()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
         $account = ChargeableAccount::create(['name' => 'Old Name', 'classification' => 'Running', 'status' => 'Active']);
 
@@ -108,7 +110,7 @@ class ChargeableAccountFeatureTest extends TestCase
 
     public function test_chargeable_account_must_have_unique_name()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
         ChargeableAccount::create(['name' => 'Existing Account', 'status' => 'Active']);
 
@@ -123,7 +125,7 @@ class ChargeableAccountFeatureTest extends TestCase
 
     public function test_administrator_can_soft_delete_chargeable_account()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'administrator']);
         $account = ChargeableAccount::create(['name' => 'To Be Deleted']);
 
@@ -137,7 +139,7 @@ class ChargeableAccountFeatureTest extends TestCase
 
     public function test_administrator_can_add_and_delete_offsets(): void
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $admin = User::factory()->create(['role' => 'administrator']);
         $account = ChargeableAccount::create(['name' => 'Offset Account', 'status' => 'Active']);
 
@@ -155,7 +157,7 @@ class ChargeableAccountFeatureTest extends TestCase
             'created_by' => $admin->id,
         ]);
 
-        $offset = \App\Models\ChargeableAccountOffset::first();
+        $offset = ChargeableAccountOffset::first();
 
         // Test updating offset
         $updateResponse = $this->actingAs($admin)->patch("/chargeable-accounts/{$account->id}/offsets/{$offset->id}", [
@@ -172,7 +174,7 @@ class ChargeableAccountFeatureTest extends TestCase
 
         // Test deleting offset
         $deleteResponse = $this->actingAs($admin)->delete("/chargeable-accounts/{$account->id}/offsets/{$offset->id}");
-        
+
         $deleteResponse->assertRedirect("/chargeable-accounts/{$account->id}");
         $this->assertDatabaseMissing('chargeable_account_offsets', [
             'id' => $offset->id,
@@ -181,7 +183,7 @@ class ChargeableAccountFeatureTest extends TestCase
 
     public function test_non_administrator_cannot_manage_offsets(): void
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $user = User::factory()->create(['role' => 'data_logger']);
         $account = ChargeableAccount::create(['name' => 'Another Account', 'status' => 'Active']);
 

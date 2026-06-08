@@ -39,16 +39,35 @@
 
                             <div class="row g-4 mb-5">
                                 <div class="col-md-6">
-                                    <h4 class="small fw-bold text-secondary text-uppercase tracking-wider mb-1">Asset Details</h4>
-                                    <p class="h5 fw-bold text-light mb-0">{{ $fuelOrder->asset->fleet_no }}</p>
-                                    <p class="small text-secondary mb-0">{{ $fuelOrder->asset->assetType->name ?? 'N/A' }} | {{ $fuelOrder->asset->plate_no ?? 'No Plate' }}</p>
+                                    @if($fuelOrder->asset)
+                                        <h4 class="small fw-bold text-secondary text-uppercase tracking-wider mb-1">Asset Details</h4>
+                                        <p class="h5 fw-bold text-light mb-0">{{ $fuelOrder->asset->fleet_no }}</p>
+                                        <p class="small text-secondary mb-0">{{ $fuelOrder->asset->assetType->name ?? 'N/A' }} | {{ $fuelOrder->asset->plate_no ?? 'No Plate' }}</p>
+                                    @else
+                                        <h4 class="small fw-bold text-secondary text-uppercase tracking-wider mb-1">Charged Direct To</h4>
+                                        <p class="h5 fw-bold text-light mb-0">{{ $fuelOrder->chargeableAccount->name ?? 'Unassigned' }}</p>
+                                        <p class="small text-secondary mb-0">
+                                            @if($fuelOrder->subAccount)
+                                                Sub-Account: {{ $fuelOrder->subAccount->name }}
+                                            @else
+                                                No Sub-Account
+                                            @endif
+                                            @if($fuelOrder->unbudgeted)
+                                                | <span class="text-danger fw-bold">UNBUDGETED</span>
+                                            @endif
+                                        </p>
+                                    @endif
                                 </div>
                                 <div class="col-md-6">
                                     <h4 class="small fw-bold text-secondary text-uppercase tracking-wider mb-1">Date Range</h4>
                                     <p class="h5 fw-bold text-light mb-0">
-                                        {{ \Carbon\Carbon::parse($fuelOrder->date_from)->format('M d, Y') }} 
-                                        - 
-                                        {{ \Carbon\Carbon::parse($fuelOrder->date_to)->format('M d, Y') }}
+                                        @if($fuelOrder->date_from && $fuelOrder->date_to)
+                                            {{ \Carbon\Carbon::parse($fuelOrder->date_from)->format('M d, Y') }} 
+                                            - 
+                                            {{ \Carbon\Carbon::parse($fuelOrder->date_to)->format('M d, Y') }}
+                                        @else
+                                            N/A (Direct Fuel Order)
+                                        @endif
                                     </p>
                                 </div>
                             </div>
@@ -56,7 +75,13 @@
                             <div class="row g-4 mb-5">
                                 <div class="col-md-6">
                                     <h4 class="small fw-bold text-secondary text-uppercase tracking-wider mb-1">Calculation Method</h4>
-                                    <p class="h6 fw-bold text-light text-capitalize mb-0">{{ $fuelOrder->utilizationEntries->first()?->calculation_type ?? 'N/A' }}</p>
+                                    <p class="h6 fw-bold text-light text-capitalize mb-0">
+                                        @if($fuelOrder->asset)
+                                            {{ $fuelOrder->utilizationEntries->first()?->calculation_type ?? 'N/A' }}
+                                        @else
+                                            Direct Account Charge
+                                        @endif
+                                    </p>
                                 </div>
                                 <div class="col-md-3">
                                     <h4 class="small fw-bold text-secondary text-uppercase tracking-wider mb-1">KM Factor</h4>
@@ -88,6 +113,15 @@
                                     </div>
                                 </div>
                             </div>
+
+                            @if($fuelOrder->remarks)
+                                <div class="mb-5">
+                                    <h4 class="small fw-bold text-secondary text-uppercase tracking-wider mb-2">Remarks / Justification</h4>
+                                    <div class="p-3 bg-dark bg-opacity-20 border border-secondary border-opacity-25 text-light font-monospace small rounded-3">
+                                        {{ $fuelOrder->remarks }}
+                                    </div>
+                                </div>
+                            @endif
 
                             <div class="bg-secondary bg-opacity-10 rounded-4 p-4 p-md-5 mb-5 shadow-inner border border-secondary border-opacity-25">
                                 <div class="mb-4">

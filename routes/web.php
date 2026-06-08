@@ -3,11 +3,16 @@
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AssetTypeController;
 use App\Http\Controllers\ChargeableAccountController;
+use App\Http\Controllers\ChargeableAccountOffsetController;
 use App\Http\Controllers\FuelOrderController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicDashboardController;
+use App\Http\Controllers\PublicDashboardLinkController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SubAccountBudgetController;
+use App\Http\Controllers\SubAccountController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UtilizationEntryController;
-use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -29,10 +34,10 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::get('dashboard/account/{chargeable_account}/sub-accounts', [ReportController::class, 'subAccountDashboard'])->name('dashboard.sub-accounts');
 
     // Shared Dashboard Management
-    Route::get('shared-links', [App\Http\Controllers\PublicDashboardLinkController::class, 'index'])->name('public-dashboard-links.index');
-    Route::post('shared-links', [App\Http\Controllers\PublicDashboardLinkController::class, 'store'])->name('public-dashboard-links.store');
-    Route::patch('shared-links/{link}/toggle', [App\Http\Controllers\PublicDashboardLinkController::class, 'toggleStatus'])->name('public-dashboard-links.toggle');
-    Route::delete('shared-links/{link}', [App\Http\Controllers\PublicDashboardLinkController::class, 'destroy'])->name('public-dashboard-links.destroy');
+    Route::get('shared-links', [PublicDashboardLinkController::class, 'index'])->name('public-dashboard-links.index');
+    Route::post('shared-links', [PublicDashboardLinkController::class, 'store'])->name('public-dashboard-links.store');
+    Route::patch('shared-links/{link}/toggle', [PublicDashboardLinkController::class, 'toggleStatus'])->name('public-dashboard-links.toggle');
+    Route::delete('shared-links/{link}', [PublicDashboardLinkController::class, 'destroy'])->name('public-dashboard-links.destroy');
 
     // Assets
     Route::resource('assets', AssetController::class);
@@ -40,7 +45,7 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::get('assets/{asset}/logs/print', [UtilizationEntryController::class, 'printLogs'])->name('assets.logs.print');
 
     // Sub Accounts JSON (needed by utilization form for all roles)
-    Route::get('chargeable-accounts/{chargeable_account}/sub-accounts/json', [App\Http\Controllers\SubAccountController::class, 'byAccount'])->name('chargeable-accounts.sub-accounts.json');
+    Route::get('chargeable-accounts/{chargeable_account}/sub-accounts/json', [SubAccountController::class, 'byAccount'])->name('chargeable-accounts.sub-accounts.json');
 
     // Utilization Entries
     Route::resource('utilization-entries', UtilizationEntryController::class)->except(['index']);
@@ -53,24 +58,24 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     // Admin, Moderator and Budgeteer routes for accounts
     Route::middleware('role:administrator,moderator,budgeteer')->group(function () {
         Route::resource('chargeable-accounts', ChargeableAccountController::class);
-        Route::get('sub-accounts/{sub_account}', [App\Http\Controllers\SubAccountController::class, 'show'])->name('sub-accounts.show');
-        Route::get('sub-accounts/{sub_account}/edit', [App\Http\Controllers\SubAccountController::class, 'edit'])->name('sub-accounts.edit');
-        Route::patch('sub-accounts/{sub_account}', [App\Http\Controllers\SubAccountController::class, 'update'])->name('sub-accounts.update');
-        Route::post('chargeable-accounts/{chargeable_account}/sub-accounts', [App\Http\Controllers\SubAccountController::class, 'store'])->name('chargeable-accounts.sub-accounts.store');
-        Route::delete('sub-accounts/{sub_account}', [App\Http\Controllers\SubAccountController::class, 'destroy'])->name('sub-accounts.destroy');
-        
+        Route::get('sub-accounts/{sub_account}', [SubAccountController::class, 'show'])->name('sub-accounts.show');
+        Route::get('sub-accounts/{sub_account}/edit', [SubAccountController::class, 'edit'])->name('sub-accounts.edit');
+        Route::patch('sub-accounts/{sub_account}', [SubAccountController::class, 'update'])->name('sub-accounts.update');
+        Route::post('chargeable-accounts/{chargeable_account}/sub-accounts', [SubAccountController::class, 'store'])->name('chargeable-accounts.sub-accounts.store');
+        Route::delete('sub-accounts/{sub_account}', [SubAccountController::class, 'destroy'])->name('sub-accounts.destroy');
+
         // Chargeable Account Offsets
-        Route::post('chargeable-accounts/{chargeable_account}/offsets', [App\Http\Controllers\ChargeableAccountOffsetController::class, 'store'])->name('chargeable-accounts.offsets.store');
-        Route::get('chargeable-accounts/{chargeable_account}/offsets/{offset}/edit', [App\Http\Controllers\ChargeableAccountOffsetController::class, 'edit'])->name('chargeable-accounts.offsets.edit');
-        Route::patch('chargeable-accounts/{chargeable_account}/offsets/{offset}', [App\Http\Controllers\ChargeableAccountOffsetController::class, 'update'])->name('chargeable-accounts.offsets.update');
-        Route::delete('chargeable-accounts/{chargeable_account}/offsets/{offset}', [App\Http\Controllers\ChargeableAccountOffsetController::class, 'destroy'])->name('chargeable-accounts.offsets.destroy');
+        Route::post('chargeable-accounts/{chargeable_account}/offsets', [ChargeableAccountOffsetController::class, 'store'])->name('chargeable-accounts.offsets.store');
+        Route::get('chargeable-accounts/{chargeable_account}/offsets/{offset}/edit', [ChargeableAccountOffsetController::class, 'edit'])->name('chargeable-accounts.offsets.edit');
+        Route::patch('chargeable-accounts/{chargeable_account}/offsets/{offset}', [ChargeableAccountOffsetController::class, 'update'])->name('chargeable-accounts.offsets.update');
+        Route::delete('chargeable-accounts/{chargeable_account}/offsets/{offset}', [ChargeableAccountOffsetController::class, 'destroy'])->name('chargeable-accounts.offsets.destroy');
     });
 
     // Admin and Moderator only routes for budget approval
     Route::middleware('role:administrator,moderator')->group(function () {
-        Route::patch('account-budgets/{account_budget}/approve', [App\Http\Controllers\SubAccountBudgetController::class, 'approve'])->name('account-budgets.approve');
-        Route::patch('account-budgets/{account_budget}/reject', [App\Http\Controllers\SubAccountBudgetController::class, 'reject'])->name('account-budgets.reject');
-        
+        Route::patch('account-budgets/{account_budget}/approve', [SubAccountBudgetController::class, 'approve'])->name('account-budgets.approve');
+        Route::patch('account-budgets/{account_budget}/reject', [SubAccountBudgetController::class, 'reject'])->name('account-budgets.reject');
+
         // User creation routes that are accessible to both Admin and Moderator
         // Note: These must be BEFORE the resource route to avoid wildcard conflict
         Route::get('users/create-data-logger', [UserController::class, 'createDataLogger'])->name('users.create-data-logger');
@@ -83,16 +88,16 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
 
     // Admin, Moderator and Budgeteer routes
     Route::middleware('role:administrator,moderator,budgeteer')->group(function () {
-        Route::resource('account-budgets', App\Http\Controllers\SubAccountBudgetController::class)->except(['create']);
+        Route::resource('account-budgets', SubAccountBudgetController::class)->except(['create']);
     });
 
     // Admin only routes
     Route::middleware('role:administrator')->group(function () {
         Route::resource('asset-types', AssetTypeController::class);
-        
+
         // Specific user creation for admins only
         Route::get('users/create-moderator', [UserController::class, 'createModerator'])->name('users.create-moderator');
-        
+
         // Void Fuel Order
         Route::post('fuel-orders/{fuel_order}/void', [FuelOrderController::class, 'void'])->name('fuel-orders.void');
     });
@@ -106,5 +111,5 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 // Public Shared Dashboard
-Route::get('/shared/dashboard/{slug}', [App\Http\Controllers\PublicDashboardController::class, 'show'])->name('public.dashboard');
-Route::get('/shared/dashboard/{slug}/manifest.json', [App\Http\Controllers\PublicDashboardController::class, 'manifest'])->name('public.dashboard.manifest');
+Route::get('/shared/dashboard/{slug}', [PublicDashboardController::class, 'show'])->name('public.dashboard');
+Route::get('/shared/dashboard/{slug}/manifest.json', [PublicDashboardController::class, 'manifest'])->name('public.dashboard.manifest');

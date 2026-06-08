@@ -28,7 +28,7 @@ class PublicDashboardController extends Controller
             return response()->json([
                 'budget_html' => view('partials.dashboard-grid', compact('chartData'))->render(),
                 'asset_html' => view('partials.asset-grid', compact('assetVarianceData'))->render(),
-                'chart_data' => $chartData
+                'chart_data' => $chartData,
             ]);
         }
 
@@ -42,7 +42,7 @@ class PublicDashboardController extends Controller
             ->firstOrFail();
 
         $manifest = [
-            'name' => 'Fuel Budget - ' . ($link->name ?? 'Shared Overview'),
+            'name' => 'Fuel Budget - '.($link->name ?? 'Shared Overview'),
             'short_name' => 'Fuel Budget',
             'description' => 'Live fuel budget and asset performance monitoring dashboard.',
             'start_url' => route('public.dashboard', $link->slug),
@@ -55,15 +55,15 @@ class PublicDashboardController extends Controller
                     'src' => asset('images/logo.svg'),
                     'sizes' => '192x192',
                     'type' => 'image/svg+xml',
-                    'purpose' => 'any maskable'
+                    'purpose' => 'any maskable',
                 ],
                 [
                     'src' => asset('images/logo.svg'),
                     'sizes' => '512x512',
                     'type' => 'image/svg+xml',
-                    'purpose' => 'any maskable'
-                ]
-            ]
+                    'purpose' => 'any maskable',
+                ],
+            ],
         ];
 
         return response()->json($manifest);

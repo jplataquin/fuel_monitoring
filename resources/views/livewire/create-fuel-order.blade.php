@@ -19,7 +19,7 @@
         <div class="col-12">
             <label for="asset_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Select Asset</label>
             <select wire:model.live="asset_id" id="asset_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-3 px-4 rounded-3">
-                <option value="">-- Choose an Asset --</option>
+                <option value="">-- Choose an Asset (Optional for Direct Fuel Order) --</option>
                 @foreach($assets as $asset)
                     <option value="{{ $asset->id }}">{{ $asset->fleet_no }} - {{ $asset->assetType->name ?? 'Unknown Type' }}</option>
                 @endforeach
@@ -27,16 +27,73 @@
             @error('asset_id') <span class="text-danger small fw-semibold mt-1 d-block">{{ $message }}</span> @enderror
         </div>
 
-        <div class="col-md-6">
-            <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
-            <input type="date" wire:model.live="date_from" id="date_from" class="form-control bg-dark text-light border-secondary border-opacity-50 py-3 px-4 rounded-3">
-            @error('date_from') <span class="text-danger small fw-semibold mt-1 d-block">{{ $message }}</span> @enderror
-        </div>
-        <div class="col-md-6">
-            <label for="date_to" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date To</label>
-            <input type="date" wire:model.live="date_to" id="date_to" class="form-control bg-dark text-light border-secondary border-opacity-50 py-3 px-4 rounded-3">
-            @error('date_to') <span class="text-danger small fw-semibold mt-1 d-block">{{ $message }}</span> @enderror
-        </div>
+        @if($asset_id)
+            <div class="col-md-6">
+                <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
+                <input type="date" wire:model.live="date_from" id="date_from" class="form-control bg-dark text-light border-secondary border-opacity-50 py-3 px-4 rounded-3">
+                @error('date_from') <span class="text-danger small fw-semibold mt-1 d-block">{{ $message }}</span> @enderror
+            </div>
+            <div class="col-md-6">
+                <label for="date_to" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date To</label>
+                <input type="date" wire:model.live="date_to" id="date_to" class="form-control bg-dark text-light border-secondary border-opacity-50 py-3 px-4 rounded-3">
+                @error('date_to') <span class="text-danger small fw-semibold mt-1 d-block">{{ $message }}</span> @enderror
+            </div>
+        @else
+            <div class="col-md-6">
+                <label for="chargeable_account_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Chargeable Account <span class="text-danger">*</span></label>
+                <select wire:model.live="chargeable_account_id" id="chargeable_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-3 px-4 rounded-3">
+                    <option value="">-- Choose an Account --</option>
+                    @foreach($chargeable_accounts as $account)
+                        <option value="{{ $account->id }}">{{ $account->name }}</option>
+                    @endforeach
+                </select>
+                @error('chargeable_account_id') <span class="text-danger small fw-semibold mt-1 d-block">{{ $message }}</span> @enderror
+            </div>
+
+            <div class="col-md-6">
+                <label for="sub_account_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Sub-Account</label>
+                <select wire:model="sub_account_id" id="sub_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-3 px-4 rounded-3" {{ empty($sub_accounts) ? 'disabled' : '' }}>
+                    <option value="">-- Choose a Sub-Account --</option>
+                    @foreach($sub_accounts as $sub)
+                        <option value="{{ $sub->id }}">{{ $sub->name }}</option>
+                    @endforeach
+                </select>
+                @error('sub_account_id') <span class="text-danger small fw-semibold mt-1 d-block">{{ $message }}</span> @enderror
+            </div>
+
+            <div class="col-12">
+                <div class="form-check form-switch py-2">
+                    <input class="form-check-input bg-dark border-secondary cursor-pointer" type="checkbox" wire:model="unbudgeted" id="unbudgeted">
+                    <label class="form-check-label small fw-bold text-secondary text-uppercase tracking-wider ms-2 cursor-pointer" for="unbudgeted">
+                        Unbudgeted Direct Expense
+                    </label>
+                </div>
+                @error('unbudgeted') <span class="text-danger small fw-semibold mt-1 d-block">{{ $message }}</span> @enderror
+            </div>
+
+            <div class="col-12">
+                <label for="remarks" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Remarks / Justification <span class="text-danger">*</span></label>
+                <textarea wire:model="remarks" id="remarks" rows="3" class="form-control bg-dark text-light border-secondary border-opacity-50 py-3 px-4 rounded-3" placeholder="Provide the reason or justification for this direct fuel order..."></textarea>
+                @error('remarks') <span class="text-danger small fw-semibold mt-1 d-block">{{ $message }}</span> @enderror
+            </div>
+
+            <div class="col-12 mt-5">
+                <label for="say_quantity" class="form-label h6 fw-bold text-secondary text-uppercase tracking-wider mb-3">Say Fuel Quantity (Liters) <span class="text-danger">*</span></label>
+                <div class="input-group input-group-lg shadow-sm border border-secondary border-opacity-25 rounded-3 overflow-hidden">
+                    <input type="number" step="0.01" wire:model="say_quantity" id="say_quantity" class="form-control bg-dark text-light border-0 py-3 px-4 h4 mb-0 fw-black" placeholder="0.00">
+                    <span class="input-group-text bg-dark text-secondary border-0 fw-bold px-4">L</span>
+                </div>
+                @error('say_quantity') <span class="text-danger small fw-semibold mt-1 d-block">{{ $message }}</span> @enderror
+            </div>
+
+            <div class="col-12 mt-5 pt-3">
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-black text-uppercase tracking-widest shadow-lg hover-translate-y">
+                        Create Fuel Order
+                    </button>
+                </div>
+            </div>
+        @endif
 
         @if($asset_id && $date_from && $date_to)
             <div class="col-12">

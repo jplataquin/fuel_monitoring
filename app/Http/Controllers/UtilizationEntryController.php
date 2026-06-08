@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use App\Models\ChargeableAccount;
 use App\Models\UtilizationEntry;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,42 +34,43 @@ class UtilizationEntryController extends Controller
                 'date',
                 function ($attribute, $value, $fail) use ($request) {
                     if ($request->chargeable_account_id) {
-                        $account = \App\Models\ChargeableAccount::find($request->chargeable_account_id);
+                        $account = ChargeableAccount::find($request->chargeable_account_id);
                         if ($account && $account->classification === 'Scoped') {
-                            $entryDate = \Carbon\Carbon::parse($value)->startOfDay();
+                            $entryDate = Carbon::parse($value)->startOfDay();
                             $startDate = $account->start_date ? $account->start_date->startOfDay() : null;
                             $endDate = $account->end_date ? $account->end_date->startOfDay() : null;
 
                             if ($startDate && $entryDate->lt($startDate)) {
-                                $fail('The utilization date must be within the scoped period of the selected chargeable account (' . $startDate->format('M d, Y') . ' to ' . ($endDate ? $endDate->format('M d, Y') : 'N/A') . ').');
+                                $fail('The utilization date must be within the scoped period of the selected chargeable account ('.$startDate->format('M d, Y').' to '.($endDate ? $endDate->format('M d, Y') : 'N/A').').');
                             }
                             if ($endDate && $entryDate->gt($endDate)) {
-                                $fail('The utilization date must be within the scoped period of the selected chargeable account (' . ($startDate ? $startDate->format('M d, Y') : 'N/A') . ' to ' . $endDate->format('M d, Y') . ').');
+                                $fail('The utilization date must be within the scoped period of the selected chargeable account ('.($startDate ? $startDate->format('M d, Y') : 'N/A').' to '.$endDate->format('M d, Y').').');
                             }
                         }
                     }
-                }
+                },
             ],
             'start_time' => [
-                'required', 
+                'required',
                 'date_format:H:i',
                 Rule::unique('utilization_entries')->where(function ($query) use ($request) {
                     return $query->where('asset_id', $request->asset_id)
-                                 ->where('date', $request->date)
-                                 ->whereNull('deleted_at');
+                        ->where('date', $request->date)
+                        ->whereNull('deleted_at');
                 }),
                 function ($attribute, $value, $fail) use ($request, $asset) {
                     if ($asset->last_date !== null && $asset->last_time !== null && $request->date) {
                         try {
-                            $assetDateTime = \Carbon\Carbon::parse($asset->last_date . ' ' . $asset->last_time);
-                            $requestDateTime = \Carbon\Carbon::parse($request->date . ' ' . $value);
-                            
+                            $assetDateTime = Carbon::parse($asset->last_date.' '.$asset->last_time);
+                            $requestDateTime = Carbon::parse($request->date.' '.$value);
+
                             if ($requestDateTime->lessThan($assetDateTime)) {
-                                $fail('Date and Start Time cannot be earlier than the asset\'s last log (' . $assetDateTime->format('M d, Y H:i') . ').');
+                                $fail('Date and Start Time cannot be earlier than the asset\'s last log ('.$assetDateTime->format('M d, Y H:i').').');
                             }
-                        } catch (\Exception $e) {}
+                        } catch (\Exception $e) {
+                        }
                     }
-                }
+                },
             ],
             'end_time' => 'required|date_format:H:i|after:start_time',
             'driver_operator_name' => 'required|string|max:255',
@@ -88,13 +90,13 @@ class UtilizationEntryController extends Controller
         if ($request->calculation_type === 'Kilometer Reading') {
             $rules['start_kilometer_reading'] = ['required', 'numeric', 'min:0'];
             if ($asset->last_kilometer_reading !== null) {
-                $rules['start_kilometer_reading'][] = 'gte:' . $asset->last_kilometer_reading;
+                $rules['start_kilometer_reading'][] = 'gte:'.$asset->last_kilometer_reading;
             }
             $rules['end_kilometer_reading'] = ['required', 'numeric', 'min:0', 'gt:start_kilometer_reading'];
         } elseif ($request->calculation_type === 'Hour Reading') {
             $rules['start_hour_reading'] = ['required', 'numeric', 'min:0'];
             if ($asset->last_engine_hours !== null) {
-                $rules['start_hour_reading'][] = 'gte:' . $asset->last_engine_hours;
+                $rules['start_hour_reading'][] = 'gte:'.$asset->last_engine_hours;
             }
             $rules['end_hour_reading'] = ['required', 'numeric', 'min:0', 'gt:start_hour_reading'];
         }
@@ -145,13 +147,13 @@ class UtilizationEntryController extends Controller
 
         return redirect()->back()
             ->withInput($request->only([
-                'date', 
-                'start_time', 
+                'date',
+                'start_time',
                 'end_time',
-                'driver_operator_name', 
-                'chargeable_account_id', 
-                'reference', 
-                'calculation_type'
+                'driver_operator_name',
+                'chargeable_account_id',
+                'reference',
+                'calculation_type',
             ]))
             ->with('status', 'Utilization entry created successfully.');
     }
@@ -159,6 +161,7 @@ class UtilizationEntryController extends Controller
     public function show(UtilizationEntry $utilizationEntry): View
     {
         $utilizationEntry->load(['asset', 'chargeableAccount', 'creator', 'updater']);
+
         return view('utilization-entries.show', compact('utilizationEntry'));
     }
 
@@ -186,30 +189,30 @@ class UtilizationEntryController extends Controller
         if (! $isAuthorized) {
             abort(403, 'You are not authorized to edit this record or the 5-minute window has expired.');
         }
-        
+
         $asset = $utilizationEntry->asset;
 
         // Find the next immediate utilization record for time validation
-        $nextTimeEntry = \App\Models\UtilizationEntry::where('asset_id', $utilizationEntry->asset_id)
+        $nextTimeEntry = UtilizationEntry::where('asset_id', $utilizationEntry->asset_id)
             ->where(function ($query) use ($utilizationEntry) {
                 $query->where('date', '>', $utilizationEntry->getOriginal('date'))
-                      ->orWhere(function ($q) use ($utilizationEntry) {
-                          $q->where('date', '=', $utilizationEntry->getOriginal('date'))
+                    ->orWhere(function ($q) use ($utilizationEntry) {
+                        $q->where('date', '=', $utilizationEntry->getOriginal('date'))
                             ->where('start_time', '>', $utilizationEntry->getOriginal('start_time'));
-                      });
+                    });
             })
             ->orderBy('date', 'asc')
             ->orderBy('start_time', 'asc')
             ->first();
 
         // Find the next record with a non-zero Kilometer reading
-        $nextKmEntry = \App\Models\UtilizationEntry::where('asset_id', $utilizationEntry->asset_id)
+        $nextKmEntry = UtilizationEntry::where('asset_id', $utilizationEntry->asset_id)
             ->where(function ($query) use ($utilizationEntry) {
                 $query->where('date', '>', $utilizationEntry->getOriginal('date'))
-                      ->orWhere(function ($q) use ($utilizationEntry) {
-                          $q->where('date', '=', $utilizationEntry->getOriginal('date'))
+                    ->orWhere(function ($q) use ($utilizationEntry) {
+                        $q->where('date', '=', $utilizationEntry->getOriginal('date'))
                             ->where('start_time', '>', $utilizationEntry->getOriginal('start_time'));
-                      });
+                    });
             })
             ->where('start_kilometer_reading', '>', 0)
             ->orderBy('date', 'asc')
@@ -217,13 +220,13 @@ class UtilizationEntryController extends Controller
             ->first();
 
         // Find the next record with a non-zero Hour reading
-        $nextHrEntry = \App\Models\UtilizationEntry::where('asset_id', $utilizationEntry->asset_id)
+        $nextHrEntry = UtilizationEntry::where('asset_id', $utilizationEntry->asset_id)
             ->where(function ($query) use ($utilizationEntry) {
                 $query->where('date', '>', $utilizationEntry->getOriginal('date'))
-                      ->orWhere(function ($q) use ($utilizationEntry) {
-                          $q->where('date', '=', $utilizationEntry->getOriginal('date'))
+                    ->orWhere(function ($q) use ($utilizationEntry) {
+                        $q->where('date', '=', $utilizationEntry->getOriginal('date'))
                             ->where('start_time', '>', $utilizationEntry->getOriginal('start_time'));
-                      });
+                    });
             })
             ->where('start_hour_reading', '>', 0)
             ->orderBy('date', 'asc')
@@ -236,43 +239,44 @@ class UtilizationEntryController extends Controller
                 'date',
                 function ($attribute, $value, $fail) use ($request) {
                     if ($request->chargeable_account_id) {
-                        $account = \App\Models\ChargeableAccount::find($request->chargeable_account_id);
+                        $account = ChargeableAccount::find($request->chargeable_account_id);
                         if ($account && $account->classification === 'Scoped') {
-                            $entryDate = \Carbon\Carbon::parse($value)->startOfDay();
+                            $entryDate = Carbon::parse($value)->startOfDay();
                             $startDate = $account->start_date ? $account->start_date->startOfDay() : null;
                             $endDate = $account->end_date ? $account->end_date->startOfDay() : null;
 
                             if ($startDate && $entryDate->lt($startDate)) {
-                                $fail('The utilization date must be within the scoped period of the selected chargeable account (' . $startDate->format('M d, Y') . ' to ' . ($endDate ? $endDate->format('M d, Y') : 'N/A') . ').');
+                                $fail('The utilization date must be within the scoped period of the selected chargeable account ('.$startDate->format('M d, Y').' to '.($endDate ? $endDate->format('M d, Y') : 'N/A').').');
                             }
                             if ($endDate && $entryDate->gt($endDate)) {
-                                $fail('The utilization date must be within the scoped period of the selected chargeable account (' . ($startDate ? $startDate->format('M d, Y') : 'N/A') . ' to ' . $endDate->format('M d, Y') . ').');
+                                $fail('The utilization date must be within the scoped period of the selected chargeable account ('.($startDate ? $startDate->format('M d, Y') : 'N/A').' to '.$endDate->format('M d, Y').').');
                             }
                         }
                     }
-                }
+                },
             ],
             'start_time' => [
-                'required', 
+                'required',
                 'date_format:H:i',
                 Rule::unique('utilization_entries')->where(function ($query) use ($request, $utilizationEntry) {
                     return $query->where('asset_id', $utilizationEntry->asset_id)
-                                 ->where('date', $request->date)
-                                 ->whereNull('deleted_at');
+                        ->where('date', $request->date)
+                        ->whereNull('deleted_at');
                 })->ignore($utilizationEntry->id),
                 function ($attribute, $value, $fail) use ($request, $utilizationEntry) {
                     if ($utilizationEntry->last_date !== null && $utilizationEntry->last_time !== null && $request->date) {
                         try {
-                            $lastDateString = $utilizationEntry->last_date instanceof \Carbon\Carbon ? $utilizationEntry->last_date->format('Y-m-d') : $utilizationEntry->last_date;
-                            $lastDateTime = \Carbon\Carbon::parse($lastDateString . ' ' . $utilizationEntry->last_time);
-                            $requestDateTime = \Carbon\Carbon::parse($request->date . ' ' . $value);
-                            
+                            $lastDateString = $utilizationEntry->last_date instanceof Carbon ? $utilizationEntry->last_date->format('Y-m-d') : $utilizationEntry->last_date;
+                            $lastDateTime = Carbon::parse($lastDateString.' '.$utilizationEntry->last_time);
+                            $requestDateTime = Carbon::parse($request->date.' '.$value);
+
                             if ($requestDateTime->lessThan($lastDateTime)) {
-                                $fail('Date and Start Time cannot be earlier than the previous log (' . $lastDateTime->format('M d, Y H:i') . ').');
+                                $fail('Date and Start Time cannot be earlier than the previous log ('.$lastDateTime->format('M d, Y H:i').').');
                             }
-                        } catch (\Exception $e) {}
+                        } catch (\Exception $e) {
+                        }
                     }
-                }
+                },
             ],
             'end_time' => [
                 'required',
@@ -281,16 +285,17 @@ class UtilizationEntryController extends Controller
                 function ($attribute, $value, $fail) use ($request, $nextTimeEntry) {
                     if ($nextTimeEntry && $request->date) {
                         try {
-                            $endDateTime = \Carbon\Carbon::parse($request->date . ' ' . $value);
-                            $nextDateString = $nextTimeEntry->date instanceof \Carbon\Carbon ? $nextTimeEntry->date->format('Y-m-d') : $nextTimeEntry->date;
-                            $nextStartDateTime = \Carbon\Carbon::parse($nextDateString . ' ' . $nextTimeEntry->start_time);
+                            $endDateTime = Carbon::parse($request->date.' '.$value);
+                            $nextDateString = $nextTimeEntry->date instanceof Carbon ? $nextTimeEntry->date->format('Y-m-d') : $nextTimeEntry->date;
+                            $nextStartDateTime = Carbon::parse($nextDateString.' '.$nextTimeEntry->start_time);
 
                             if ($endDateTime->greaterThan($nextStartDateTime)) {
-                                $fail('Date and End Time overlap with the next immediate record which starts at ' . $nextStartDateTime->format('M d, Y H:i') . '.');
+                                $fail('Date and End Time overlap with the next immediate record which starts at '.$nextStartDateTime->format('M d, Y H:i').'.');
                             }
-                        } catch (\Exception $e) {}
+                        } catch (\Exception $e) {
+                        }
                     }
-                }
+                },
             ],
             'driver_operator_name' => 'required|string|max:255',
             'chargeable_account_id' => 'required|exists:chargeable_accounts,id',
@@ -310,39 +315,39 @@ class UtilizationEntryController extends Controller
             $rules['start_kilometer_reading'] = ['required', 'numeric', 'min:0'];
             $comparisonKm = $utilizationEntry->last_kilometer_reading;
             if ($comparisonKm !== null) {
-                $rules['start_kilometer_reading'][] = 'gte:' . $comparisonKm;
+                $rules['start_kilometer_reading'][] = 'gte:'.$comparisonKm;
             }
             $rules['end_kilometer_reading'] = [
-                'required', 
-                'numeric', 
-                'min:0', 
+                'required',
+                'numeric',
+                'min:0',
                 'gt:start_kilometer_reading',
                 function ($attribute, $value, $fail) use ($nextKmEntry) {
                     if ($nextKmEntry && $nextKmEntry->start_kilometer_reading > 0) {
                         if ($value > $nextKmEntry->start_kilometer_reading) {
-                            $fail('End Kilometer Reading cannot exceed the next available start reading (' . $nextKmEntry->start_kilometer_reading . ').');
+                            $fail('End Kilometer Reading cannot exceed the next available start reading ('.$nextKmEntry->start_kilometer_reading.').');
                         }
                     }
-                }
+                },
             ];
         } elseif ($request->calculation_type === 'Hour Reading') {
             $rules['start_hour_reading'] = ['required', 'numeric', 'min:0'];
             $comparisonHr = $utilizationEntry->last_engine_hours;
             if ($comparisonHr !== null) {
-                $rules['start_hour_reading'][] = 'gte:' . $comparisonHr;
+                $rules['start_hour_reading'][] = 'gte:'.$comparisonHr;
             }
             $rules['end_hour_reading'] = [
-                'required', 
-                'numeric', 
-                'min:0', 
+                'required',
+                'numeric',
+                'min:0',
                 'gt:start_hour_reading',
                 function ($attribute, $value, $fail) use ($nextHrEntry) {
                     if ($nextHrEntry && $nextHrEntry->start_hour_reading > 0) {
                         if ($value > $nextHrEntry->start_hour_reading) {
-                            $fail('End Engine Hours cannot exceed the next available start hours (' . $nextHrEntry->start_hour_reading . ').');
+                            $fail('End Engine Hours cannot exceed the next available start hours ('.$nextHrEntry->start_hour_reading.').');
                         }
                     }
-                }
+                },
             ];
         }
 
@@ -407,7 +412,7 @@ class UtilizationEntryController extends Controller
         if ($request->filled('start_date')) {
             $query->where('date', '>=', $request->start_date);
         }
-        
+
         if ($request->filled('end_date')) {
             $query->where('date', '<=', $request->end_date);
         }
@@ -435,7 +440,7 @@ class UtilizationEntryController extends Controller
         if ($request->filled('start_date')) {
             $query->where('date', '>=', $request->start_date);
         }
-        
+
         if ($request->filled('end_date')) {
             $query->where('date', '<=', $request->end_date);
         }

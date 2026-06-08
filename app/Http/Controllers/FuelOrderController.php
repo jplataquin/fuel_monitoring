@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FuelOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class FuelOrderController extends Controller
 {
@@ -13,11 +14,11 @@ class FuelOrderController extends Controller
      */
     public function index(Request $request)
     {
-        $query = FuelOrder::with(['asset', 'creator']);
+        $query = FuelOrder::with(['asset', 'creator', 'chargeableAccount', 'subAccount']);
 
         if ($request->filled('fleet_no')) {
             $query->whereHas('asset', function ($q) use ($request) {
-                $q->where('fleet_no', 'like', '%' . $request->fleet_no . '%');
+                $q->where('fleet_no', 'like', '%'.$request->fleet_no.'%');
             });
         }
 
@@ -31,7 +32,7 @@ class FuelOrderController extends Controller
      */
     public function create()
     {
-        if (!in_array(Auth::user()->role, ['data_logger', 'data logger', 'administrator'])) {
+        if (! in_array(Auth::user()->role, ['data_logger', 'data logger', 'administrator'])) {
             abort(403, 'Unauthorized action. Only Data Loggers can create fuel orders.');
         }
 
@@ -78,7 +79,7 @@ class FuelOrderController extends Controller
             'status' => 'required|in:PEND,DONE,VOID',
         ]);
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($fuelOrder, $validated) {
+        DB::transaction(function () use ($fuelOrder, $validated) {
             $fuelOrder->update([
                 'say_quantity' => $validated['say_quantity'],
                 'actual_quantity' => $validated['actual_quantity'],
@@ -103,7 +104,7 @@ class FuelOrderController extends Controller
      */
     public function actualize(FuelOrder $fuelOrder)
     {
-        if (!in_array(Auth::user()->role, ['data_logger', 'data logger', 'fuel_man', 'administrator'])) {
+        if (! in_array(Auth::user()->role, ['data_logger', 'data logger', 'fuel_man', 'administrator'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -121,7 +122,7 @@ class FuelOrderController extends Controller
      */
     public function storeActualization(Request $request, FuelOrder $fuelOrder)
     {
-        if (!in_array(Auth::user()->role, ['data_logger', 'data logger', 'fuel_man', 'administrator'])) {
+        if (! in_array(Auth::user()->role, ['data_logger', 'data logger', 'fuel_man', 'administrator'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -133,7 +134,7 @@ class FuelOrderController extends Controller
             'actual_quantity' => 'required|numeric|min:0',
         ]);
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($fuelOrder, $validated) {
+        DB::transaction(function () use ($fuelOrder, $validated) {
             $status = $validated['actual_quantity'] > 0 ? 'DONE' : 'PEND';
 
             $fuelOrder->update([
@@ -162,7 +163,7 @@ class FuelOrderController extends Controller
         }
 
         // Use a transaction to ensure both operations succeed
-        \Illuminate\Support\Facades\DB::transaction(function () use ($fuelOrder) {
+        DB::transaction(function () use ($fuelOrder) {
             // Remove fuel_order_id from all associated utilization entries
             $fuelOrder->utilizationEntries()->update(['fuel_order_id' => null]);
 

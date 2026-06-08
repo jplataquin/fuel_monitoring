@@ -24,6 +24,7 @@ class ChargeableAccountController extends Controller
     public function show(ChargeableAccount $chargeableAccount): View
     {
         $chargeableAccount->load('subAccounts');
+
         return view('chargeable-accounts.show', compact('chargeableAccount'));
     }
 

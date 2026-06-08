@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -39,7 +40,7 @@ class UserManagementTest extends TestCase
 
     public function test_administrator_can_store_moderator()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]); // Disable CSRF middleware to bypass CSRF issues in this test environment
+        $this->withoutMiddleware([ValidateCsrfToken::class]); // Disable CSRF middleware to bypass CSRF issues in this test environment
         $admin = User::factory()->create(['role' => 'administrator']);
 
         $response = $this->actingAs($admin)->post(route('users.store'), [
@@ -55,7 +56,7 @@ class UserManagementTest extends TestCase
 
     public function test_moderator_cannot_store_moderator()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]); // Disable CSRF middleware to bypass CSRF issues in this test environment
+        $this->withoutMiddleware([ValidateCsrfToken::class]); // Disable CSRF middleware to bypass CSRF issues in this test environment
         $moderator = User::factory()->create(['role' => 'moderator']);
 
         $response = $this->actingAs($moderator)->post(route('users.store'), [
@@ -71,7 +72,7 @@ class UserManagementTest extends TestCase
 
     public function test_moderator_can_store_data_logger()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]); // Disable CSRF middleware to bypass CSRF issues in this test environment
+        $this->withoutMiddleware([ValidateCsrfToken::class]); // Disable CSRF middleware to bypass CSRF issues in this test environment
         $moderator = User::factory()->create(['role' => 'moderator']);
 
         $response = $this->actingAs($moderator)->post(route('users.store'), [
@@ -87,7 +88,7 @@ class UserManagementTest extends TestCase
 
     public function test_administrator_can_update_user_role()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $admin = User::factory()->create(['role' => 'administrator']);
         $user = User::factory()->create(['role' => 'data_logger']);
 
@@ -103,7 +104,7 @@ class UserManagementTest extends TestCase
 
     public function test_moderator_cannot_update_user_role()
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
         $moderator = User::factory()->create(['role' => 'moderator']);
         $user = User::factory()->create(['role' => 'data_logger']);
 

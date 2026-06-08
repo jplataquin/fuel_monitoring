@@ -14,6 +14,10 @@ class FuelOrder extends Model
 
     protected $fillable = [
         'asset_id',
+        'chargeable_account_id',
+        'sub_account_id',
+        'unbudgeted',
+        'remarks',
         'calculated_quantity',
         'say_quantity',
         'calculated_hours',
@@ -36,11 +40,22 @@ class FuelOrder extends Model
     protected $casts = [
         'actualized_at' => 'datetime',
         'void_at' => 'datetime',
+        'unbudgeted' => 'boolean',
     ];
 
     public function asset(): BelongsTo
     {
         return $this->belongsTo(Asset::class);
+    }
+
+    public function chargeableAccount(): BelongsTo
+    {
+        return $this->belongsTo(ChargeableAccount::class);
+    }
+
+    public function subAccount(): BelongsTo
+    {
+        return $this->belongsTo(SubAccount::class);
     }
 
     public function utilizationEntries(): HasMany

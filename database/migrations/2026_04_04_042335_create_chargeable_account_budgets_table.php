@@ -18,11 +18,11 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->text('remarks')->nullable();
-            
+
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('deleted_by')->nullable()->constrained('users')->nullOnDelete();
-            
+
             $table->timestamps();
             $table->softDeletes();
         });

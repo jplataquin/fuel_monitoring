@@ -37,7 +37,7 @@ return new class extends Migration
                 'date_from',
                 'date_to',
                 'status',
-                'actual_quantity'
+                'actual_quantity',
             ]);
         });
     }

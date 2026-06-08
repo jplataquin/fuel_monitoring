@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SubAccount extends Model
@@ -18,7 +19,7 @@ class SubAccount extends Model
         return $this->belongsTo(ChargeableAccount::class);
     }
 
-    public function budgets(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function budgets(): HasMany
     {
         return $this->hasMany(SubAccountBudget::class);
     }

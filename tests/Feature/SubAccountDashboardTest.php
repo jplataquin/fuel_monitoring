@@ -18,13 +18,14 @@ class SubAccountDashboardTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private Asset $asset;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->admin = User::factory()->create(['role' => 'administrator']);
-        
+
         $assetType = AssetType::create(['name' => 'Excavator']);
         $this->asset = Asset::create([
             'fleet_no' => 'EX-900',
@@ -109,7 +110,7 @@ class SubAccountDashboardTest extends TestCase
 
         $response->assertStatus(200);
         $subAccountData = $response->viewData('subAccountData');
-        
+
         $this->assertEquals('Sub Section A', $subAccountData[0]['name']);
         $this->assertEquals(1000.0, $subAccountData[0]['total_budget']);
         $this->assertEquals(4.0, $subAccountData[0]['consumed']);
@@ -154,10 +155,10 @@ class SubAccountDashboardTest extends TestCase
 
         $response->assertStatus(200);
         $subAccountData = $response->viewData('subAccountData');
-        
+
         $this->assertEquals(0.0, $subAccountData[0]['total_budget']);
         $this->assertEquals(4.0, $subAccountData[0]['consumed']);
-        
+
         $response->assertSee('Exhausted');
     }
 }

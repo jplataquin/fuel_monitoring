@@ -56,6 +56,7 @@ class AssetController extends Controller
     public function show(Asset $asset): View
     {
         $chargeableAccounts = ChargeableAccount::where('status', 'Active')->orderBy('name', 'asc')->get();
+
         return view('assets.show', compact('asset', 'chargeableAccounts'));
     }
 

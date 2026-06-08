@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
-use App\Models\UtilizationEntry;
-use App\Models\SubAccountBudget;
 use App\Models\ChargeableAccount;
+use App\Models\FuelOrder;
+use App\Models\SubAccountBudget;
+use App\Models\UtilizationEntry;
 use App\Traits\DashboardDataTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -17,7 +18,7 @@ class ReportController extends Controller
     public function assetUtilization(Request $request)
     {
         $assets = Asset::with('assetType')->orderBy('fleet_no')->get();
-        
+
         $query = UtilizationEntry::with(['asset', 'chargeableAccount', 'subAccount', 'fuelOrder'])
             ->whereHas('fuelOrder', function ($q) {
                 $q->where('status', 'DONE');
@@ -43,7 +44,7 @@ class ReportController extends Controller
         if ($assetId || $dateFrom || $dateTo) {
             $entries = $query->orderBy('date', 'asc')
                 ->get()
-                ->sortBy(function($entry) {
+                ->sortBy(function ($entry) {
                     return $entry->asset->fleet_no ?? '';
                 })
                 ->groupBy('fuel_order_id');
@@ -62,7 +63,7 @@ class ReportController extends Controller
         $assetId = $request->input('asset_id');
         $isPrint = $request->boolean('print');
 
-        $query = \App\Models\FuelOrder::with('asset.assetType')
+        $query = FuelOrder::with('asset.assetType')
             ->where('status', 'DONE')
             ->orderBy('created_at', 'asc'); // Order ASC for chart timeline
 
@@ -88,31 +89,31 @@ class ReportController extends Controller
             'labels' => [],
             'actual' => [],
             'say' => [],
-            'trend' => []
+            'trend' => [],
         ];
 
         if ($fuelOrders->isNotEmpty()) {
             $dailyConsumption = [];
             $dailySayConsumption = [];
-            
+
             // Group by date to get actual and say consumption
             foreach ($fuelOrders as $order) {
                 $dateString = \Carbon\Carbon::parse($order->created_at)->format('Y-m-d');
-                if (!isset($dailyConsumption[$dateString])) {
+                if (! isset($dailyConsumption[$dateString])) {
                     $dailyConsumption[$dateString] = 0;
                     $dailySayConsumption[$dateString] = 0;
                 }
                 $dailyConsumption[$dateString] += $order->actual_quantity;
                 $dailySayConsumption[$dateString] += $order->say_quantity;
             }
-            
+
             ksort($dailyConsumption); // Ensure chronological order
             ksort($dailySayConsumption);
 
             $labels = array_keys($dailyConsumption);
             $actualData = array_values($dailyConsumption);
             $sayData = array_values($dailySayConsumption);
-            
+
             // Calculate a simple trend line (Linear Regression)
             $n = count($actualData);
             $sumX = 0;
@@ -129,7 +130,7 @@ class ReportController extends Controller
 
             $slope = 0;
             $intercept = 0;
-            
+
             if ($n > 1 && ($n * $sumXX - $sumX * $sumX) > 0) {
                 $slope = ($n * $sumXY - $sumX * $sumY) / ($n * $sumXX - $sumX * $sumX);
                 $intercept = ($sumY - $slope * $sumX) / $n;
@@ -141,7 +142,7 @@ class ReportController extends Controller
             for ($i = 0; $i < $n; $i++) {
                 $trendData[] = round($slope * $i + $intercept, 2);
             }
-            
+
             // Project into the future (e.g., next 3 days)
             if ($n > 0) {
                 $lastDate = \Carbon\Carbon::parse(end($labels));
@@ -163,12 +164,12 @@ class ReportController extends Controller
                 'labels' => $labels,
                 'actual' => $actualData,
                 'say' => $sayData,
-                'trend' => $trendData
+                'trend' => $trendData,
             ];
         }
 
         // Order by asset fleet_no as requested
-        $fuelOrders = $fuelOrders->sortBy(function($order) {
+        $fuelOrders = $fuelOrders->sortBy(function ($order) {
             return $order->asset->fleet_no ?? '';
         })->values();
 
@@ -187,14 +188,14 @@ class ReportController extends Controller
         $isPrint = $request->boolean('print');
 
         if ($accountId) {
-            $selectedAccount = \App\Models\ChargeableAccount::find($accountId);
+            $selectedAccount = ChargeableAccount::find($accountId);
             if ($selectedAccount && $selectedAccount->classification === 'Scoped') {
                 $dateFrom = $selectedAccount->start_date ? $selectedAccount->start_date->format('Y-m-d') : null;
                 $dateTo = $selectedAccount->end_date ? $selectedAccount->end_date->format('Y-m-d') : null;
             }
         }
 
-        $query = \App\Models\FuelOrder::with(['utilizationEntries.chargeableAccount'])
+        $query = FuelOrder::with(['utilizationEntries.chargeableAccount'])
             ->where('status', 'DONE')
             ->orderBy('created_at', 'desc');
 
@@ -222,12 +223,12 @@ class ReportController extends Controller
         foreach ($fuelOrders as $order) {
             $orderTotalCalcQty = 0;
             $orderActualQty = $order->actual_quantity;
-            
+
             foreach ($order->utilizationEntries as $entry) {
                 // ... existing calc logic ...
                 $calcType = strtolower($entry->calculation_type ?? '');
                 $qty = 0;
-                
+
                 if (str_contains($calcType, 'kilometer')) {
                     $calcKm = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
                     $qty = $entry->fuel_factor_km > 0 ? $calcKm / $entry->fuel_factor_km : 0;
@@ -242,7 +243,7 @@ class ReportController extends Controller
                     $calcHours = max(0, $entry->end_hour_reading - $entry->start_hour_reading);
                     $qty = $calcHours * $entry->fuel_factor_hr;
                 }
-                
+
                 $entry->_calculated_qty = $qty;
                 $orderTotalCalcQty += $qty;
             }
@@ -257,13 +258,13 @@ class ReportController extends Controller
                 $subAccount = $entry->subAccount;
                 $subAccountName = $subAccount->name ?? 'No Sub-Account';
 
-                if (!isset($accountSummaries[$accountName])) {
+                if (! isset($accountSummaries[$accountName])) {
                     // Fetch the sum of all approved budgets for all sub-accounts of this chargeable account
                     $totalBudget = 0;
                     $offsetFuel = 0;
                     if ($account) {
                         foreach ($account->subAccounts as $sa) {
-                            $sumSubBudget = \App\Models\SubAccountBudget::where('sub_account_id', $sa->id)
+                            $sumSubBudget = SubAccountBudget::where('sub_account_id', $sa->id)
                                 ->where('status', 'Approved')
                                 ->sum('budget_quantity');
                             $totalBudget += $sumSubBudget;
@@ -288,12 +289,12 @@ class ReportController extends Controller
                     ];
                 }
 
-                if (!isset($accountSummaries[$accountName]['sub_accounts'][$subAccountName])) {
+                if (! isset($accountSummaries[$accountName]['sub_accounts'][$subAccountName])) {
                     $subAccountBudget = 0;
                     if ($subAccount) {
-                         $subAccountBudget = \App\Models\SubAccountBudget::where('sub_account_id', $subAccount->id)
-                                ->where('status', 'Approved')
-                                ->sum('budget_quantity');
+                        $subAccountBudget = SubAccountBudget::where('sub_account_id', $subAccount->id)
+                            ->where('status', 'Approved')
+                            ->sum('budget_quantity');
                     }
 
                     $accountSummaries[$accountName]['sub_accounts'][$subAccountName] = [
@@ -330,7 +331,7 @@ class ReportController extends Controller
                 $accountSummaries[$accountName]['total_hours'] += $calcHours;
                 $accountSummaries[$accountName]['sub_accounts'][$subAccountName]['total_km'] += $calcKm;
                 $accountSummaries[$accountName]['sub_accounts'][$subAccountName]['total_hours'] += $calcHours;
-                
+
                 $entryCalcQty = $entry->_calculated_qty;
                 if ($entry->unbudgeted) {
                     $accountSummaries[$accountName]['unbudgeted_fuel'] += $entryCalcQty;
@@ -355,7 +356,7 @@ class ReportController extends Controller
 
         ksort($accountSummaries);
 
-        $accounts = \App\Models\ChargeableAccount::orderBy('name')->get();
+        $accounts = ChargeableAccount::orderBy('name')->get();
 
         $view = $isPrint ? 'reports.print.chargeable-account-summary' : 'reports.chargeable-account-summary';
 
@@ -376,7 +377,7 @@ class ReportController extends Controller
             return response()->json([
                 'budget_html' => view('partials.dashboard-grid', compact('chartData'))->render(),
                 'asset_html' => view('partials.asset-grid', compact('assetVarianceData'))->render(),
-                'chart_data' => $chartData
+                'chart_data' => $chartData,
             ]);
         }
 
@@ -391,9 +392,9 @@ class ReportController extends Controller
         $subAccounts = $chargeableAccount->subAccounts()->get();
 
         // 2. Fetch all fuel orders associated with this account (using the exact calculation logic)
-        $fuelOrders = \App\Models\FuelOrder::with(['utilizationEntries' => function ($q) use ($chargeableAccount) {
-                $q->where('chargeable_account_id', $chargeableAccount->id);
-            }])
+        $fuelOrders = FuelOrder::with(['utilizationEntries' => function ($q) use ($chargeableAccount) {
+            $q->where('chargeable_account_id', $chargeableAccount->id);
+        }])
             ->where('status', 'DONE')
             ->whereHas('utilizationEntries', function ($q) use ($chargeableAccount) {
                 $q->where('chargeable_account_id', $chargeableAccount->id);
@@ -410,12 +411,12 @@ class ReportController extends Controller
         foreach ($fuelOrders as $order) {
             $orderTotalCalcQty = 0;
             $orderActualQty = $order->actual_quantity;
-            
+
             // Calculate total calculated qty for the entire order
             foreach ($order->utilizationEntries as $entry) {
                 $calcType = strtolower($entry->calculation_type ?? '');
                 $qty = 0;
-                
+
                 if (str_contains($calcType, 'kilometer')) {
                     $calcKm = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
                     $qty = $entry->fuel_factor_km > 0 ? $calcKm / $entry->fuel_factor_km : 0;
@@ -430,14 +431,14 @@ class ReportController extends Controller
                     $calcHours = max(0, $entry->end_hour_reading - $entry->start_hour_reading);
                     $qty = $calcHours * $entry->fuel_factor_hr;
                 }
-                
+
                 $entry->_calculated_qty = $qty;
                 $orderTotalCalcQty += $qty;
             }
 
             // Accumulate calculated qty per sub-account
             foreach ($order->utilizationEntries as $entry) {
-                if ($entry->chargeable_account_id != $chargeableAccount->id || !$entry->sub_account_id) {
+                if ($entry->chargeable_account_id != $chargeableAccount->id || ! $entry->sub_account_id) {
                     continue;
                 }
 

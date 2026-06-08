@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Models\Asset;
 use App\Models\ChargeableAccount;
 use App\Models\FuelOrder;
 use App\Models\SubAccountBudget;
@@ -34,11 +35,11 @@ trait DashboardDataTrait
         foreach ($fuelOrders as $order) {
             $orderTotalCalcQty = 0;
             $orderActualQty = $order->actual_quantity;
-            
+
             foreach ($order->utilizationEntries as $entry) {
                 $calcType = strtolower($entry->calculation_type ?? '');
                 $qty = 0;
-                
+
                 if (str_contains($calcType, 'kilometer')) {
                     $calcKm = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
                     $qty = $entry->fuel_factor_km > 0 ? $calcKm / $entry->fuel_factor_km : 0;
@@ -53,7 +54,7 @@ trait DashboardDataTrait
                     $calcHours = max(0, $entry->end_hour_reading - $entry->start_hour_reading);
                     $qty = $calcHours * $entry->fuel_factor_hr;
                 }
-                
+
                 $entry->_calculated_qty = $qty;
                 $orderTotalCalcQty += $qty;
             }
@@ -64,7 +65,7 @@ trait DashboardDataTrait
                 }
 
                 $account = $entry->chargeableAccount;
-                if (!$account || $account->status !== 'Active') {
+                if (! $account || $account->status !== 'Active') {
                     continue;
                 }
                 $accountName = $account->name ?? 'Unassigned';
@@ -99,7 +100,7 @@ trait DashboardDataTrait
                     }
                 }
 
-                if (!isset($accountSummaries[$accountName])) {
+                if (! isset($accountSummaries[$accountName])) {
                     $totalBudget = 0;
                     $offsetFuel = 0;
                     if ($account) {
@@ -153,7 +154,7 @@ trait DashboardDataTrait
 
         foreach ($allAccounts as $account) {
             $accountName = $account->name;
-            if (!isset($accountSummaries[$accountName])) {
+            if (! isset($accountSummaries[$accountName])) {
                 $totalBudget = 0;
                 $offsetFuel = 0;
                 foreach ($account->subAccounts as $sa) {
@@ -161,7 +162,7 @@ trait DashboardDataTrait
                         ->where('status', 'Approved')
                         ->sum('budget_quantity');
                 }
-                
+
                 $offsetFuel = $account->offsets()->sum('quantity');
 
                 if ($totalBudget > 0 || $offsetFuel > 0) {
@@ -192,13 +193,13 @@ trait DashboardDataTrait
      */
     protected function getAssetVarianceData(?string $dateFrom = null, ?string $dateTo = null, ?int $assetId = null): Collection
     {
-        $query = \App\Models\Asset::with(['fuelOrders' => function($q) use ($dateFrom, $dateTo) {
+        $query = Asset::with(['fuelOrders' => function ($q) use ($dateFrom, $dateTo) {
             $q->where('status', 'DONE');
-            
+
             if ($dateFrom) {
                 $q->whereDate('created_at', '>=', $dateFrom);
             }
-            
+
             if ($dateTo) {
                 $q->whereDate('created_at', '<=', $dateTo);
             }
@@ -210,10 +211,10 @@ trait DashboardDataTrait
 
         $assets = $query->orderBy('fleet_no')->get();
 
-        return $assets->map(function($asset) {
+        return $assets->map(function ($asset) {
             $totalSay = $asset->fuelOrders->sum('say_quantity');
             $totalActual = $asset->fuelOrders->sum('actual_quantity');
-            
+
             $variancePercent = 0;
             if ($totalSay > 0) {
                 $variancePercent = (($totalActual - $totalSay) / $totalSay) * 100;
@@ -226,7 +227,7 @@ trait DashboardDataTrait
                 'total_say' => $totalSay,
                 'total_actual' => $totalActual,
                 'variance_percent' => $variancePercent,
-                'order_count' => $asset->fuelOrders->count()
+                'order_count' => $asset->fuelOrders->count(),
             ];
         });
     }

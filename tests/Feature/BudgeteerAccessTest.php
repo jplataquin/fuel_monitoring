@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\ChargeableAccount;
 use App\Models\SubAccount;
-use App\Models\SubAccountBudget;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,7 +16,7 @@ class BudgeteerAccessTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
     }
 
     public function test_budgeteer_can_manage_chargeable_accounts(): void

@@ -3,7 +3,9 @@
 namespace App\Livewire;
 
 use App\Models\Asset;
+use App\Models\ChargeableAccount;
 use App\Models\FuelOrder;
+use App\Models\SubAccount;
 use App\Models\UtilizationEntry;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +16,19 @@ class CreateFuelOrder extends Component
 {
     public $assets = [];
 
+    public $chargeable_accounts = [];
+
+    public $sub_accounts = [];
+
     public $asset_id = '';
+
+    public $chargeable_account_id = '';
+
+    public $sub_account_id = '';
+
+    public $unbudgeted = false;
+
+    public $remarks = '';
 
     public $date_from = '';
 
@@ -43,13 +57,19 @@ class CreateFuelOrder extends Component
     public function mount()
     {
         $this->assets = Asset::all();
+        $this->chargeable_accounts = ChargeableAccount::where('status', 'Active')->orderBy('name', 'asc')->get();
     }
 
     public function updatedAssetId()
     {
-        // Reset dates when a new asset is selected
+        // Reset dates and direct account fields when a new asset is selected
         $this->date_from = '';
         $this->date_to = '';
+        $this->chargeable_account_id = '';
+        $this->sub_account_id = '';
+        $this->sub_accounts = [];
+        $this->unbudgeted = false;
+        $this->remarks = '';
 
         if ($this->asset_id) {
             $entries = UtilizationEntry::where('asset_id', $this->asset_id)
@@ -64,6 +84,18 @@ class CreateFuelOrder extends Component
         }
 
         $this->calculateQuantity();
+    }
+
+    public function updatedChargeableAccountId()
+    {
+        $this->sub_account_id = '';
+        if ($this->chargeable_account_id) {
+            $this->sub_accounts = SubAccount::where('chargeable_account_id', $this->chargeable_account_id)
+                ->orderBy('name', 'asc')
+                ->get();
+        } else {
+            $this->sub_accounts = [];
+        }
     }
 
     public function updatedDateFrom()
@@ -120,7 +152,7 @@ class CreateFuelOrder extends Component
             $entry_calculated_hours = 0;
             $accountName = $entry->chargeableAccount->name ?? 'Unassigned';
             if ($entry->subAccount) {
-                $accountName .= ' - ' . $entry->subAccount->name;
+                $accountName .= ' - '.$entry->subAccount->name;
             }
 
             if (! isset($this->grouped_totals[$accountName])) {
@@ -187,47 +219,60 @@ class CreateFuelOrder extends Component
     public function submit()
     {
         $this->validate([
-            'asset_id' => 'required|exists:assets,id',
-            'date_from' => 'required|date',
-            'date_to' => 'required|date|after_or_equal:date_from',
+            'asset_id' => 'nullable|exists:assets,id',
+            'chargeable_account_id' => 'required_without:asset_id|nullable|exists:chargeable_accounts,id',
+            'sub_account_id' => 'nullable|exists:sub_accounts,id',
+            'unbudgeted' => 'boolean',
+            'remarks' => 'required_without:asset_id|nullable|string',
+            'date_from' => 'required_with:asset_id|nullable|date',
+            'date_to' => 'required_with:asset_id|nullable|date|after_or_equal:date_from',
             'say_quantity' => 'required|numeric|min:0',
         ]);
 
-        // Recalculate to ensure accurate data on submission
-        $this->calculateQuantity();
+        if ($this->asset_id) {
+            // Recalculate to ensure accurate data on submission
+            $this->calculateQuantity();
 
-        if ($this->unprocessed_entries_count === 0) {
-            $this->addError('date_from', 'No unprocessed utilization entries found for this asset within the selected date range.');
-            return;
+            if ($this->unprocessed_entries_count === 0) {
+                $this->addError('date_from', 'No unprocessed utilization entries found for this asset within the selected date range.');
+
+                return;
+            }
         }
 
         DB::transaction(function () {
             $fuelOrder = FuelOrder::create([
-                'asset_id' => $this->asset_id,
-                'calculated_quantity' => $this->calculated_quantity,
+                'asset_id' => $this->asset_id ?: null,
+                'chargeable_account_id' => $this->asset_id ? null : ($this->chargeable_account_id ?: null),
+                'sub_account_id' => $this->asset_id ? null : ($this->sub_account_id ?: null),
+                'unbudgeted' => $this->asset_id ? false : (bool) $this->unbudgeted,
+                'remarks' => $this->remarks ?: null,
+                'calculated_quantity' => $this->asset_id ? $this->calculated_quantity : 0,
                 'say_quantity' => $this->say_quantity,
-                'calculated_hours' => $this->calculated_hours,
-                'calculated_kilometers' => $this->calculated_kilometers,
-                'fuel_factor_km' => $this->fuel_factor_km,
-                'fuel_factor_hr' => $this->fuel_factor_hr,
-                'date_from' => $this->date_from,
-                'date_to' => $this->date_to,
+                'calculated_hours' => $this->asset_id ? $this->calculated_hours : 0,
+                'calculated_kilometers' => $this->asset_id ? $this->calculated_kilometers : 0,
+                'fuel_factor_km' => $this->asset_id ? $this->fuel_factor_km : 0,
+                'fuel_factor_hr' => $this->asset_id ? $this->fuel_factor_hr : 0,
+                'date_from' => $this->asset_id ? $this->date_from : null,
+                'date_to' => $this->asset_id ? $this->date_to : null,
                 'status' => 'PEND',
                 'actual_quantity' => $this->actual_quantity,
                 'created_by' => Auth::id(),
             ]);
 
-            $dateFrom = Carbon::parse($this->date_from)->startOfDay();
-            $dateTo = Carbon::parse($this->date_to)->endOfDay();
+            if ($this->asset_id) {
+                $dateFrom = Carbon::parse($this->date_from)->startOfDay();
+                $dateTo = Carbon::parse($this->date_to)->endOfDay();
 
-            UtilizationEntry::where('asset_id', $this->asset_id)
-                ->whereNull('fuel_order_id')
-                ->whereBetween('date', [$dateFrom, $dateTo])
-                ->update([
-                    'fuel_order_id' => $fuelOrder->id,
-                    'fuel_factor_km' => $this->fuel_factor_km,
-                    'fuel_factor_hr' => $this->fuel_factor_hr,
-                ]);
+                UtilizationEntry::where('asset_id', $this->asset_id)
+                    ->whereNull('fuel_order_id')
+                    ->whereBetween('date', [$dateFrom, $dateTo])
+                    ->update([
+                        'fuel_order_id' => $fuelOrder->id,
+                        'fuel_factor_km' => $this->fuel_factor_km,
+                        'fuel_factor_hr' => $this->fuel_factor_hr,
+                    ]);
+            }
         });
 
         session()->flash('message', 'Fuel Order created successfully.');

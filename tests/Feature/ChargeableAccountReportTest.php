@@ -17,13 +17,14 @@ class ChargeableAccountReportTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private Asset $asset;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->admin = User::factory()->create(['role' => 'administrator']);
-        
+
         $assetType = AssetType::create(['name' => 'Truck']);
         $this->asset = Asset::create([
             'fleet_no' => 'T-500',
@@ -102,10 +103,10 @@ class ChargeableAccountReportTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertViewHas('accountSummaries');
-        
+
         $summaries = $response->viewData('accountSummaries');
         $this->assertCount(1, $summaries);
-        
+
         // Prorated June quantity is 100
         $this->assertEquals(100.0, $summaries['Running Project']['actual_fuel']);
     }
@@ -179,10 +180,10 @@ class ChargeableAccountReportTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertViewHas('accountSummaries');
-        
+
         $summaries = $response->viewData('accountSummaries');
         $this->assertCount(1, $summaries);
-        
+
         // It should automatically filter and only include July data (80 L), ignoring June data
         $this->assertEquals(80.0, $summaries['July Scoped Project']['actual_fuel']);
     }

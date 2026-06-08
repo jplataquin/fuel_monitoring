@@ -8,6 +8,7 @@ use App\Models\ChargeableAccount;
 use App\Models\SubAccount;
 use App\Models\User;
 use App\Models\UtilizationEntry;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,7 +17,9 @@ class UtilizationEntryFeatureTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private Asset $asset;
+
     private AssetType $assetType;
 
     protected function setUp(): void
@@ -36,7 +39,7 @@ class UtilizationEntryFeatureTest extends TestCase
 
     public function test_scoped_account_allows_date_within_scope_on_create(): void
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
 
         $account = ChargeableAccount::create([
             'name' => 'Scoped Project',
@@ -74,7 +77,7 @@ class UtilizationEntryFeatureTest extends TestCase
 
     public function test_scoped_account_rejects_date_before_scope_on_create(): void
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
 
         $account = ChargeableAccount::create([
             'name' => 'Scoped Project',
@@ -111,7 +114,7 @@ class UtilizationEntryFeatureTest extends TestCase
 
     public function test_scoped_account_rejects_date_after_scope_on_create(): void
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
 
         $account = ChargeableAccount::create([
             'name' => 'Scoped Project',
@@ -148,7 +151,7 @@ class UtilizationEntryFeatureTest extends TestCase
 
     public function test_running_account_allows_any_date_on_create(): void
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
 
         $account = ChargeableAccount::create([
             'name' => 'Running Project',
@@ -183,7 +186,7 @@ class UtilizationEntryFeatureTest extends TestCase
 
     public function test_scoped_account_allows_date_within_scope_on_update(): void
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
 
         $account = ChargeableAccount::create([
             'name' => 'Scoped Project',
@@ -232,7 +235,7 @@ class UtilizationEntryFeatureTest extends TestCase
 
     public function test_scoped_account_rejects_date_before_scope_on_update(): void
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
 
         $account = ChargeableAccount::create([
             'name' => 'Scoped Project',
@@ -281,7 +284,7 @@ class UtilizationEntryFeatureTest extends TestCase
 
     public function test_scoped_account_rejects_date_after_scope_on_update(): void
     {
-        $this->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
 
         $account = ChargeableAccount::create([
             'name' => 'Scoped Project',

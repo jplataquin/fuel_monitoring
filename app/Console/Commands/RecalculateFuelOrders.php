@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\FuelOrder;
+use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 
 class RecalculateFuelOrders extends Command
@@ -60,8 +60,8 @@ class RecalculateFuelOrders extends Command
             $updateData = [
                 'calculated_quantity' => $totalQuantity,
             ];
-            
-            // Optional: If they match previously, sync them. 
+
+            // Optional: If they match previously, sync them.
             if ($order->say_quantity == $order->calculated_quantity) {
                 $updateData['say_quantity'] = $totalQuantity;
             }

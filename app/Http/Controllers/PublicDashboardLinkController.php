@@ -16,6 +16,7 @@ class PublicDashboardLinkController extends Controller
         }
 
         $links = PublicDashboardLink::with('creator')->latest()->get();
+
         return view('public-dashboard-links.index', compact('links'));
     }
 
@@ -46,7 +47,7 @@ class PublicDashboardLinkController extends Controller
         }
 
         $link->update([
-            'is_active' => !$link->is_active,
+            'is_active' => ! $link->is_active,
         ]);
 
         return redirect()->route('public-dashboard-links.index')->with('status', 'Link status updated.');

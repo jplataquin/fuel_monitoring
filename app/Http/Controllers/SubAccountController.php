@@ -4,13 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\ChargeableAccount;
 use App\Models\SubAccount;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-
 use Illuminate\Validation\Rule;
-
 use Illuminate\View\View;
-use Illuminate\Http\JsonResponse;
 
 class SubAccountController extends Controller
 {

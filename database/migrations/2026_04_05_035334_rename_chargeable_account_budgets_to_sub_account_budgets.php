@@ -23,10 +23,10 @@ return new class extends Migration
             // Rename the column
             $table->renameColumn('chargeable_account_id', 'sub_account_id');
         });
-        
+
         // Add the new foreign key constraint
         Schema::table('sub_account_budgets', function (Blueprint $table) {
-             $table->foreign('sub_account_id')->references('id')->on('sub_accounts')->onDelete('cascade');
+            $table->foreign('sub_account_id')->references('id')->on('sub_accounts')->onDelete('cascade');
         });
     }
 

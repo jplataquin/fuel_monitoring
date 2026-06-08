@@ -93,16 +93,35 @@
 
                         <div class="row g-4 mb-4">
                             <div class="col-6">
-                                <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-1">Asset Details</h4>
-                                <p class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }} mb-0">{{ $fuelOrder->asset->fleet_no }}</p>
-                                <p class="small {{ $isPrint ? 'text-dark' : 'text-secondary' }} mb-0">{{ $fuelOrder->asset->assetType->name ?? 'N/A' }} | {{ $fuelOrder->asset->plate_no ?? 'No Plate' }}</p>
+                                @if($fuelOrder->asset)
+                                    <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-1">Asset Details</h4>
+                                    <p class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }} mb-0">{{ $fuelOrder->asset->fleet_no }}</p>
+                                    <p class="small {{ $isPrint ? 'text-dark' : 'text-secondary' }} mb-0">{{ $fuelOrder->asset->assetType->name ?? 'N/A' }} | {{ $fuelOrder->asset->plate_no ?? 'No Plate' }}</p>
+                                @else
+                                    <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-1">Charged Direct To</h4>
+                                    <p class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }} mb-0">{{ $fuelOrder->chargeableAccount->name ?? 'Unassigned' }}</p>
+                                    <p class="small {{ $isPrint ? 'text-dark' : 'text-secondary' }} mb-0">
+                                        @if($fuelOrder->subAccount)
+                                            Sub-Account: {{ $fuelOrder->subAccount->name }}
+                                        @else
+                                            No Sub-Account
+                                        @endif
+                                        @if($fuelOrder->unbudgeted)
+                                            | <span class="text-danger fw-bold">UNBUDGETED</span>
+                                        @endif
+                                    </p>
+                                @endif
                             </div>
                             <div class="col-6">
                                 <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-1">Date Range</h4>
                                 <p class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }} mb-0">
-                                    {{ \Carbon\Carbon::parse($fuelOrder->date_from)->format('M d, Y') }} 
-                                    - 
-                                    {{ \Carbon\Carbon::parse($fuelOrder->date_to)->format('M d, Y') }}
+                                    @if($fuelOrder->date_from && $fuelOrder->date_to)
+                                        {{ \Carbon\Carbon::parse($fuelOrder->date_from)->format('M d, Y') }} 
+                                        - 
+                                        {{ \Carbon\Carbon::parse($fuelOrder->date_to)->format('M d, Y') }}
+                                    @else
+                                        N/A (Direct Fuel Order)
+                                    @endif
                                 </p>
                             </div>
                         </div>
@@ -226,6 +245,15 @@
                                 </div>
                             @endif
                         </div>
+
+                        @if($fuelOrder->remarks)
+                            <div class="mb-5">
+                                <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-2">Remarks / Justification</h4>
+                                <div class="p-3 rounded-3 border {{ $isPrint ? 'border-dark text-dark' : 'bg-dark bg-opacity-20 border-secondary border-opacity-25 text-light font-monospace' }} small">
+                                    {{ $fuelOrder->remarks }}
+                                </div>
+                            </div>
+                        @endif
 
                         <div class="row g-5 pt-4 {{ $isPrint ? '' : 'border-top border-secondary border-opacity-25 mt-4' }}">
                             <div class="col-6 text-center">
