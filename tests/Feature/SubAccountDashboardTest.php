@@ -161,4 +161,98 @@ class SubAccountDashboardTest extends TestCase
 
         $response->assertSee('Exhausted');
     }
+
+    public function test_guest_can_access_public_sub_account_dashboard_with_active_slug(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Public Project',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Public Sub Section',
+        ]);
+
+        SubAccountBudget::create([
+            'sub_account_id' => $subAccount->id,
+            'budget_quantity' => 500,
+            'status' => 'Approved',
+            'allocated_by' => $this->admin->id,
+        ]);
+
+        $link = \App\Models\PublicDashboardLink::create([
+            'slug' => 'public-test-slug',
+            'name' => 'Public Test Link',
+            'is_active' => true,
+            'created_by' => $this->admin->id,
+        ]);
+
+        // Access route as a guest (no actingAs!)
+        $response = $this->get(route('public.dashboard.sub-accounts', [
+            'slug' => $link->slug,
+            'chargeable_account' => $account->id,
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('public-sub-account-dashboard');
+        $response->assertViewHasAll(['link', 'chargeableAccount', 'chartLabels', 'remainingBalances', 'subAccountData']);
+        $response->assertSee('Public Sub Section');
+        $response->assertSee('500.00');
+        $response->assertSee('Public Test Link');
+    }
+
+    public function test_guest_cannot_access_public_sub_account_dashboard_with_inactive_or_missing_slug(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Public Project B',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $inactiveLink = \App\Models\PublicDashboardLink::create([
+            'slug' => 'inactive-slug',
+            'name' => 'Inactive Test Link',
+            'is_active' => false,
+            'created_by' => $this->admin->id,
+        ]);
+
+        // Attempting with inactive slug
+        $response = $this->get(route('public.dashboard.sub-accounts', [
+            'slug' => $inactiveLink->slug,
+            'chargeable_account' => $account->id,
+        ]));
+        $response->assertStatus(404);
+
+        // Attempting with completely non-existent slug
+        $response = $this->get(route('public.dashboard.sub-accounts', [
+            'slug' => 'does-not-exist',
+            'chargeable_account' => $account->id,
+        ]));
+        $response->assertStatus(404);
+    }
+
+    public function test_guest_cannot_access_public_sub_account_dashboard_for_inactive_account(): void
+    {
+        $inactiveAccount = ChargeableAccount::create([
+            'name' => 'Inactive Public Project',
+            'classification' => 'Running',
+            'status' => 'Inactive', // Inactive account!
+        ]);
+
+        $link = \App\Models\PublicDashboardLink::create([
+            'slug' => 'public-active-slug',
+            'name' => 'Public Test Link',
+            'is_active' => true,
+            'created_by' => $this->admin->id,
+        ]);
+
+        $response = $this->get(route('public.dashboard.sub-accounts', [
+            'slug' => $link->slug,
+            'chargeable_account' => $inactiveAccount->id,
+        ]));
+
+        $response->assertStatus(404);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChargeableAccount;
 use App\Models\PublicDashboardLink;
 use App\Traits\DashboardDataTrait;
 use Illuminate\Http\Request;
@@ -26,13 +27,32 @@ class PublicDashboardController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'budget_html' => view('partials.dashboard-grid', compact('chartData'))->render(),
+                'budget_html' => view('partials.dashboard-grid', compact('chartData', 'link'))->render(),
                 'asset_html' => view('partials.asset-grid', compact('assetVarianceData'))->render(),
                 'chart_data' => $chartData,
             ]);
         }
 
         return view('public-dashboard', compact('chartData', 'assetVarianceData', 'dateFrom', 'dateTo', 'link'));
+    }
+
+    public function subAccountDashboard(string $slug, ChargeableAccount $chargeableAccount)
+    {
+        $link = PublicDashboardLink::where('slug', $slug)
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        if ($chargeableAccount->status !== 'Active') {
+            abort(404);
+        }
+
+        $data = $this->getSubAccountDashboardData($chargeableAccount);
+
+        $chartLabels = $data['chartLabels'];
+        $remainingBalances = $data['remainingBalances'];
+        $subAccountData = $data['subAccountData'];
+
+        return view('public-sub-account-dashboard', compact('link', 'chargeableAccount', 'chartLabels', 'remainingBalances', 'subAccountData'));
     }
 
     public function manifest(string $slug)

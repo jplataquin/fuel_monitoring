@@ -40,7 +40,7 @@
                 }
             @endphp
             <div class="col-12 col-md-6 col-lg-4">
-                <a href="{{ isset($data['account_id']) ? route('dashboard.sub-accounts', $data['account_id']) : '#' }}" class="dashboard-card-link">
+                <a href="{{ isset($data['account_id']) ? (isset($link) ? route('public.dashboard.sub-accounts', ['slug' => $link->slug, 'chargeable_account' => $data['account_id']]) : route('dashboard.sub-accounts', $data['account_id'])) : '#' }}" class="dashboard-card-link">
                     <div class="card h-100 bg-dark border-secondary border-opacity-50 rounded-4 p-4 shadow-sm" style="transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;">
                         <h3 class="h5 fw-bold text-light mb-1 text-center text-truncate" title="{{ $data['name'] }}">
                             {{ $data['name'] }}

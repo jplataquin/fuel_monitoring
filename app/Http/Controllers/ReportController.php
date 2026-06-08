@@ -388,105 +388,11 @@ class ReportController extends Controller
 
     public function subAccountDashboard(ChargeableAccount $chargeableAccount)
     {
-        // 1. Get all active sub-accounts
-        $subAccounts = $chargeableAccount->subAccounts()->get();
+        $data = $this->getSubAccountDashboardData($chargeableAccount);
 
-        // 2. Fetch all fuel orders associated with this account (using the exact calculation logic)
-        $fuelOrders = FuelOrder::with(['utilizationEntries' => function ($q) use ($chargeableAccount) {
-            $q->where('chargeable_account_id', $chargeableAccount->id);
-        }])
-            ->where('status', 'DONE')
-            ->whereHas('utilizationEntries', function ($q) use ($chargeableAccount) {
-                $q->where('chargeable_account_id', $chargeableAccount->id);
-            })
-            ->get();
-
-        // Initialize consumption data
-        $subAccountConsumption = [];
-        foreach ($subAccounts as $sa) {
-            $subAccountConsumption[$sa->id] = 0;
-        }
-
-        // Loop over fuel orders and calculate prorated entry calculated quantities
-        foreach ($fuelOrders as $order) {
-            $orderTotalCalcQty = 0;
-            $orderActualQty = $order->actual_quantity;
-
-            // Calculate total calculated qty for the entire order
-            foreach ($order->utilizationEntries as $entry) {
-                $calcType = strtolower($entry->calculation_type ?? '');
-                $qty = 0;
-
-                if (str_contains($calcType, 'kilometer')) {
-                    $calcKm = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
-                    $qty = $entry->fuel_factor_km > 0 ? $calcKm / $entry->fuel_factor_km : 0;
-                } elseif (str_contains($calcType, 'actual')) {
-                    if ($entry->end_time && $entry->start_time) {
-                        $start = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
-                        $end = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
-                        $calcHours = max(0, $start->diffInMinutes($end) / 60);
-                        $qty = $calcHours * $entry->fuel_factor_hr;
-                    }
-                } elseif (str_contains($calcType, 'hour')) {
-                    $calcHours = max(0, $entry->end_hour_reading - $entry->start_hour_reading);
-                    $qty = $calcHours * $entry->fuel_factor_hr;
-                }
-
-                $entry->_calculated_qty = $qty;
-                $orderTotalCalcQty += $qty;
-            }
-
-            // Accumulate calculated qty per sub-account
-            foreach ($order->utilizationEntries as $entry) {
-                if ($entry->chargeable_account_id != $chargeableAccount->id || ! $entry->sub_account_id) {
-                    continue;
-                }
-
-                // If scoped, apply scoped date boundaries
-                if ($chargeableAccount->classification === 'Scoped') {
-                    $entryDate = $entry->date ? Carbon::parse($entry->date)->startOfDay() : null;
-                    $startDate = $chargeableAccount->start_date ? Carbon::parse($chargeableAccount->start_date)->startOfDay() : null;
-                    $endDate = $chargeableAccount->end_date ? Carbon::parse($chargeableAccount->end_date)->startOfDay() : null;
-
-                    if ($entryDate) {
-                        if ($startDate && $entryDate->lt($startDate)) {
-                            continue;
-                        }
-                        if ($endDate && $entryDate->gt($endDate)) {
-                            continue;
-                        }
-                    }
-                }
-
-                if (isset($subAccountConsumption[$entry->sub_account_id])) {
-                    $subAccountConsumption[$entry->sub_account_id] += $entry->_calculated_qty;
-                }
-            }
-        }
-
-        // 3. Prepare Chart Data (Sub-Account name, Approved Budget, Consumed calculated, Remaining Balance)
-        $chartLabels = [];
-        $remainingBalances = [];
-        $subAccountData = [];
-
-        foreach ($subAccounts as $sa) {
-            $totalBudget = SubAccountBudget::where('sub_account_id', $sa->id)
-                ->where('status', 'Approved')
-                ->sum('budget_quantity');
-
-            $consumed = $subAccountConsumption[$sa->id] ?? 0;
-            $remaining = max(0, $totalBudget - $consumed);
-
-            $chartLabels[] = $sa->name;
-            $remainingBalances[] = round($remaining, 2);
-
-            $subAccountData[] = [
-                'name' => $sa->name,
-                'total_budget' => $totalBudget,
-                'consumed' => $consumed,
-                'remaining' => $remaining,
-            ];
-        }
+        $chartLabels = $data['chartLabels'];
+        $remainingBalances = $data['remainingBalances'];
+        $subAccountData = $data['subAccountData'];
 
         return view('dashboard-sub-accounts', compact('chargeableAccount', 'chartLabels', 'remainingBalances', 'subAccountData'));
     }
