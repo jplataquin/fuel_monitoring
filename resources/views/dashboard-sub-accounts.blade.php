@@ -61,7 +61,7 @@
                             @php
                                 $totalBudgets = collect($subAccountData)->sum('total_budget');
                                 $totalConsumed = collect($subAccountData)->sum('consumed');
-                                $totalRemaining = collect($subAccountData)->sum('remaining');
+                                $totalRemaining = $totalBudgets - ($totalActualQuantity ?? 0);
                                 $utilizationPercent = $totalBudgets > 0 ? ($totalConsumed / $totalBudgets) * 100 : 0;
                             @endphp
 
