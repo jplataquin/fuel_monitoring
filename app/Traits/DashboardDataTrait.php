@@ -337,10 +337,13 @@ trait DashboardDataTrait
             ];
         }
 
+        $totalActualQuantity = $fuelOrders->sum('actual_quantity');
+
         return [
             'chartLabels' => $chartLabels,
             'remainingBalances' => $remainingBalances,
             'subAccountData' => $subAccountData,
+            'totalActualQuantity' => $totalActualQuantity,
         ];
     }
 }

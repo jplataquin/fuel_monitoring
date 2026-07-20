@@ -71,8 +71,12 @@
                                     <div class="h3 font-monospace fw-bold text-light mb-0">{{ number_format($totalBudgets, 2) }} L</div>
                                 </div>
                                 <div class="p-3 bg-success bg-opacity-10 rounded-3 text-center">
-                                    <div class="text-success small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.65rem; color: #34d399 !important;">Total Consumed</div>
+                                    <div class="text-success small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.65rem; color: #34d399 !important;">Total Calculated Quantity</div>
                                     <div class="h3 font-monospace fw-bold text-success mb-0" style="color: #34d399 !important;">{{ number_format($totalConsumed, 2) }} L</div>
+                                </div>
+                                <div class="p-3 bg-warning bg-opacity-10 rounded-3 text-center">
+                                    <div class="text-warning small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.65rem; color: #fbbf24 !important;">Total Actual Quantity</div>
+                                    <div class="h3 font-monospace fw-bold text-warning mb-0" style="color: #fbbf24 !important;">{{ number_format($totalActualQuantity ?? 0, 2) }} L</div>
                                 </div>
                                 <div class="p-3 bg-info bg-opacity-10 rounded-3 text-center">
                                     <div class="text-info small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.65rem; color: #38bdf8 !important;">Total Remaining Balance</div>
