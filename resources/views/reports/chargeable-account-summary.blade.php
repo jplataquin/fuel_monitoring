@@ -26,17 +26,23 @@
                     <form action="{{ route('reports.chargeable-accounts') }}" method="GET" class="row g-3 align-items-end">
                         <div class="col-md-3">
                             <label for="account_search" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Chargeable Account</label>
-                            <input type="text" id="account_search" class="form-control bg-dark text-light border-secondary" placeholder="Search account..." list="account_suggestions" autocomplete="off" value="{{ $accountId && $accounts->firstWhere('id', $accountId) ? $accounts->firstWhere('id', $accountId)->name : '' }}" required>
+                            <input type="text" id="account_search" class="form-control bg-dark text-light border-secondary" placeholder="Search account..." list="account_suggestions" autocomplete="off" value="{{ $accountId && $accounts->firstWhere('id', $accountId) ? ($accounts->firstWhere('id', $accountId)->name . ($accounts->firstWhere('id', $accountId)->status === 'Inactive' ? ' ⛔️' : '')) : '' }}" required>
                             <input type="hidden" name="account_id" id="account_id" value="{{ $accountId }}">
                             <datalist id="account_suggestions">
                                 @foreach($accounts as $acc)
-                                    <option value="{{ $acc->name }}" data-id="{{ $acc->id }}" data-classification="{{ $acc->classification }}">
+                                    <option value="{{ $acc->name . ($acc->status === 'Inactive' ? ' ⛔️' : '') }}" data-id="{{ $acc->id }}" data-classification="{{ $acc->classification }}">
                                         @if($acc->classification === 'Scoped')
                                             Scoped Account ({{ $acc->start_date ? $acc->start_date->format('M d, Y') : 'N/A' }} - {{ $acc->end_date ? $acc->end_date->format('M d, Y') : 'N/A' }})
                                         @endif
                                     </option>
                                 @endforeach
                             </datalist>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input bg-dark border-secondary" type="checkbox" name="include_inactive" id="include_inactive" value="1" {{ ($includeInactive ?? false) ? 'checked' : '' }} onchange="this.form.submit()">
+                                <label class="form-check-label text-secondary small" for="include_inactive">
+                                    Include Inactive Accounts
+                                </label>
+                            </div>
                         </div>
                         <div class="col-md-3" id="date_from_col">
                             <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>

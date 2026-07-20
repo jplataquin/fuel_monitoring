@@ -356,11 +356,25 @@ class ReportController extends Controller
 
         ksort($accountSummaries);
 
-        $accounts = ChargeableAccount::orderBy('name')->get();
+        $selectedAccount = null;
+        if ($accountId) {
+            $selectedAccount = ChargeableAccount::find($accountId);
+        }
+
+        $includeInactive = $request->boolean('include_inactive');
+        if ($selectedAccount && $selectedAccount->status === 'Inactive') {
+            $includeInactive = true;
+        }
+
+        $accountsQuery = ChargeableAccount::orderBy('name');
+        if (!$includeInactive) {
+            $accountsQuery->where('status', 'Active');
+        }
+        $accounts = $accountsQuery->get();
 
         $view = $isPrint ? 'reports.print.chargeable-account-summary' : 'reports.chargeable-account-summary';
 
-        return view($view, compact('accountSummaries', 'dateFrom', 'dateTo', 'accounts', 'accountId', 'isPrint'));
+        return view($view, compact('accountSummaries', 'dateFrom', 'dateTo', 'accounts', 'accountId', 'isPrint', 'includeInactive'));
     }
 
     public function accountBudgetDashboard(Request $request)
