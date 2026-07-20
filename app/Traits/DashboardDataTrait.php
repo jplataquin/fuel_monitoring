@@ -324,7 +324,7 @@ trait DashboardDataTrait
                 ->sum('budget_quantity');
 
             $consumed = $subAccountConsumption[$sa->id] ?? 0;
-            $remaining = max(0, $totalBudget - $consumed);
+            $remaining = $totalBudget - $consumed;
 
             $chartLabels[] = $sa->name;
             $remainingBalances[] = round($remaining, 2);
