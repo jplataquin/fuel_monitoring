@@ -195,29 +195,7 @@
                             <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-unbudgeted"></p>
                         </div>
 
-                        <div class="col-md-3">
-                            <label for="date" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Date</label>
-                            <input id="date" name="date" type="date" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('Y-m-d') }}" required>
-                            <div id="date-scope-error" class="text-danger small fw-bold mt-1 ps-1 d-none"></div>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-date"></p>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="start_time" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Start Time</label>
-                            <input id="start_time" name="start_time" type="time" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('H:i') }}" required>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-start_time"></p>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="end_time" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">End Time</label>
-                            <input id="end_time" name="end_time" type="time" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('H:i', strtotime('+1 hour')) }}" required>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-end_time"></p>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="actual_hours" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Hours</label>
-                            <input id="actual_hours" name="actual_hours" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" placeholder="0.00" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-actual_hours"></p>
-                        </div>
-                        
-                        <div class="col-md-6">
+                         <div class="col-md-6">
                             <label for="chargeable_account_id" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Charged To</label>
                             <select id="chargeable_account_id" name="chargeable_account_id" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required onchange="fetchSubAccounts(this.value)">
                                 <option value="">-- Select Account --</option>
@@ -242,12 +220,38 @@
                             </select>
                             <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-sub_account_id"></p>
                         </div>
-                    
+                        
                         <div class="col-12">
                             <label for="particulars" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Particulars / Mission</label>
                             <input id="particulars" name="particulars" type="text" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required placeholder="Describe the activity...">
                             <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-particulars"></p>
                         </div>
+                        
+                        <div class="col-md-3">
+                            <label for="date" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Date</label>
+                            <input id="date" name="date" type="date" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('Y-m-d') }}" required>
+                            <div id="date-scope-error" class="text-danger small fw-bold mt-1 ps-1 d-none"></div>
+                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-date"></p>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="start_time" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Start Time</label>
+                            <input id="start_time" name="start_time" type="time" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('H:i') }}" required>
+                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-start_time"></p>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="end_time" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">End Time</label>
+                            <input id="end_time" name="end_time" type="time" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('H:i', strtotime('+1 hour')) }}" required>
+                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-end_time"></p>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="actual_hours" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Hours</label>
+                            <input id="actual_hours" name="actual_hours" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" placeholder="0.00" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
+                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-actual_hours"></p>
+                        </div>
+                        
+                       
+                    
+                        
                         <div class="col-md-3">
                             <label for="start_kilometer_reading" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Start Odo (KM)</label>
                             <input id="start_kilometer_reading" name="start_kilometer_reading" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" value="0" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
