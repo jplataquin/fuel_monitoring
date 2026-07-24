@@ -11,7 +11,7 @@ class ChargeableAccountController extends Controller
 {
     public function index(): View
     {
-        $chargeableAccounts = ChargeableAccount::all();
+        $chargeableAccounts = ChargeableAccount::withCount('subAccounts')->get();
 
         return view('chargeable-accounts.index', compact('chargeableAccounts'));
     }

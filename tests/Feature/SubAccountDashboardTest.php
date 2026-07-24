@@ -6,6 +6,7 @@ use App\Models\Asset;
 use App\Models\AssetType;
 use App\Models\ChargeableAccount;
 use App\Models\FuelOrder;
+use App\Models\PublicDashboardLink;
 use App\Models\SubAccount;
 use App\Models\SubAccountBudget;
 use App\Models\User;
@@ -182,7 +183,7 @@ class SubAccountDashboardTest extends TestCase
             'allocated_by' => $this->admin->id,
         ]);
 
-        $link = \App\Models\PublicDashboardLink::create([
+        $link = PublicDashboardLink::create([
             'slug' => 'public-test-slug',
             'name' => 'Public Test Link',
             'is_active' => true,
@@ -211,7 +212,7 @@ class SubAccountDashboardTest extends TestCase
             'status' => 'Active',
         ]);
 
-        $inactiveLink = \App\Models\PublicDashboardLink::create([
+        $inactiveLink = PublicDashboardLink::create([
             'slug' => 'inactive-slug',
             'name' => 'Inactive Test Link',
             'is_active' => false,
@@ -241,7 +242,7 @@ class SubAccountDashboardTest extends TestCase
             'status' => 'Inactive', // Inactive account!
         ]);
 
-        $link = \App\Models\PublicDashboardLink::create([
+        $link = PublicDashboardLink::create([
             'slug' => 'public-active-slug',
             'name' => 'Public Test Link',
             'is_active' => true,

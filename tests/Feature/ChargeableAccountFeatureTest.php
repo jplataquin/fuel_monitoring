@@ -24,6 +24,24 @@ class ChargeableAccountFeatureTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_chargeable_accounts_index_displays_sub_account_count()
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create([
+            'name' => 'Project Gamma',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $account->subAccounts()->create(['name' => 'Sub Account 1']);
+        $account->subAccounts()->create(['name' => 'Sub Account 2']);
+
+        $response = $this->actingAs($user)->get(route('chargeable-accounts.index'));
+        $response->assertStatus(200);
+        $response->assertSee('Sub-Account');
+        $response->assertSee('2');
+    }
+
     public function test_standard_user_cannot_access_chargeable_accounts_routes()
     {
         $user = User::factory()->create(['role' => 'data_logger']);

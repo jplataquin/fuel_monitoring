@@ -9,7 +9,6 @@ use App\Models\SubAccountBudget;
 use App\Models\UtilizationEntry;
 use App\Traits\DashboardDataTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 
 class ReportController extends Controller
 {
@@ -367,7 +366,7 @@ class ReportController extends Controller
         }
 
         $accountsQuery = ChargeableAccount::orderBy('name');
-        if (!$includeInactive) {
+        if (! $includeInactive) {
             $accountsQuery->where('status', 'Active');
         }
         $accounts = $accountsQuery->get();

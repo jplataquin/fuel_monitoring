@@ -319,7 +319,7 @@ trait DashboardDataTrait
         $subAccountData = [];
 
         foreach ($subAccounts as $sa) {
-            $totalBudget = \App\Models\SubAccountBudget::where('sub_account_id', $sa->id)
+            $totalBudget = SubAccountBudget::where('sub_account_id', $sa->id)
                 ->where('status', 'Approved')
                 ->sum('budget_quantity');
 
