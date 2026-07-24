@@ -223,10 +223,10 @@
                         
                         <div class="col-12">
                             <label for="particulars" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Particulars / Mission</label>
-                            <input id="particulars" name="particulars" type="text" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required placeholder="Describe the activity...">
+                            <textarea id="particulars" name="particulars" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required placeholder="Describe the activity..."></textarea>
                             <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-particulars"></p>
                         </div>
-                        
+
                         <div class="col-md-3">
                             <label for="date" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Date</label>
                             <input id="date" name="date" type="date" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('Y-m-d') }}" required>
@@ -329,7 +329,7 @@
             </div>
             
             <div class="table-responsive d-none d-md-block">
-                <table class="table table-dark table-hover mb-0 align-middle">
+                <table class="table table-dark table-hover mb-0 align-middle" style="min-width:1500px">
                     <thead>
                         <tr class="bg-secondary bg-opacity-5">
                             <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Date & Time</th>
