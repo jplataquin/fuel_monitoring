@@ -13,22 +13,116 @@
         </div>
     </x-slot>
 
-    <div class="py-5">
+    <div class="py-5" x-data="{
+        search: '',
+        showInactive: false,
+        sortBy: 'account',
+        sortAsc: true,
+        accounts: {{ $chargeableAccounts->map(fn($a) => ['id' => $a->id, 'name' => strtolower($a->name), 'status' => $a->status])->toJson() }},
+        get hasVisibleAccounts() {
+            return this.accounts.some(a => 
+                (this.search === '' || a.name.includes(this.search.toLowerCase())) &&
+                (this.showInactive || a.status === 'Active')
+            );
+        },
+        sort(column) {
+            if (this.sortBy === column) {
+                this.sortAsc = !this.sortAsc;
+            } else {
+                this.sortBy = column;
+                this.sortAsc = true;
+            }
+            this.sortTable();
+        },
+        sortTable() {
+            let table = this.$refs.accountsTable;
+            let rows = Array.from(table.querySelectorAll('tbody tr'));
+            
+            rows.sort((a, b) => {
+                let valA = a.getAttribute('data-' + this.sortBy) || '';
+                let valB = b.getAttribute('data-' + this.sortBy) || '';
+                
+                if (this.sortBy === 'sub-account') {
+                    return (parseInt(valA) - parseInt(valB)) * (this.sortAsc ? 1 : -1);
+                }
+                
+                return valA.localeCompare(valB, undefined, {numeric: true, sensitivity: 'base'}) * (this.sortAsc ? 1 : -1);
+            });
+            
+            let tbody = table.querySelector('tbody');
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    }">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 ms-3 me-3">
+            <div class="position-relative" style="max-width: 400px; width: 100%;">
+                <span class="position-absolute start-0 top-50 translate-middle-y ms-3 text-secondary">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </span>
+                <input type="text" 
+                       x-model="search"
+                       placeholder="Search accounts..." 
+                       class="form-control bg-dark border-secondary border-opacity-50 text-light rounded-pill ps-5 py-2 shadow-sm focus-ring-primary"
+                       style="font-size: 0.9rem;">
+            </div>
+            
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="showInactiveToggle" x-model="showInactive">
+                <label class="form-check-label text-secondary small fw-bold text-uppercase" style="cursor: pointer;" for="showInactiveToggle">Show Inactive Accounts</label>
+            </div>
+        </div>
         
-            <div class="table-responsive ms-3 me-3">
-                <table class="table table-dark table-hover mb-0">
+            <div class="table-responsive ms-3 me-3" x-show="hasVisibleAccounts">
+                <table class="table table-dark table-hover mb-0" x-ref="accountsTable">
                     <thead>
                         <tr class="bg-secondary bg-opacity-10">
-                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Account</th>
-                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Type</th>
-                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Sub-Account</th>
-                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Status</th>
-                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end" style="width: 200px;">Actions</th>
+                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider" style="cursor: pointer; user-select: none;" @click="sort('account')">
+                                Account
+                                <span class="ms-1" x-show="sortBy === 'account'">
+                                    <i :class="sortAsc ? 'bi bi-arrow-up-short' : 'bi bi-arrow-down-short'"></i>
+                                </span>
+                                <span class="ms-1 opacity-25" x-show="sortBy !== 'account'">
+                                    <i class="bi bi-arrow-down-up" style="font-size: 0.8rem;"></i>
+                                </span>
+                            </th>
+                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider" style="cursor: pointer; user-select: none;" @click="sort('type')">
+                                Type
+                                <span class="ms-1" x-show="sortBy === 'type'">
+                                    <i :class="sortAsc ? 'bi bi-arrow-up-short' : 'bi bi-arrow-down-short'"></i>
+                                </span>
+                                <span class="ms-1 opacity-25" x-show="sortBy !== 'type'">
+                                    <i class="bi bi-arrow-down-up" style="font-size: 0.8rem;"></i>
+                                </span>
+                            </th>
+                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider" style="cursor: pointer; user-select: none;" @click="sort('sub-account')">
+                                Sub-Account
+                                <span class="ms-1" x-show="sortBy === 'sub-account'">
+                                    <i :class="sortAsc ? 'bi bi-arrow-up-short' : 'bi bi-arrow-down-short'"></i>
+                                </span>
+                                <span class="ms-1 opacity-25" x-show="sortBy !== 'sub-account'">
+                                    <i class="bi bi-arrow-down-up" style="font-size: 0.8rem;"></i>
+                                </span>
+                            </th>
+                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider" style="cursor: pointer; user-select: none;" @click="sort('status')">
+                                Status
+                                <span class="ms-1" x-show="sortBy === 'status'">
+                                    <i :class="sortAsc ? 'bi bi-arrow-up-short' : 'bi bi-arrow-down-short'"></i>
+                                </span>
+                                <span class="ms-1 opacity-25" x-show="sortBy !== 'status'">
+                                    <i class="bi bi-arrow-down-up" style="font-size: 0.8rem;"></i>
+                                </span>
+                            </th>
+                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end" style="width: 200px; user-select: none;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($chargeableAccounts as $account)
-                            <tr>
+                            <tr x-show="(search === '' || '{{ addslashes(strtolower($account->name)) }}'.includes(search.toLowerCase())) && (showInactive || '{{ $account->status }}' === 'Active')"
+                                data-account="{{ strtolower($account->name) }}"
+                                data-type="{{ strtolower($account->classification) }}"
+                                data-sub-account="{{ $account->sub_accounts_count }}"
+                                data-status="{{ strtolower($account->status) }}">
                                 <td class="px-4 py-3 align-middle">
                                     <span class="fw-bold text-light">{{ $account->name }}</span>
                                 </td>
@@ -73,6 +167,14 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mt-4 text-center card bg-dark border-secondary p-5 rounded-4 ms-3 me-3" x-show="!hasVisibleAccounts && {{ $chargeableAccounts->isNotEmpty() ? 'true' : 'false' }}">
+                <svg class="mx-auto mb-3 text-secondary" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <h3 class="h5 text-white">No matching accounts found</h3>
+                <p class="text-secondary">Try adjusting your search terms or enabling "Show Inactive Accounts".</p>
             </div>
 
             @if($chargeableAccounts->isEmpty())

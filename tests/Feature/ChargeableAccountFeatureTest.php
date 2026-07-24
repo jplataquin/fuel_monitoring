@@ -42,6 +42,39 @@ class ChargeableAccountFeatureTest extends TestCase
         $response->assertSee('2');
     }
 
+    public function test_chargeable_accounts_index_has_alpine_sorting_searching_and_toggle()
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+
+        $activeAccount = ChargeableAccount::create([
+            'name' => 'Active Project Alpha',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $inactiveAccount = ChargeableAccount::create([
+            'name' => 'Inactive Project Beta',
+            'classification' => 'Running',
+            'status' => 'Inactive',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('chargeable-accounts.index'));
+        $response->assertStatus(200);
+
+        $response->assertSee('x-model="search"', false);
+        $response->assertSee('x-model="showInactive"', false);
+
+        $response->assertSee("@click=\"sort('account')\"", false);
+        $response->assertSee("@click=\"sort('type')\"", false);
+        $response->assertSee("@click=\"sort('sub-account')\"", false);
+        $response->assertSee("@click=\"sort('status')\"", false);
+
+        $response->assertSee('data-account="active project alpha"', false);
+        $response->assertSee('data-account="inactive project beta"', false);
+        $response->assertSee('data-status="active"', false);
+        $response->assertSee('data-status="inactive"', false);
+    }
+
     public function test_standard_user_cannot_access_chargeable_accounts_routes()
     {
         $user = User::factory()->create(['role' => 'data_logger']);
