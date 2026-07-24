@@ -329,7 +329,7 @@
             </div>
             
             <div class="table-responsive d-none d-md-block">
-                <table class="table table-dark table-hover mb-0 align-middle" style="min-width:1300px">
+                <table class="table table-dark table-hover mb-0 align-middle" style="min-width:1500px">
                     <thead>
                         <tr class="bg-secondary bg-opacity-5">
                             <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Date & Time</th>
