@@ -172,7 +172,7 @@ class CreateFuelOrder extends Component
 
                 $this->grouped_totals[$accountName]['kilometers'] += $diff;
                 $this->grouped_totals[$accountName]['quantity'] += $entry_calculated_quantity;
-            } elseif (str_contains($calcType, 'actual')) {
+            } elseif (str_contains($calcType, 'actual') || str_contains($calcType, 'timeframe')) {
                 if ($entry->end_time && $entry->start_time) {
                     $start = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
                     $end = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));

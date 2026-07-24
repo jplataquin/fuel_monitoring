@@ -43,7 +43,7 @@ trait DashboardDataTrait
                 if (str_contains($calcType, 'kilometer')) {
                     $calcKm = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
                     $qty = $entry->fuel_factor_km > 0 ? $calcKm / $entry->fuel_factor_km : 0;
-                } elseif (str_contains($calcType, 'actual')) {
+                } elseif (str_contains($calcType, 'actual') || str_contains($calcType, 'timeframe')) {
                     if ($entry->end_time && $entry->start_time) {
                         $start = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
                         $end = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
@@ -269,7 +269,7 @@ trait DashboardDataTrait
                 if (str_contains($calcType, 'kilometer')) {
                     $calcKm = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
                     $qty = $entry->fuel_factor_km > 0 ? $calcKm / $entry->fuel_factor_km : 0;
-                } elseif (str_contains($calcType, 'actual')) {
+                } elseif (str_contains($calcType, 'actual') || str_contains($calcType, 'timeframe')) {
                     if ($entry->end_time && $entry->start_time) {
                         $start = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
                         $end = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));

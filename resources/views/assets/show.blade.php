@@ -223,7 +223,7 @@
                                 <option value="">-- Select Calculation Type --</option>
                                 <option value="Kilometer Reading">Kilometer Reading</option>
                                 <option value="Hour Reading">Hour Reading</option>
-                                <option value="Actual Operation Hours">Actual Operation Hours</option>
+                                <option value="Timeframe">Timeframe</option>
                             </select>
                             <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-calculation_type"></p>
                         </div>

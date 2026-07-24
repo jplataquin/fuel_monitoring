@@ -77,7 +77,7 @@ class UtilizationEntryController extends Controller
             'chargeable_account_id' => 'required|exists:chargeable_accounts,id',
             'sub_account_id' => 'required_unless:unbudgeted,1|nullable|exists:sub_accounts,id',
             'reference' => 'nullable|string|max:255',
-            'calculation_type' => 'required|string|in:Kilometer Reading,Hour Reading,Actual Operation Hours',
+            'calculation_type' => 'required|string|in:Kilometer Reading,Hour Reading,Timeframe',
             'unbudgeted' => 'nullable',
             'particulars' => 'required|string|max:255',
             'remarks' => 'nullable|string',
@@ -132,7 +132,7 @@ class UtilizationEntryController extends Controller
             $asset->last_date = $validated['date'];
             $asset->last_time = $validated['end_time'];
             $asset->save();
-        } elseif ($request->calculation_type === 'Actual Operation Hours') {
+        } elseif ($request->calculation_type === 'Timeframe') {
             $asset->last_date = $validated['date'];
             $asset->last_time = $validated['end_time'];
             $asset->save();
@@ -301,7 +301,7 @@ class UtilizationEntryController extends Controller
             'chargeable_account_id' => 'required|exists:chargeable_accounts,id',
             'sub_account_id' => 'required_unless:unbudgeted,1|nullable|exists:sub_accounts,id',
             'reference' => 'nullable|string|max:255',
-            'calculation_type' => 'required|string|in:Kilometer Reading,Hour Reading,Actual Operation Hours',
+            'calculation_type' => 'required|string|in:Kilometer Reading,Hour Reading,Timeframe',
             'unbudgeted' => 'nullable',
             'particulars' => 'required|string|max:255',
             'remarks' => 'nullable|string',
@@ -375,7 +375,7 @@ class UtilizationEntryController extends Controller
             $asset->last_date = $validated['date'];
             $asset->last_time = $validated['end_time'];
             $asset->save();
-        } elseif ($request->calculation_type === 'Actual Operation Hours') {
+        } elseif ($request->calculation_type === 'Timeframe') {
             $asset->last_date = $validated['date'];
             $asset->last_time = $validated['end_time'];
             $asset->save();

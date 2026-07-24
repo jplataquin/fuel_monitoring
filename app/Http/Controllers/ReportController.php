@@ -8,6 +8,7 @@ use App\Models\FuelOrder;
 use App\Models\SubAccountBudget;
 use App\Models\UtilizationEntry;
 use App\Traits\DashboardDataTrait;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -97,7 +98,7 @@ class ReportController extends Controller
 
             // Group by date to get actual and say consumption
             foreach ($fuelOrders as $order) {
-                $dateString = \Carbon\Carbon::parse($order->created_at)->format('Y-m-d');
+                $dateString = Carbon::parse($order->created_at)->format('Y-m-d');
                 if (! isset($dailyConsumption[$dateString])) {
                     $dailyConsumption[$dateString] = 0;
                     $dailySayConsumption[$dateString] = 0;
@@ -144,7 +145,7 @@ class ReportController extends Controller
 
             // Project into the future (e.g., next 3 days)
             if ($n > 0) {
-                $lastDate = \Carbon\Carbon::parse(end($labels));
+                $lastDate = Carbon::parse(end($labels));
                 for ($j = 1; $j <= 3; $j++) {
                     $nextDate = $lastDate->copy()->addDays($j)->format('Y-m-d');
                     $labels[] = $nextDate;
@@ -156,7 +157,7 @@ class ReportController extends Controller
 
             // Format labels for display
             foreach ($labels as &$label) {
-                $label = \Carbon\Carbon::parse($label)->format('M d');
+                $label = Carbon::parse($label)->format('M d');
             }
 
             $chartData = [
@@ -231,10 +232,10 @@ class ReportController extends Controller
                 if (str_contains($calcType, 'kilometer')) {
                     $calcKm = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
                     $qty = $entry->fuel_factor_km > 0 ? $calcKm / $entry->fuel_factor_km : 0;
-                } elseif (str_contains($calcType, 'actual')) {
+                } elseif (str_contains($calcType, 'actual') || str_contains($calcType, 'timeframe')) {
                     if ($entry->end_time && $entry->start_time) {
-                        $start = \Carbon\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
-                        $end = \Carbon\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
+                        $start = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
+                        $end = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
                         $calcHours = max(0, $start->diffInMinutes($end) / 60);
                         $qty = $calcHours * $entry->fuel_factor_hr;
                     }
@@ -316,10 +317,10 @@ class ReportController extends Controller
 
                 if (str_contains($calcType, 'kilometer')) {
                     $calcKm = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
-                } elseif (str_contains($calcType, 'actual')) {
+                } elseif (str_contains($calcType, 'actual') || str_contains($calcType, 'timeframe')) {
                     if ($entry->end_time && $entry->start_time) {
-                        $start = \Carbon\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
-                        $end = \Carbon\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
+                        $start = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
+                        $end = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
                         $calcHours = max(0, $start->diffInMinutes($end) / 60);
                     }
                 } elseif (str_contains($calcType, 'hour')) {

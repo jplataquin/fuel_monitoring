@@ -49,7 +49,7 @@
                                         <option value="">-- Select Calculation Type --</option>
                                         <option value="Kilometer Reading" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Kilometer Reading' ? 'selected' : '' }}>Kilometer Reading</option>
                                         <option value="Hour Reading" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Hour Reading' ? 'selected' : '' }}>Hour Reading</option>
-                                        <option value="Actual Operation Hours" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Actual Operation Hours' ? 'selected' : '' }}>Actual Operation Hours</option>
+                                        <option value="Timeframe" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Timeframe' ? 'selected' : '' }}>Timeframe</option>
                                     </select>
                                     @error('calculation_type') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
                                 </div>

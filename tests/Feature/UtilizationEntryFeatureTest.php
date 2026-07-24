@@ -63,7 +63,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
             'reference' => 'REF-123',
-            'calculation_type' => 'Actual Operation Hours',
+            'calculation_type' => 'Timeframe',
             'particulars' => 'Daily run',
         ]);
 
@@ -101,7 +101,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
             'reference' => 'REF-123',
-            'calculation_type' => 'Actual Operation Hours',
+            'calculation_type' => 'Timeframe',
             'particulars' => 'Daily run',
         ]);
 
@@ -138,7 +138,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
             'reference' => 'REF-123',
-            'calculation_type' => 'Actual Operation Hours',
+            'calculation_type' => 'Timeframe',
             'particulars' => 'Daily run',
         ]);
 
@@ -173,7 +173,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
             'reference' => 'REF-123',
-            'calculation_type' => 'Actual Operation Hours',
+            'calculation_type' => 'Timeframe',
             'particulars' => 'Daily run',
         ]);
 
@@ -210,7 +210,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
             'reference' => 'REF-123',
-            'calculation_type' => 'Actual Operation Hours',
+            'calculation_type' => 'Timeframe',
             'particulars' => 'Daily run',
         ]);
 
@@ -222,7 +222,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
             'reference' => 'REF-123',
-            'calculation_type' => 'Actual Operation Hours',
+            'calculation_type' => 'Timeframe',
             'particulars' => 'Daily run',
         ]);
 
@@ -259,7 +259,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
             'reference' => 'REF-123',
-            'calculation_type' => 'Actual Operation Hours',
+            'calculation_type' => 'Timeframe',
             'particulars' => 'Daily run',
         ]);
 
@@ -271,7 +271,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
             'reference' => 'REF-123',
-            'calculation_type' => 'Actual Operation Hours',
+            'calculation_type' => 'Timeframe',
             'particulars' => 'Daily run',
         ]);
 
@@ -308,7 +308,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
             'reference' => 'REF-123',
-            'calculation_type' => 'Actual Operation Hours',
+            'calculation_type' => 'Timeframe',
             'particulars' => 'Daily run',
         ]);
 
@@ -320,7 +320,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
             'reference' => 'REF-123',
-            'calculation_type' => 'Actual Operation Hours',
+            'calculation_type' => 'Timeframe',
             'particulars' => 'Daily run',
         ]);
 

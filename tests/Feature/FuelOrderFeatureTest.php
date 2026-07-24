@@ -220,7 +220,7 @@ class FuelOrderFeatureTest extends TestCase
             'end_hour_reading' => 100,
             'driver_operator_name' => 'Jane Doe',
             'chargeable_account_id' => $account->id,
-            'calculation_type' => 'Actual Operation Hours',
+            'calculation_type' => 'Timeframe',
         ]);
 
         UtilizationEntry::create([
@@ -237,7 +237,7 @@ class FuelOrderFeatureTest extends TestCase
             'end_hour_reading' => 102.5,
             'driver_operator_name' => 'Jane Doe',
             'chargeable_account_id' => $account->id,
-            'calculation_type' => 'Actual Operation Hours',
+            'calculation_type' => 'Timeframe',
         ]);
 
         Livewire::actingAs($user)
