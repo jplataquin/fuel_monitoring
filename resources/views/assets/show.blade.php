@@ -233,13 +233,13 @@
                             </select>
                             <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-calculation_type"></p>
                         </div>
-                        <div class="col-md-6 d-flex align-items-end pb-3">
-                             <div class="form-check">
-                                <input type="checkbox" name="unbudgeted" value="1" id="unbudgeted" class="form-check-input bg-dark border-primary" onchange="toggleSubAccount()">
-                                <label class="form-check-label text-secondary text-uppercase small fw-bold tracking-widest ms-2" for="unbudgeted">
-                                    {{ __('Unbudgeted') }}
-                                </label>
-                            </div>
+                        <div class="col-md-6">
+                            <label for="unbudgeted" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Unbudgeted</label>
+                            <select id="unbudgeted" name="unbudgeted" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required onchange="toggleSubAccount()">
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-unbudgeted"></p>
                         </div>
                         <div class="col-12">
                             <label for="particulars" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Particulars / Mission</label>
@@ -365,10 +365,10 @@
         let hasMore = true;
 
         function toggleSubAccount() {
-            const unbudgetedCheckbox = document.getElementById('unbudgeted');
+            const unbudgetedSelect = document.getElementById('unbudgeted');
             const subAccountSelect = document.getElementById('sub_account_id');
             
-            if (unbudgetedCheckbox.checked) {
+            if (unbudgetedSelect.value === '1') {
                 subAccountSelect.value = '';
                 subAccountSelect.disabled = true;
                 subAccountSelect.required = false;
@@ -383,7 +383,7 @@
 
         async function fetchSubAccounts(accountId) {
             const subAccountSelect = document.getElementById('sub_account_id');
-            const unbudgetedCheckbox = document.getElementById('unbudgeted');
+            const unbudgetedSelect = document.getElementById('unbudgeted');
             
             subAccountSelect.innerHTML = '<option value="">-- Select Sub Account --</option>';
             
@@ -407,7 +407,7 @@
                     subAccountSelect.appendChild(option);
                 });
                 
-                if (!unbudgetedCheckbox.checked) {
+                if (unbudgetedSelect.value !== '1') {
                     subAccountSelect.disabled = false;
                 }
             } catch (error) {

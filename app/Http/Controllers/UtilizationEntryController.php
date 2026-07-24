@@ -106,7 +106,7 @@ class UtilizationEntryController extends Controller
 
         $validated = $request->validate($rules);
 
-        $validated['unbudgeted'] = $request->has('unbudgeted');
+        $validated['unbudgeted'] = $request->unbudgeted == '1';
         if ($validated['unbudgeted']) {
             $validated['sub_account_id'] = null;
         }
@@ -359,7 +359,7 @@ class UtilizationEntryController extends Controller
 
         $validated = $request->validate($rules);
 
-        $validated['unbudgeted'] = $request->has('unbudgeted');
+        $validated['unbudgeted'] = $request->unbudgeted == '1';
         if ($validated['unbudgeted']) {
             $validated['sub_account_id'] = null;
         }

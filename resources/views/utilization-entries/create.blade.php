@@ -62,10 +62,12 @@
                                 </div>
 
                                 <div class="col-12">
-                                    <div class="form-check form-switch p-3 bg-secondary bg-opacity-10 rounded-3 border border-secondary border-opacity-10 ps-5">
-                                        <input type="checkbox" id="unbudgeted" name="unbudgeted" value="1" {{ old('unbudgeted') ? 'checked' : '' }} class="form-check-input" onchange="toggleSubAccount()">
-                                        <label class="form-check-label small fw-bold text-light ms-2" for="unbudgeted">{{ __('Unbudgeted Utilization') }}</label>
-                                    </div>
+                                    <label for="unbudgeted" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Unbudgeted Utilization</label>
+                                    <select id="unbudgeted" name="unbudgeted" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required onchange="toggleSubAccount()">
+                                        <option value="0" {{ old('unbudgeted') == '0' ? 'selected' : '' }}>No</option>
+                                        <option value="1" {{ old('unbudgeted') == '1' ? 'selected' : '' }}>Yes</option>
+                                    </select>
+                                    @error('unbudgeted') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-12">
@@ -166,10 +168,10 @@
 
     <script>
         function toggleSubAccount() {
-            const unbudgetedCheckbox = document.getElementById('unbudgeted');
+            const unbudgetedSelect = document.getElementById('unbudgeted');
             const subAccountSelect = document.getElementById('sub_account_id');
             
-            if (unbudgetedCheckbox.checked) {
+            if (unbudgetedSelect.value === '1') {
                 subAccountSelect.value = '';
                 subAccountSelect.disabled = true;
                 subAccountSelect.required = false;
@@ -184,7 +186,7 @@
 
         async function fetchSubAccounts(accountId, selectedId = null) {
             const subAccountSelect = document.getElementById('sub_account_id');
-            const unbudgetedCheckbox = document.getElementById('unbudgeted');
+            const unbudgetedSelect = document.getElementById('unbudgeted');
             
             subAccountSelect.innerHTML = '<option value="">-- Select Sub Account --</option>';
             
@@ -211,7 +213,7 @@
                     subAccountSelect.appendChild(option);
                 });
                 
-                if (!unbudgetedCheckbox.checked) {
+                if (unbudgetedSelect.value !== '1') {
                     subAccountSelect.disabled = false;
                 }
             } catch (error) {
