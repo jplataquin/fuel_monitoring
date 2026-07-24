@@ -20,7 +20,7 @@
                 <div class="card-body p-0">
 
 -->
-                    <div class="table-responsive">
+                    <div class="table-responsive ms-3 me-3">
                         <table class="table table-dark table-hover mb-0">
                             <thead>
                                 <tr class="bg-secondary bg-opacity-10">
