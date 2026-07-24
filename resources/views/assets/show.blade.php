@@ -370,6 +370,11 @@
         let loading = false;
         let hasMore = true;
 
+        function truncateText(text, limit = 50) {
+            if (!text) return '—';
+            return text.length > limit ? text.substring(0, limit) + '...' : text;
+        }
+
         function toggleSubAccount() {
             const unbudgetedSelect = document.getElementById('unbudgeted');
             const subAccountSelect = document.getElementById('sub_account_id');
@@ -577,6 +582,17 @@
                             }
                         }
                         
+                        const particularsTruncated = truncateText(entry.particulars, 50);
+                        
+                        let accountText = entry.chargeable_account ? entry.chargeable_account.name : '';
+                        if (entry.sub_account) {
+                            accountText += (accountText ? ' | ' : '') + entry.sub_account.name;
+                        }
+                        if (!accountText) {
+                            accountText = '—';
+                        }
+                        const chargedToTruncated = truncateText(accountText, 50);
+
                         // Desktop Row
                         const row = document.createElement('tr');
                         row.style.cursor = 'pointer';
@@ -587,15 +603,13 @@
                                 <div class="text-primary small fw-bold text-uppercase tracking-widest" style="font-size: 0.65rem;">${entry.start_time || '—'} - ${entry.end_time || '—'}</div>
                                 ${operationHoursHtml}
                             </td>
-                            <td class="py-3 text-secondary small">${entry.particulars}</td>
+                            <td class="py-3 text-secondary small" title="${entry.particulars || ''}">${particularsTruncated}</td>
                             <td class="py-3 text-center">
                                 ${entry.unbudgeted ? '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 text-uppercase fw-bold tracking-widest" style="font-size: 0.6rem;">Yes</span>' : '<span class="text-secondary opacity-25">—</span>'}
                             </td>
-                            <td class="py-3">
+                            <td class="py-3" title="${accountText !== '—' ? accountText : ''}">
                                 <div class="text-secondary small">
-                                    ${entry.chargeable_account ? entry.chargeable_account.name : '—'}
-                                    <span class="mx-1 opacity-25">|</span>
-                                    ${entry.sub_account ? entry.sub_account.name : '—'}
+                                    ${chargedToTruncated}
                                 </div>
                             </td>
                             <td class="py-3 text-center font-monospace small text-light">${parseFloat(entry.start_kilometer_reading).toLocaleString()} - ${parseFloat(entry.end_kilometer_reading).toLocaleString()}</td>
@@ -620,12 +634,10 @@
                                 </div>
                                 ${entry.fuel_order_id ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-bold">#${entry.fuel_order_id}</span>` : ''}
                             </div>
-                            <p class="small text-secondary mb-2">${entry.particulars} ${entry.unbudgeted ? '<span class="badge bg-danger bg-opacity-10 text-danger ms-2" style="font-size: 0.6rem;">UNBUDGETED</span>' : ''}</p>
-                            <p class="text-primary small fw-bold text-uppercase tracking-widest mb-3" style="font-size: 0.6rem;">
+                            <p class="small text-secondary mb-2" title="${entry.particulars || ''}">${particularsTruncated} ${entry.unbudgeted ? '<span class="badge bg-danger bg-opacity-10 text-danger ms-2" style="font-size: 0.6rem;">UNBUDGETED</span>' : ''}</p>
+                            <p class="text-primary small fw-bold text-uppercase tracking-widest mb-3" style="font-size: 0.6rem;" title="${accountText !== '—' ? accountText : ''}">
                                 <span class="text-secondary opacity-50">ACCOUNT:</span> 
-                                ${entry.chargeable_account ? entry.chargeable_account.name : '—'} 
-                                | 
-                                ${entry.sub_account ? entry.sub_account.name : '—'}
+                                ${chargedToTruncated}
                             </p>
                             <div class="row g-2 pt-3 border-top border-secondary border-opacity-10">
                                 <div class="col-6">
