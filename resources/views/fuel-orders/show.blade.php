@@ -168,7 +168,7 @@
                                     $diff = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
                                     $groupedTotals[$accountName]['km'] += $diff;
                                     $groupedTotals[$accountName]['qty'] += $fuelOrder->fuel_factor_km > 0 ? $diff / $fuelOrder->fuel_factor_km : 0;
-                                } elseif (str_contains($calcType, 'actual') || str_contains($calcType, 'timeframe')) {
+                                } elseif (str_contains($calcType, 'timeframe')) {
                                     if ($entry->end_time && $entry->start_time) {
                                         $start = \Illuminate\Support\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
                                         $end = \Illuminate\Support\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
@@ -176,6 +176,10 @@
                                         $groupedTotals[$accountName]['hr'] += $diffInHours;
                                         $groupedTotals[$accountName]['qty'] += $diffInHours * $fuelOrder->fuel_factor_hr;
                                     }
+                                } elseif (str_contains($calcType, 'actual')) {
+                                    $diffInHours = $entry->actual_hours ?? 0;
+                                    $groupedTotals[$accountName]['hr'] += $diffInHours;
+                                    $groupedTotals[$accountName]['qty'] += $diffInHours * $fuelOrder->fuel_factor_hr;
                                 } elseif (str_contains($calcType, 'hour')) {
                                     $diff = max(0, $entry->end_hour_reading - $entry->start_hour_reading);
                                     $groupedTotals[$accountName]['hr'] += $diff;

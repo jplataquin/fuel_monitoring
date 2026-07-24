@@ -330,4 +330,104 @@ class UtilizationEntryFeatureTest extends TestCase
             'date' => '2026-06-10 00:00:00', // remained unchanged
         ]);
     }
+
+    public function test_actual_hours_calculation_type_requires_gt_zero_actual_hours(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+
+        $account = ChargeableAccount::create([
+            'name' => 'Running Project',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Sub 1',
+        ]);
+
+        // 1. Fails when actual_hours is empty
+        $response = $this->actingAs($this->admin)->post(route('utilization-entries.store'), [
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-123',
+            'calculation_type' => 'Actual Hours',
+            'particulars' => 'Daily run',
+        ]);
+        $response->assertSessionHasErrors(['actual_hours']);
+
+        // 2. Fails when actual_hours is 0
+        $response = $this->actingAs($this->admin)->post(route('utilization-entries.store'), [
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-123',
+            'calculation_type' => 'Actual Hours',
+            'particulars' => 'Daily run',
+            'actual_hours' => 0,
+        ]);
+        $response->assertSessionHasErrors(['actual_hours']);
+
+        // 3. Fails when actual_hours is negative
+        $response = $this->actingAs($this->admin)->post(route('utilization-entries.store'), [
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-123',
+            'calculation_type' => 'Actual Hours',
+            'particulars' => 'Daily run',
+            'actual_hours' => -5.5,
+        ]);
+        $response->assertSessionHasErrors(['actual_hours']);
+    }
+
+    public function test_actual_hours_calculation_type_saves_correctly(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+
+        $account = ChargeableAccount::create([
+            'name' => 'Running Project',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Sub 1',
+        ]);
+
+        $response = $this->actingAs($this->admin)->post(route('utilization-entries.store'), [
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-123',
+            'calculation_type' => 'Actual Hours',
+            'particulars' => 'Daily run',
+            'actual_hours' => 4.5,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('utilization_entries', [
+            'asset_id' => $this->asset->id,
+            'calculation_type' => 'Actual Hours',
+            'actual_hours' => 4.5,
+        ]);
+    }
 }

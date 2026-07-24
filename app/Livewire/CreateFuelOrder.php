@@ -172,7 +172,7 @@ class CreateFuelOrder extends Component
 
                 $this->grouped_totals[$accountName]['kilometers'] += $diff;
                 $this->grouped_totals[$accountName]['quantity'] += $entry_calculated_quantity;
-            } elseif (str_contains($calcType, 'actual') || str_contains($calcType, 'timeframe')) {
+            } elseif (str_contains($calcType, 'timeframe')) {
                 if ($entry->end_time && $entry->start_time) {
                     $start = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
                     $end = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
@@ -185,6 +185,15 @@ class CreateFuelOrder extends Component
                     $this->grouped_totals[$accountName]['hours'] += $diffInHours;
                     $this->grouped_totals[$accountName]['quantity'] += $entry_calculated_quantity;
                 }
+            } elseif (str_contains($calcType, 'actual')) {
+                $diffInHours = $entry->actual_hours ?? 0;
+                $this->calculated_hours += $diffInHours;
+                $entry_calculated_hours = $diffInHours;
+                $entry_calculated_quantity = $diffInHours * $this->fuel_factor_hr;
+                $this->calculated_quantity += $entry_calculated_quantity;
+
+                $this->grouped_totals[$accountName]['hours'] += $diffInHours;
+                $this->grouped_totals[$accountName]['quantity'] += $entry_calculated_quantity;
             } elseif (str_contains($calcType, 'hour')) {
                 $diff = max(0, $entry->end_hour_reading - $entry->start_hour_reading);
                 $this->calculated_hours += $diff;

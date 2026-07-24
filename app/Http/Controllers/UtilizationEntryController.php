@@ -77,7 +77,7 @@ class UtilizationEntryController extends Controller
             'chargeable_account_id' => 'required|exists:chargeable_accounts,id',
             'sub_account_id' => 'required_unless:unbudgeted,1|nullable|exists:sub_accounts,id',
             'reference' => 'nullable|string|max:255',
-            'calculation_type' => 'required|string|in:Kilometer Reading,Hour Reading,Timeframe',
+            'calculation_type' => 'required|string|in:Kilometer Reading,Hour Reading,Timeframe,Actual Hours',
             'unbudgeted' => 'nullable',
             'particulars' => 'required|string|max:255',
             'remarks' => 'nullable|string',
@@ -85,6 +85,7 @@ class UtilizationEntryController extends Controller
             'end_kilometer_reading' => 'nullable|numeric|min:0',
             'start_hour_reading' => 'nullable|numeric|min:0',
             'end_hour_reading' => 'nullable|numeric|min:0',
+            'actual_hours' => 'nullable|numeric|min:0',
         ];
 
         if ($request->calculation_type === 'Kilometer Reading') {
@@ -99,6 +100,8 @@ class UtilizationEntryController extends Controller
                 $rules['start_hour_reading'][] = 'gte:'.$asset->last_engine_hours;
             }
             $rules['end_hour_reading'] = ['required', 'numeric', 'min:0', 'gt:start_hour_reading'];
+        } elseif ($request->calculation_type === 'Actual Hours') {
+            $rules['actual_hours'] = ['required', 'numeric', 'gt:0'];
         }
 
         $validated = $request->validate($rules);
@@ -132,7 +135,7 @@ class UtilizationEntryController extends Controller
             $asset->last_date = $validated['date'];
             $asset->last_time = $validated['end_time'];
             $asset->save();
-        } elseif ($request->calculation_type === 'Timeframe') {
+        } elseif ($request->calculation_type === 'Timeframe' || $request->calculation_type === 'Actual Hours') {
             $asset->last_date = $validated['date'];
             $asset->last_time = $validated['end_time'];
             $asset->save();
@@ -301,7 +304,7 @@ class UtilizationEntryController extends Controller
             'chargeable_account_id' => 'required|exists:chargeable_accounts,id',
             'sub_account_id' => 'required_unless:unbudgeted,1|nullable|exists:sub_accounts,id',
             'reference' => 'nullable|string|max:255',
-            'calculation_type' => 'required|string|in:Kilometer Reading,Hour Reading,Timeframe',
+            'calculation_type' => 'required|string|in:Kilometer Reading,Hour Reading,Timeframe,Actual Hours',
             'unbudgeted' => 'nullable',
             'particulars' => 'required|string|max:255',
             'remarks' => 'nullable|string',
@@ -309,6 +312,7 @@ class UtilizationEntryController extends Controller
             'end_kilometer_reading' => 'nullable|numeric|min:0',
             'start_hour_reading' => 'nullable|numeric|min:0',
             'end_hour_reading' => 'nullable|numeric|min:0',
+            'actual_hours' => 'nullable|numeric|min:0',
         ];
 
         if ($request->calculation_type === 'Kilometer Reading') {
@@ -349,6 +353,8 @@ class UtilizationEntryController extends Controller
                     }
                 },
             ];
+        } elseif ($request->calculation_type === 'Actual Hours') {
+            $rules['actual_hours'] = ['required', 'numeric', 'gt:0'];
         }
 
         $validated = $request->validate($rules);
@@ -375,7 +381,7 @@ class UtilizationEntryController extends Controller
             $asset->last_date = $validated['date'];
             $asset->last_time = $validated['end_time'];
             $asset->save();
-        } elseif ($request->calculation_type === 'Timeframe') {
+        } elseif ($request->calculation_type === 'Timeframe' || $request->calculation_type === 'Actual Hours') {
             $asset->last_date = $validated['date'];
             $asset->last_time = $validated['end_time'];
             $asset->save();

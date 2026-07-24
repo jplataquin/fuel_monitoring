@@ -38,6 +38,12 @@
                                 </div>
 
                                 <div class="col-md-6">
+                                    <label for="actual_hours" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Hours</label>
+                                    <input type="number" step="0.01" id="actual_hours" name="actual_hours" class="form-control bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" value="{{ old('actual_hours', $utilizationEntry->actual_hours) }}" placeholder="0.00" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
+                                    @error('actual_hours') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="col-md-6">
                                     <label for="reference" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Reference</label>
                                     <input type="text" id="reference" name="reference" class="form-control bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" value="{{ old('reference', $utilizationEntry->reference) }}" required>
                                     @error('reference') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
@@ -50,6 +56,7 @@
                                         <option value="Kilometer Reading" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Kilometer Reading' ? 'selected' : '' }}>Kilometer Reading</option>
                                         <option value="Hour Reading" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Hour Reading' ? 'selected' : '' }}>Hour Reading</option>
                                         <option value="Timeframe" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Timeframe' ? 'selected' : '' }}>Timeframe</option>
+                                        <option value="Actual Hours" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Actual Hours' ? 'selected' : '' }}>Actual Hours</option>
                                     </select>
                                     @error('calculation_type') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
                                 </div>

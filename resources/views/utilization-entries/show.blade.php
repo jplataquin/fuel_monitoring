@@ -77,6 +77,13 @@
                                         <p class="h6 fw-bold text-primary">{{ number_format($operationHours, 2) }} <span class="small text-uppercase text-secondary ms-1">HRS</span></p>
                                     </div>
                                     @endif
+                                    
+                                    @if($utilizationEntry->actual_hours !== null)
+                                    <div class="col-12">
+                                        <p class="small fw-bold text-secondary text-uppercase tracking-widest mb-1">Logged Actual Hours</p>
+                                        <p class="h6 fw-bold text-primary">{{ number_format($utilizationEntry->actual_hours, 2) }} <span class="small text-uppercase text-secondary ms-1">HRS</span></p>
+                                    </div>
+                                    @endif
                                 </div>
                             </div>
 

@@ -40,13 +40,15 @@ class RecalculateFuelOrders extends Command
                 if (str_contains($calcType, 'kilometer')) {
                     $diff = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
                     $qty = $entry->fuel_factor_km > 0 ? $diff / $entry->fuel_factor_km : 0;
-                } elseif (str_contains($calcType, 'actual') || str_contains($calcType, 'timeframe')) {
+                } elseif (str_contains($calcType, 'timeframe')) {
                     if ($entry->end_time && $entry->start_time) {
                         $start = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
                         $end = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
                         $hours = max(0, $start->diffInMinutes($end) / 60);
                         $qty = $hours * $entry->fuel_factor_hr;
                     }
+                } elseif (str_contains($calcType, 'actual')) {
+                    $qty = ($entry->actual_hours ?? 0) * $entry->fuel_factor_hr;
                 } elseif (str_contains($calcType, 'hour')) {
                     $hours = max(0, $entry->end_hour_reading - $entry->start_hour_reading);
                     $qty = $hours * $entry->fuel_factor_hr;
