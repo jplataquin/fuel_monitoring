@@ -14,9 +14,12 @@
     </x-slot>
 
     <div class="py-5">
+<!--
         <div class="container" style="max-width: 900px;">
             <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
                 <div class="card-body p-0">
+
+-->
                     <div class="table-responsive">
                         <table class="table table-dark table-hover mb-0">
                             <thead>
@@ -76,8 +79,12 @@
                             </tbody>
                         </table>
                     </div>
+
+            <!--
+
                 </div>
             </div>
+-->
             
             @if($chargeableAccounts->isEmpty())
                 <div class="mt-4 text-center card bg-dark border-secondary p-5 rounded-4">
@@ -88,6 +95,6 @@
                     <p class="text-secondary">Get started by creating a new chargeable account.</p>
                 </div>
             @endif
-        </div>
+        <!-- </div> -->
     </div>
 </x-app-layout>
