@@ -345,6 +345,8 @@
                 <p class="small fw-bold text-secondary text-uppercase tracking-widest">Syncing Data...</p>
             </div>
 
+            <div id="infinite-scroll-sentinel" class="py-1"></div>
+
             <div id="no-more-logs" class="p-4 text-center bg-secondary bg-opacity-5 d-none">
                 <p class="small fw-bold text-secondary text-uppercase tracking-widest mb-0">End of History</p>
             </div>
@@ -665,11 +667,21 @@
             window.open(url + params.toString(), '_blank');
         }
 
-        window.onscroll = function() {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+        // IntersectionObserver for lazy loading infinite scroll
+        const sentinel = document.getElementById('infinite-scroll-sentinel');
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !loading && hasMore) {
                 loadLogs();
             }
-        };
+        }, {
+            root: null, // use the viewport
+            rootMargin: '200px', // start loading when the sentinel is within 200px of the viewport
+            threshold: 0.1
+        });
+
+        if (sentinel) {
+            observer.observe(sentinel);
+        }
 
         function parseLocalDate(dateStr) {
             if (!dateStr) return null;
