@@ -175,6 +175,26 @@
                             <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-driver_operator_name"></p>
                         </div>
 
+                        <div class="col-md-6">
+                            <label for="calculation_type" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Calculation Type</label>
+                            <select id="calculation_type" name="calculation_type" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required>
+                                <option value="">-- Select Calculation Type --</option>
+                                <option value="Kilometer Reading">Kilometer Reading</option>
+                                <option value="Hour Reading">Hour Reading</option>
+                                <option value="Timeframe">Timeframe</option>
+                                <option value="Actual Hours">Actual Hours</option>
+                            </select>
+                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-calculation_type"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="unbudgeted" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Unbudgeted</label>
+                            <select id="unbudgeted" name="unbudgeted" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required onchange="toggleSubAccount()">
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-unbudgeted"></p>
+                        </div>
+
                         <div class="col-md-3">
                             <label for="date" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Date</label>
                             <input id="date" name="date" type="date" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('Y-m-d') }}" required>
@@ -222,25 +242,7 @@
                             </select>
                             <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-sub_account_id"></p>
                         </div>
-                        <div class="col-md-6">
-                            <label for="calculation_type" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Calculation Type</label>
-                            <select id="calculation_type" name="calculation_type" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required>
-                                <option value="">-- Select Calculation Type --</option>
-                                <option value="Kilometer Reading">Kilometer Reading</option>
-                                <option value="Hour Reading">Hour Reading</option>
-                                <option value="Timeframe">Timeframe</option>
-                                <option value="Actual Hours">Actual Hours</option>
-                            </select>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-calculation_type"></p>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="unbudgeted" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Unbudgeted</label>
-                            <select id="unbudgeted" name="unbudgeted" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required onchange="toggleSubAccount()">
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-unbudgeted"></p>
-                        </div>
+                    
                         <div class="col-12">
                             <label for="particulars" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Particulars / Mission</label>
                             <input id="particulars" name="particulars" type="text" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required placeholder="Describe the activity...">
