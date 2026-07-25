@@ -430,4 +430,59 @@ class UtilizationEntryFeatureTest extends TestCase
             'actual_hours' => 4.5,
         ]);
     }
+
+    public function test_actual_hours_allows_start_and_end_time_to_be_equal(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+
+        $account = ChargeableAccount::create([
+            'name' => 'Running Project',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Sub 1',
+        ]);
+
+        // 1. For Actual Hours, identical start and end time is ALLOWED
+        $response = $this->actingAs($this->admin)->post(route('utilization-entries.store'), [
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'end_time' => '08:00',
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-123',
+            'calculation_type' => 'Actual Hours',
+            'particulars' => 'Daily run',
+            'actual_hours' => 4.5,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('utilization_entries', [
+            'asset_id' => $this->asset->id,
+            'calculation_type' => 'Actual Hours',
+            'start_time' => '08:00',
+            'end_time' => '08:00',
+        ]);
+
+        // 2. For Timeframe, identical start and end time is REJECTED
+        $response = $this->actingAs($this->admin)->post(route('utilization-entries.store'), [
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'end_time' => '08:00',
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-123',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Daily run',
+        ]);
+
+        $response->assertSessionHasErrors(['end_time']);
+    }
 }

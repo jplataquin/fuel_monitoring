@@ -10,7 +10,7 @@
             <div class="col-md-10 col-lg-8">
                 <div class="card bg-dark border-secondary border-opacity-25 shadow-lg rounded-4 overflow-hidden">
                     <div class="card-body p-4 p-md-5">
-                        <form method="POST" action="{{ route('utilization-entries.update', $utilizationEntry) }}">
+                        <form id="utilization-entry-form" method="POST" action="{{ route('utilization-entries.update', $utilizationEntry) }}">
                             @csrf
                             @method('PATCH')
 
@@ -303,6 +303,94 @@
             return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
+        let isInitialLoad = true;
+
+        function updateFieldStates() {
+            const calculationType = document.getElementById('calculation_type').value;
+            const startOdo = document.getElementById('start_kilometer_reading');
+            const endOdo = document.getElementById('end_kilometer_reading');
+            const startEngine = document.getElementById('start_hour_reading');
+            const endEngine = document.getElementById('end_hour_reading');
+            const actualHours = document.getElementById('actual_hours');
+            const startTime = document.getElementById('start_time');
+            const endTime = document.getElementById('end_time');
+
+            const assetLastTime = "{{ $utilizationEntry->asset->last_time ? \Carbon\Carbon::parse($utilizationEntry->asset->last_time)->format('H:i') : '' }}";
+            const originalStartTime = "{{ old('start_time', $utilizationEntry->start_time ? $utilizationEntry->start_time->format('H:i') : '') }}";
+            const originalEndTime = "{{ old('end_time', $utilizationEntry->end_time ? $utilizationEntry->end_time->format('H:i') : '') }}";
+
+            const enable = (el) => {
+                if (el) {
+                    el.disabled = false;
+                    if (el.id === 'start_time' || el.id === 'end_time') {
+                        el.required = true;
+                    }
+                }
+            };
+
+            const disableAndSet = (el, val) => {
+                if (el) {
+                    el.disabled = true;
+                    el.value = val;
+                    el.required = false;
+                }
+            };
+
+            if (calculationType === 'Kilometer Reading') {
+                enable(startOdo);
+                enable(endOdo);
+                enable(startTime);
+                enable(endTime);
+
+                disableAndSet(startEngine, '0');
+                disableAndSet(endEngine, '0');
+                disableAndSet(actualHours, '0');
+            } else if (calculationType === 'Hour Reading') {
+                enable(startEngine);
+                enable(endEngine);
+                enable(startTime);
+                enable(endTime);
+
+                disableAndSet(startOdo, '0');
+                disableAndSet(endOdo, '0');
+                disableAndSet(actualHours, '0');
+            } else if (calculationType === 'Timeframe') {
+                enable(startTime);
+                enable(endTime);
+
+                disableAndSet(startOdo, '0');
+                disableAndSet(endOdo, '0');
+                disableAndSet(startEngine, '0');
+                disableAndSet(endEngine, '0');
+                disableAndSet(actualHours, '0');
+            } else if (calculationType === 'Actual Hours') {
+                enable(actualHours);
+
+                disableAndSet(startOdo, '0');
+                disableAndSet(endOdo, '0');
+                disableAndSet(startEngine, '0');
+                disableAndSet(endEngine, '0');
+
+                if (isInitialLoad) {
+                    disableAndSet(startTime, originalStartTime);
+                    disableAndSet(endTime, originalEndTime);
+                } else {
+                    disableAndSet(startTime, assetLastTime);
+                    disableAndSet(endTime, assetLastTime);
+                }
+            } else {
+                enable(startOdo);
+                enable(endOdo);
+                enable(startEngine);
+                enable(endEngine);
+                enable(actualHours);
+                enable(startTime);
+                enable(endTime);
+            }
+            
+            isInitialLoad = false;
+        }
+
         // Initialize sub-accounts on load
         document.addEventListener('DOMContentLoaded', function() {
             const accountId = document.getElementById('chargeable_account_id').value;
@@ -316,12 +404,23 @@
 
             const dateInput = document.getElementById('date');
             const accountSelect = document.getElementById('chargeable_account_id');
+            const calculationTypeSelect = document.getElementById('calculation_type');
+            const form = document.getElementById('utilization-entry-form');
             
             dateInput.addEventListener('input', validateDateScope);
             dateInput.addEventListener('change', validateDateScope);
             accountSelect.addEventListener('change', validateDateScope);
+            calculationTypeSelect.addEventListener('change', updateFieldStates);
 
             validateDateScope();
+            updateFieldStates();
+
+            if (form) {
+                form.addEventListener('submit', function() {
+                    const disabledInputs = this.querySelectorAll('input:disabled, select:disabled, textarea:disabled');
+                    disabledInputs.forEach(el => el.disabled = false);
+                });
+            }
         });
     </script>
 </x-app-layout>

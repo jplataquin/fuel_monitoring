@@ -72,7 +72,7 @@ class UtilizationEntryController extends Controller
                     }
                 },
             ],
-            'end_time' => 'required|date_format:H:i|after:start_time',
+            'end_time' => 'required|date_format:H:i',
             'driver_operator_name' => 'required|string|max:255',
             'chargeable_account_id' => 'required|exists:chargeable_accounts,id',
             'sub_account_id' => 'required_unless:unbudgeted,1|nullable|exists:sub_accounts,id',
@@ -87,6 +87,10 @@ class UtilizationEntryController extends Controller
             'end_hour_reading' => 'nullable|numeric|min:0',
             'actual_hours' => 'nullable|numeric|min:0',
         ];
+
+        if ($request->calculation_type !== 'Actual Hours') {
+            $rules['end_time'] = 'required|date_format:H:i|after:start_time';
+        }
 
         if ($request->calculation_type === 'Kilometer Reading') {
             $rules['start_kilometer_reading'] = ['required', 'numeric', 'min:0'];
@@ -284,7 +288,6 @@ class UtilizationEntryController extends Controller
             'end_time' => [
                 'required',
                 'date_format:H:i',
-                'after:start_time',
                 function ($attribute, $value, $fail) use ($request, $nextTimeEntry) {
                     if ($nextTimeEntry && $request->date) {
                         try {
@@ -314,6 +317,10 @@ class UtilizationEntryController extends Controller
             'end_hour_reading' => 'nullable|numeric|min:0',
             'actual_hours' => 'nullable|numeric|min:0',
         ];
+
+        if ($request->calculation_type !== 'Actual Hours') {
+            $rules['end_time'][] = 'after:start_time';
+        }
 
         if ($request->calculation_type === 'Kilometer Reading') {
             $rules['start_kilometer_reading'] = ['required', 'numeric', 'min:0'];
