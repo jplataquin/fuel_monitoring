@@ -15,14 +15,6 @@ use Illuminate\View\View;
 
 class UtilizationEntryController extends Controller
 {
-    public function create(Request $request): View
-    {
-        $asset = Asset::findOrFail($request->asset_id);
-        $chargeableAccounts = ChargeableAccount::where('status', 'Active')->orderBy('name', 'asc')->get();
-
-        return view('utilization-entries.create', compact('asset', 'chargeableAccounts'));
-    }
-
     public function store(Request $request): JsonResponse|RedirectResponse
     {
         $asset = Asset::findOrFail($request->asset_id);
