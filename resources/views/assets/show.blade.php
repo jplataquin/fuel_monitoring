@@ -144,148 +144,148 @@
             </div>
         </div>
 
-        <!-- Add Utilization Entry Form -->
-        <div class="card bg-dark border-primary border-opacity-25 shadow-lg position-relative overflow-hidden mb-5">
-            <div class="position-absolute top-0 end-0 p-4 opacity-10 pointer-events-none">
-                <svg width="120" height="120" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-            </div>
-            
-            <div class="card-body p-4 p-md-5 position-relative z-1">
-                <h3 class="h4 fw-bold text-light mb-5 d-flex align-items-center">
-                    <span class="bg-primary p-2 rounded-3 me-3 text-white">
-                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                    </span>
-                    Register Utilization
-                </h3>
-                
-                <form id="utilization-form">
-                    @csrf
-                    <input type="hidden" name="asset_id" value="{{ $asset->id }}">
-                    
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <label for="reference" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Reference</label>
-                            <input id="reference" name="reference" type="text" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required placeholder="e.g. REF-001">
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-reference"></p>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="driver_operator_name" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Personnel In-Charge</label>
-                            <input id="driver_operator_name" name="driver_operator_name" type="text" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required placeholder="Driver or Operator">
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-driver_operator_name"></p>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="calculation_type" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Calculation Type</label>
-                            <select id="calculation_type" name="calculation_type" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required>
-                                <option value="">-- Select Calculation Type --</option>
-                                <option value="Kilometer Reading">Kilometer Reading</option>
-                                <option value="Hour Reading">Hour Reading</option>
-                                <option value="Timeframe">Timeframe</option>
-                                <option value="Actual Hours">Actual Hours</option>
-                            </select>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-calculation_type"></p>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="unbudgeted" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Unbudgeted</label>
-                            <select id="unbudgeted" name="unbudgeted" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required onchange="toggleSubAccount()">
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-unbudgeted"></p>
-                        </div>
-
-                         <div class="col-md-6">
-                            <label for="chargeable_account_id" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Charged To</label>
-                            <select id="chargeable_account_id" name="chargeable_account_id" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required onchange="fetchSubAccounts(this.value)">
-                                <option value="">-- Select Account --</option>
-                                @foreach($chargeableAccounts as $account)
-                                    <option value="{{ $account->id }}"
-                                            data-classification="{{ $account->classification }}"
-                                            data-start-date="{{ $account->start_date ? $account->start_date->format('Y-m-d') : '' }}"
-                                            data-end-date="{{ $account->end_date ? $account->end_date->format('Y-m-d') : '' }}">
-                                        {{ $account->name }}
-                                        @if($account->classification === 'Scoped')
-                                            ({{ $account->start_date ? $account->start_date->format('M d, Y') : 'N/A' }} - {{ $account->end_date ? $account->end_date->format('M d, Y') : 'N/A' }})
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-chargeable_account_id"></p>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="sub_account_id" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Sub Account</label>
-                            <select id="sub_account_id" name="sub_account_id" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required disabled>
-                                <option value="">-- Select Sub Account --</option>
-                            </select>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-sub_account_id"></p>
-                        </div>
-                        
-                        <div class="col-12">
-                            <label for="particulars" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Particulars / Mission</label>
-                            <textarea id="particulars" name="particulars" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required placeholder="Describe the activity..."></textarea>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-particulars"></p>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label for="date" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Date</label>
-                            <input id="date" name="date" type="date" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('Y-m-d') }}" required>
-                            <div id="date-scope-error" class="text-danger small fw-bold mt-1 ps-1 d-none"></div>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-date"></p>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="start_time" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Start Time</label>
-                            <input id="start_time" name="start_time" type="time" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('H:i') }}" required>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-start_time"></p>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="end_time" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">End Time</label>
-                            <input id="end_time" name="end_time" type="time" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('H:i', strtotime('+1 hour')) }}" required>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-end_time"></p>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="actual_hours" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Hours</label>
-                            <input id="actual_hours" name="actual_hours" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" placeholder="0.00" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-actual_hours"></p>
-                        </div>
-                        
-                       
-                    
-                        
-                        <div class="col-md-3">
-                            <label for="start_kilometer_reading" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Start Odo (KM)</label>
-                            <input id="start_kilometer_reading" name="start_kilometer_reading" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" value="0" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-start_kilometer_reading"></p>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="end_kilometer_reading" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">End Odo (KM)</label>
-                            <input id="end_kilometer_reading" name="end_kilometer_reading" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" value="0" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-end_kilometer_reading"></p>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="start_hour_reading" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Start Engine (HR)</label>
-                            <input id="start_hour_reading" name="start_hour_reading" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" value="0" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-start_hour_reading"></p>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="end_hour_reading" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">End Engine (HR)</label>
-                            <input id="end_hour_reading" name="end_hour_reading" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" value="0" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-end_hour_reading"></p>
-                        </div>
-                        <div class="col-12">
-                            <label for="remarks" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Remarks</label>
-                            <textarea id="remarks" name="remarks" rows="2" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" placeholder="Any additional notes..."></textarea>
-                            <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-remarks"></p>
-                        </div>
+        <!-- Register Utilization Form Modal -->
+        <div class="modal fade" id="utilizationModal" tabindex="-1" aria-labelledby="utilizationModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content bg-dark border-0">
+                    <div class="modal-header border-secondary border-opacity-25 px-4 px-md-5 py-4 bg-dark">
+                        <h4 class="modal-title h4 fw-bold text-light d-flex align-items-center" id="utilizationModalLabel">
+                            <span class="bg-primary p-2 rounded-3 me-3 text-white d-inline-flex align-items-center">
+                                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                            </span>
+                            Register Utilization
+                        </h4>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
+                    <div class="modal-body p-4 p-md-5 bg-dark">
+                        <form id="utilization-form">
+                            @csrf
+                            <input type="hidden" name="asset_id" value="{{ $asset->id }}">
+                            
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="reference" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Reference</label>
+                                    <input id="reference" name="reference" type="text" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required placeholder="e.g. REF-001">
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-reference"></p>
+                                </div>
 
-                    <div class="d-flex justify-content-end pt-5 mt-5 border-top border-secondary border-opacity-25">
-                        <button type="submit" id="submit-btn" class="btn btn-primary rounded-pill px-5 py-3 fw-bold text-uppercase tracking-widest shadow-sm">
-                            <span id="btn-text">Submit Entry</span>
-                            <div id="btn-spinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></div>
-                        </button>
+                                <div class="col-md-6">
+                                    <label for="driver_operator_name" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Personnel In-Charge</label>
+                                    <input id="driver_operator_name" name="driver_operator_name" type="text" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required placeholder="Driver or Operator">
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-driver_operator_name"></p>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="calculation_type" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Calculation Type</label>
+                                    <select id="calculation_type" name="calculation_type" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required>
+                                        <option value="">-- Select Calculation Type --</option>
+                                        <option value="Kilometer Reading">Kilometer Reading</option>
+                                        <option value="Hour Reading">Hour Reading</option>
+                                        <option value="Timeframe">Timeframe</option>
+                                        <option value="Actual Hours">Actual Hours</option>
+                                    </select>
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-calculation_type"></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="unbudgeted" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Unbudgeted</label>
+                                    <select id="unbudgeted" name="unbudgeted" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required onchange="toggleSubAccount()">
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-unbudgeted"></p>
+                                </div>
+
+                                 <div class="col-md-6">
+                                    <label for="chargeable_account_id" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Charged To</label>
+                                    <select id="chargeable_account_id" name="chargeable_account_id" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required onchange="fetchSubAccounts(this.value)">
+                                        <option value="">-- Select Account --</option>
+                                        @foreach($chargeableAccounts as $account)
+                                            <option value="{{ $account->id }}"
+                                                    data-classification="{{ $account->classification }}"
+                                                    data-start-date="{{ $account->start_date ? $account->start_date->format('Y-m-d') : '' }}"
+                                                    data-end-date="{{ $account->end_date ? $account->end_date->format('Y-m-d') : '' }}">
+                                                {{ $account->name }}
+                                                @if($account->classification === 'Scoped')
+                                                    ({{ $account->start_date ? $account->start_date->format('M d, Y') : 'N/A' }} - {{ $account->end_date ? $account->end_date->format('M d, Y') : 'N/A' }})
+                                                @endif
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-chargeable_account_id"></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="sub_account_id" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Sub Account</label>
+                                    <select id="sub_account_id" name="sub_account_id" class="form-select bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required disabled>
+                                        <option value="">-- Select Sub Account --</option>
+                                    </select>
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-sub_account_id"></p>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <label for="particulars" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Particulars / Mission</label>
+                                    <textarea id="particulars" name="particulars" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" required placeholder="Describe the activity..."></textarea>
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-particulars"></p>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label for="date" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Date</label>
+                                    <input id="date" name="date" type="date" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('Y-m-d') }}" required>
+                                    <div id="date-scope-error" class="text-danger small fw-bold mt-1 ps-1 d-none"></div>
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-date"></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="start_time" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Start Time</label>
+                                    <input id="start_time" name="start_time" type="time" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('H:i') }}" required>
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-start_time"></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="end_time" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">End Time</label>
+                                    <input id="end_time" name="end_time" type="time" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" value="{{ date('H:i', strtotime('+1 hour')) }}" required>
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-end_time"></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="actual_hours" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Hours</label>
+                                    <input id="actual_hours" name="actual_hours" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" placeholder="0.00" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-actual_hours"></p>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <label for="start_kilometer_reading" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Start Odo (KM)</label>
+                                    <input id="start_kilometer_reading" name="start_kilometer_reading" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" value="0" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-start_kilometer_reading"></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="end_kilometer_reading" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">End Odo (KM)</label>
+                                    <input id="end_kilometer_reading" name="end_kilometer_reading" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" value="0" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-end_kilometer_reading"></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="start_hour_reading" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Start Engine (HR)</label>
+                                    <input id="start_hour_reading" name="start_hour_reading" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" value="0" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-start_hour_reading"></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="end_hour_reading" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">End Engine (HR)</label>
+                                    <input id="end_hour_reading" name="end_hour_reading" type="number" step="0.01" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light font-monospace focus-ring focus-ring-primary" value="0" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46">
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-end_hour_reading"></p>
+                                </div>
+                                <div class="col-12">
+                                    <label for="remarks" class="form-label text-secondary text-uppercase small fw-bold tracking-widest ps-1 mb-2">Remarks</label>
+                                    <textarea id="remarks" name="remarks" rows="2" class="form-control bg-dark bg-opacity-25 border-secondary border-opacity-50 text-light focus-ring focus-ring-primary" placeholder="Any additional notes..."></textarea>
+                                    <p class="text-danger small fw-bold mt-1 ps-1 d-none" id="error-remarks"></p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end pt-5 mt-5 border-top border-secondary border-opacity-25">
+                                <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-3 fw-bold text-uppercase tracking-widest me-3" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" id="submit-btn" class="btn btn-primary rounded-pill px-5 py-3 fw-bold text-uppercase tracking-widest shadow-sm">
+                                    <span id="btn-text">Submit Entry</span>
+                                    <div id="btn-spinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></div>
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
 
@@ -293,7 +293,13 @@
         <div class="card bg-dark border-secondary border-opacity-25 shadow-sm overflow-hidden">
             <div class="card-header bg-secondary bg-opacity-10 py-4 px-4 border-bottom border-secondary border-opacity-25">
                 <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4">
-                    <h3 class="h5 fw-bold text-light mb-0 tracking-tight">{{ __('Utilization Logs') }}</h3>
+                    <div class="d-flex align-items-center gap-3">
+                        <h3 class="h5 fw-bold text-light mb-0 tracking-tight">{{ __('Utilization Logs') }}</h3>
+                        <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest" data-bs-toggle="modal" data-bs-target="#utilizationModal" style="font-size: 0.7rem;">
+                            <svg width="12" height="12" class="me-1 d-inline-block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                            Register
+                        </button>
+                    </div>
                     
                     <div class="d-flex flex-wrap align-items-center gap-3">
                         <div class="d-flex align-items-center gap-2">
@@ -508,6 +514,13 @@
                     // Re-validate restored values
                     validateDateScope();
                     
+                    // Close Modal
+                    const modalEl = document.getElementById('utilizationModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+
                     alert(data.message);
                 } else {
                     // Show errors
