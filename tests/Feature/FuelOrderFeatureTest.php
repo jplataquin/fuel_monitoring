@@ -469,4 +469,55 @@ class FuelOrderFeatureTest extends TestCase
                 'remarks' => 'required_without',
             ]);
     }
+
+    public function test_show_fuel_order_displays_fuel_type_in_say_quantity_when_asset_is_present()
+    {
+        $user = User::factory()->create(['role' => 'data_logger']);
+        $type = AssetType::create(['name' => 'Vehicle']);
+        $account = ChargeableAccount::create(['name' => 'Project Alpha', 'status' => 'Active']);
+        $asset = Asset::create([
+            'fleet_no' => 'V-001',
+            'asset_type_id' => $type->id,
+            'fuel_type' => 'Diesel',
+            'fuel_factor_km' => 2.5,
+            'fuel_factor_hr' => 1.5,
+            'tank_capacity' => 100,
+        ]);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $asset->id,
+            'chargeable_account_id' => $account->id,
+            'calculated_quantity' => 100,
+            'say_quantity' => 100,
+            'status' => 'PEND',
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('fuel-orders.show', $fuelOrder));
+
+        $response->assertStatus(200);
+        $response->assertSee('Say Fuel Quantity (Diesel):');
+    }
+
+    public function test_show_fuel_order_does_not_display_fuel_type_in_say_quantity_for_direct_orders()
+    {
+        $user = User::factory()->create(['role' => 'data_logger']);
+        $account = ChargeableAccount::create(['name' => 'Project Alpha', 'status' => 'Active']);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'calculated_quantity' => 0,
+            'say_quantity' => 100,
+            'status' => 'PEND',
+            'created_by' => $user->id,
+            'remarks' => 'Monthly generator replenishment',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('fuel-orders.show', $fuelOrder));
+
+        $response->assertStatus(200);
+        $response->assertSee('Say Fuel Quantity:');
+        $response->assertDontSee('Say Fuel Quantity (');
+    }
 }

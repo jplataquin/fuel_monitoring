@@ -30,7 +30,7 @@ class SubAccountBudgetController extends Controller
             $budgets = new LengthAwarePaginator([], 0, 50);
         }
 
-        $accounts = ChargeableAccount::orderBy('name')->get();
+        $accounts = ChargeableAccount::where('status', 'Active')->orderBy('name')->get();
 
         return view('sub-account-budgets.index', compact('budgets', 'accounts'));
     }

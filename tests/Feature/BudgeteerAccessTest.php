@@ -162,4 +162,17 @@ class BudgeteerAccessTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_budget_index_only_shows_active_accounts_in_dropdown(): void
+    {
+        $user = User::factory()->create(['role' => 'budgeteer']);
+        $activeAccount = ChargeableAccount::create(['name' => 'Active Account', 'status' => 'Active']);
+        $inactiveAccount = ChargeableAccount::create(['name' => 'Inactive Account', 'status' => 'Inactive']);
+
+        $response = $this->actingAs($user)->get(route('account-budgets.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Active Account');
+        $response->assertDontSee('Inactive Account');
+    }
 }

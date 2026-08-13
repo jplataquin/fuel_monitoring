@@ -328,7 +328,7 @@
                 </div>
             </div>
             
-            <div class="table-responsive d-none d-md-block">
+            <div id="table-scroll-container" class="table-responsive d-none d-md-block" style="cursor: grab; overflow-x: auto; -webkit-overflow-scrolling: touch;">
                 <table class="table table-dark table-hover mb-0 align-middle" style="min-width:1500px">
                     <thead>
                         <tr class="bg-secondary bg-opacity-5">
@@ -603,7 +603,14 @@
                         // Desktop Row
                         const row = document.createElement('tr');
                         row.style.cursor = 'pointer';
-                        row.onclick = () => window.location.href = `/utilization-entries/${entry.id}`;
+                        row.onclick = (e) => {
+                            const container = document.getElementById('table-scroll-container');
+                            if (container && container.isDragging) {
+                                e.preventDefault();
+                                return;
+                            }
+                            window.location.href = `/utilization-entries/${entry.id}`;
+                        };
                         row.innerHTML = `
                             <td class="ps-4 py-3">
                                 <div class="fw-bold text-light small">${formattedDate}</div>
@@ -874,5 +881,45 @@
         loadLogs();
         validateDateScope();
         updateFieldStates();
+
+        // Click-and-drag horizontal scrolling
+        const slider = document.getElementById('table-scroll-container');
+        if (slider) {
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            slider.addEventListener('mousedown', (e) => {
+                isDown = true;
+                slider.style.cursor = 'grabbing';
+                slider.style.userSelect = 'none';
+                startX = e.pageX - slider.offsetLeft;
+                scrollLeft = slider.scrollLeft;
+                slider.isDragging = false;
+            });
+
+            slider.addEventListener('mouseleave', () => {
+                isDown = false;
+                slider.style.cursor = 'grab';
+                slider.style.removeProperty('user-select');
+            });
+
+            slider.addEventListener('mouseup', () => {
+                isDown = false;
+                slider.style.cursor = 'grab';
+                slider.style.removeProperty('user-select');
+            });
+
+            slider.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - slider.offsetLeft;
+                const walk = (x - startX) * 1.5; // Scroll speed multiplier
+                if (Math.abs(walk) > 5) {
+                    slider.isDragging = true;
+                }
+                slider.scrollLeft = scrollLeft - walk;
+            });
+        }
     </script>
 </x-app-layout>

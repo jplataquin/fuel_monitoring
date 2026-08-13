@@ -239,12 +239,12 @@
 
                         <div class="{{ $isPrint ? 'border border-dark' : 'bg-dark bg-opacity-50 border border-secondary border-opacity-25 shadow-inner' }} rounded-4 p-4 mb-4">
                             <div class="d-flex justify-content-between align-items-center {{ $fuelOrder->status === 'DONE' ? 'mb-3 pb-3 border-bottom border-secondary border-opacity-25' : '' }}">
-                                <span class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} mb-0">Say Fuel Quantity:</span>
+                                <span class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} mb-0">Say Fuel Quantity{{ $fuelOrder->asset && $fuelOrder->asset->fuel_type ? ' (' . $fuelOrder->asset->fuel_type . ')' : '' }}:</span>
                                 <span class="h2 fw-black text-primary mb-0 font-monospace">{{ number_format($fuelOrder->say_quantity, 2) }} L</span>
                             </div>
                             @if($fuelOrder->status === 'DONE')
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} mb-0">Actual Quantity:</span>
+                                    <span class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} mb-0">Actual Quantity{{ $fuelOrder->asset && $fuelOrder->asset->fuel_type ? ' (' . $fuelOrder->asset->fuel_type . ')' : '' }}:</span>
                                     <span class="h2 fw-black {{ $isPrint ? 'text-dark' : 'text-success' }} mb-0 font-monospace">{{ number_format($fuelOrder->actual_quantity, 2) }} L</span>
                                 </div>
                             @endif
