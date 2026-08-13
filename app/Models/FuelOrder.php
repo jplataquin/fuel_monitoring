@@ -34,6 +34,7 @@ class FuelOrder extends Model
         'actualized_at',
         'void_by',
         'void_at',
+        'void_remarks',
         'deleted_by',
     ];
 

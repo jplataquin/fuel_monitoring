@@ -18,13 +18,10 @@
                 </div>
                 <div class="d-flex align-items-center gap-2 d-print-none flex-wrap">
                     @if(Auth::user()->role === 'administrator' && $fuelOrder->status !== 'VOID')
-                        <form action="{{ route('fuel-orders.void', $fuelOrder) }}" method="POST" onsubmit="return confirm('Are you sure you want to void this fuel order? This will release all associated utilization entries and mark this order as VOID.')" class="d-inline">
-                            @csrf
-                            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold small text-uppercase tracking-widest shadow-sm">
-                                <svg width="16" height="16" class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                Void Order
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold small text-uppercase tracking-widest shadow-sm" data-bs-toggle="modal" data-bs-target="#voidOrderModal">
+                            <svg width="16" height="16" class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Void Order
+                        </button>
                     @endif
                     @if(Auth::user()->role === 'administrator')
                         <a href="{{ route('fuel-orders.edit', $fuelOrder) }}" class="btn btn-primary rounded-pill px-4 fw-bold small text-uppercase tracking-widest shadow-sm">
@@ -259,6 +256,15 @@
                             </div>
                         @endif
 
+                        @if($fuelOrder->status === 'VOID' && $fuelOrder->void_remarks)
+                            <div class="mb-5">
+                                <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-danger' }} text-uppercase tracking-wider mb-2">Void Remarks</h4>
+                                <div class="p-3 rounded-3 border {{ $isPrint ? 'border-dark text-dark' : 'bg-danger bg-opacity-10 border-danger border-opacity-25 text-light font-monospace' }} small">
+                                    {{ $fuelOrder->void_remarks }}
+                                </div>
+                            </div>
+                        @endif
+
                         <div class="row g-5 pt-4 {{ $isPrint ? '' : 'border-top border-secondary border-opacity-25 mt-4' }}">
                             <div class="col-6 text-center">
                                 <div class="border-bottom border-dark pb-1 mb-2 px-3 d-flex align-items-end justify-content-center" style="min-height: 2.5rem;">
@@ -343,4 +349,36 @@
             </div>
         </div>
     </div>
+    @if(Auth::user()->role === 'administrator' && $fuelOrder->status !== 'VOID')
+        <!-- Void Order Confirmation Modal -->
+        <div class="modal fade d-print-none" id="voidOrderModal" tabindex="-1" aria-labelledby="voidOrderModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content bg-dark border border-secondary border-opacity-25">
+                    <form action="{{ route('fuel-orders.void', $fuelOrder) }}" method="POST">
+                        @csrf
+                        <div class="modal-header border-secondary border-opacity-10">
+                            <h5 class="modal-title h5 fw-bold text-light d-flex align-items-center" id="voidOrderModalLabel">
+                                <svg width="24" height="24" class="text-danger me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                Confirm Void Order
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-secondary small mb-4">
+                                Are you sure you want to void this fuel order? This will release all associated utilization entries and mark this order as <strong class="text-danger">VOID</strong>. This action cannot be undone.
+                            </p>
+                            <div class="mb-3">
+                                <label for="void_remarks" class="form-label text-secondary text-uppercase small fw-bold tracking-widest mb-2">Void Remarks / Reason <span class="text-danger">*</span></label>
+                                <textarea id="void_remarks" name="void_remarks" class="form-control bg-dark text-light border-secondary border-opacity-50" rows="3" placeholder="Enter reason for voiding..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-secondary border-opacity-10">
+                            <button type="button" class="btn btn-secondary rounded-pill px-4 small fw-bold text-uppercase tracking-widest" data-bs-modal="dismiss" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger rounded-pill px-4 small fw-bold text-uppercase tracking-widest">Void Order</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
 </x-dynamic-component>

@@ -162,8 +162,12 @@ class FuelOrderController extends Controller
             return redirect()->back()->with('error', 'This fuel order is already voided.');
         }
 
+        $validated = $request->validate([
+            'void_remarks' => 'required|string|max:500',
+        ]);
+
         // Use a transaction to ensure both operations succeed
-        DB::transaction(function () use ($fuelOrder) {
+        DB::transaction(function () use ($fuelOrder, $validated) {
             // Remove fuel_order_id from all associated utilization entries
             $fuelOrder->utilizationEntries()->update(['fuel_order_id' => null]);
 
@@ -172,6 +176,7 @@ class FuelOrderController extends Controller
                 'status' => 'VOID',
                 'void_by' => Auth::id(),
                 'void_at' => now(),
+                'void_remarks' => $validated['void_remarks'],
                 'updated_by' => Auth::id(),
             ]);
         });

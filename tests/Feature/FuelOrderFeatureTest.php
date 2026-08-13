@@ -415,13 +415,16 @@ class FuelOrderFeatureTest extends TestCase
 
         $this->assertEquals($fuelOrder->id, $entry->fresh()->fuel_order_id);
 
-        $response = $this->actingAs($user)->post(route('fuel-orders.void', $fuelOrder));
+        $response = $this->actingAs($user)->post(route('fuel-orders.void', $fuelOrder), [
+            'void_remarks' => 'Test void remarks',
+        ]);
 
         $response->assertRedirect(route('fuel-orders.index'));
 
         $this->assertDatabaseHas('fuel_orders', [
             'id' => $fuelOrder->id,
             'status' => 'VOID',
+            'void_remarks' => 'Test void remarks',
         ]);
 
         $this->assertNull($entry->fresh()->fuel_order_id);
