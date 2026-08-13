@@ -17,8 +17,23 @@ class FuelOrderController extends Controller
         $query = FuelOrder::with(['asset', 'creator', 'chargeableAccount', 'subAccount']);
 
         if ($request->filled('fleet_no')) {
-            $query->whereHas('asset', function ($q) use ($request) {
-                $q->where('fleet_no', 'like', '%'.$request->fleet_no.'%');
+            $searchTerm = $request->fleet_no;
+            $searchId = ltrim($searchTerm, '#');
+            $searchIdInt = ltrim($searchId, '0');
+
+            $query->where(function ($q) use ($searchTerm, $searchId, $searchIdInt) {
+                $q->where('id', 'like', '%'.$searchTerm.'%');
+                
+                if ($searchId !== '') {
+                    $q->orWhere('id', 'like', '%'.$searchId.'%');
+                }
+                if ($searchIdInt !== '') {
+                    $q->orWhere('id', '=', $searchIdInt);
+                }
+
+                $q->orWhereHas('asset', function ($assetQuery) use ($searchTerm) {
+                    $assetQuery->where('fleet_no', 'like', '%'.$searchTerm.'%');
+                });
             });
         }
 

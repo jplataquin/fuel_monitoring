@@ -7,7 +7,7 @@
             <div class="d-flex align-items-center gap-3">
                 <form action="{{ route('fuel-orders.index') }}" method="GET" class="d-flex">
                     <div class="input-group">
-                        <input type="text" name="fleet_no" value="{{ request('fleet_no') }}" placeholder="Search Fleet No..." class="form-control bg-dark text-light border-secondary border-opacity-50 rounded-start-pill px-4 py-2 text-sm" style="width: 200px;">
+                        <input type="text" name="fleet_no" value="{{ request('fleet_no') }}" placeholder="Search Fleet No / Order ID..." class="form-control bg-dark text-light border-secondary border-opacity-50 rounded-start-pill px-4 py-2 text-sm" style="width: 200px;">
                         <button type="submit" class="btn btn-secondary border-secondary border-opacity-50 rounded-end-pill px-4 py-2">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </button>
