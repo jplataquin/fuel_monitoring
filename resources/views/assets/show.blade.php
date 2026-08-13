@@ -360,7 +360,7 @@
             <div id="infinite-scroll-sentinel" class="py-1"></div>
 
             <div id="no-more-logs" class="p-4 text-center bg-secondary bg-opacity-5 d-none">
-                <p class="small fw-bold text-secondary text-uppercase tracking-widest mb-0">End of History</p>
+                <p class="small fw-bold text-dark text-uppercase tracking-widest mb-0">End of History</p>
             </div>
         </div>
     </div>
