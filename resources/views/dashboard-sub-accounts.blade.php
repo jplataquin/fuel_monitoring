@@ -16,10 +16,10 @@
                     @endif
                 </p>
             </div>
-            <div class="d-flex gap-2">
-                <button onclick="window.print()" class="btn btn-outline-info rounded-pill px-4 shadow-sm fw-bold text-uppercase small d-flex align-items-center gap-2">
+            <div class="d-flex gap-2 d-print-none">
+                <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" target="_blank" class="btn btn-outline-info rounded-pill px-4 shadow-sm fw-bold text-uppercase small d-flex align-items-center gap-2">
                     <i class="bi bi-printer"></i> Print Dashboard
-                </button>
+                </a>
                 <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm fw-bold text-uppercase small d-flex align-items-center gap-2">
                     <i class="bi bi-arrow-left"></i> Back to Dashboard
                 </a>

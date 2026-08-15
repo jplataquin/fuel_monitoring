@@ -27,6 +27,84 @@
             .transition-all {
                 transition: all 0.2s ease-in-out;
             }
+            
+            /* Compact Print View styles (works both on screen preview and on paper) */
+            .compact-print-view {
+                background-color: white !important;
+                color: black !important;
+                font-size: 0.75rem !important;
+                line-height: 1.25 !important;
+            }
+            .compact-print-view .public-header {
+                display: none !important;
+            }
+            .compact-print-view h1, .compact-print-view .h1,
+            .compact-print-view h2, .compact-print-view .h2 {
+                font-size: 1.15rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+            .compact-print-view h3, .compact-print-view .h3 {
+                font-size: 0.95rem !important;
+                margin-bottom: 0.25rem !important;
+            }
+            .compact-print-view h4, .compact-print-view .h4,
+            .compact-print-view h5, .compact-print-view .h5,
+            .compact-print-view h6, .compact-print-view .h6 {
+                font-size: 0.8rem !important;
+                margin-bottom: 0.25rem !important;
+            }
+            .compact-print-view .container, .compact-print-view .container-xl {
+                max-width: 100% !important;
+                padding: 10px !important;
+                margin: 0 !important;
+            }
+            .compact-print-view .py-5 {
+                padding-top: 10px !important;
+                padding-bottom: 10px !important;
+            }
+            .compact-print-view .mb-5 {
+                margin-bottom: 15px !important;
+            }
+            .compact-print-view .g-4, .compact-print-view .row {
+                --bs-gutter-x: 10px !important;
+                --bs-gutter-y: 10px !important;
+            }
+            .compact-print-view .card {
+                padding: 12px !important;
+                border-radius: 8px !important;
+                background-color: white !important;
+                color: black !important;
+                border: 1px solid #dee2e6 !important;
+                box-shadow: none !important;
+            }
+            .compact-print-view .card-header {
+                margin-bottom: 8px !important;
+            }
+            .compact-print-view canvas {
+                max-height: 220px !important;
+            }
+            .compact-print-view .table {
+                --bs-table-bg: transparent !important;
+                --bs-table-color: black !important;
+                --bs-table-border-color: #dee2e6 !important;
+                --bs-table-striped-bg: rgba(0, 0, 0, 0.03) !important;
+                color: black !important;
+                border-color: #dee2e6 !important;
+                margin-bottom: 0 !important;
+            }
+            .compact-print-view .table th, .compact-print-view .table td {
+                padding: 3px 6px !important;
+                font-size: 0.7rem !important;
+            }
+            .compact-print-view .bg-dark, .compact-print-view .table-dark, .compact-print-view .modal-content, .compact-print-view .bg-secondary {
+                background-color: white !important;
+                color: black !important;
+                border-color: #dee2e6 !important;
+            }
+            .compact-print-view .text-light, .compact-print-view .text-white, .compact-print-view .text-secondary, .compact-print-view .text-info {
+                color: black !important;
+            }
+
             @media print {
                 html, [data-bs-theme="dark"] {
                     color-scheme: light !important;
@@ -69,7 +147,7 @@
             }
         </style>
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased {{ request()->query('print') == 1 ? 'compact-print-view bg-white text-dark' : '' }}">
         <div class="min-vh-100 pb-5">
             
             <!-- Minimalist Header -->
@@ -366,6 +444,17 @@
                             }
                         }
                     });
+                });
+            </script>
+        @endif
+
+        @if(request()->query('print') == 1)
+            <script>
+                window.addEventListener('load', () => {
+                    // Wait a brief moment for Chart.js to render fully
+                    setTimeout(() => {
+                        window.print();
+                    }, 1200);
                 });
             </script>
         @endif
