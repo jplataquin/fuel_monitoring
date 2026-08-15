@@ -280,6 +280,7 @@
                                                 <th class="px-4 py-3 border-secondary text-end">Total Budget (L)</th>
                                                 <th class="px-4 py-3 border-secondary text-end">Consumed (L)</th>
                                                 <th class="px-4 py-3 border-secondary text-end">Remaining (L)</th>
+                                                <th class="px-4 py-3 border-secondary text-end">Fuel Used (%)</th>
                                                 <th class="px-4 py-3 border-secondary text-center" style="width: 15%">Utilization Status</th>
                                             </tr>
                                         </thead>
@@ -313,6 +314,9 @@
                                                     <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info">
                                                         {{ number_format($sa['remaining'], 2) }}
                                                     </td>
+                                                    <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-light">
+                                                        {{ number_format($saPercent, 1) }}%
+                                                    </td>
                                                     <td class="px-4 py-3 text-center border-secondary">
                                                         <span class="badge rounded-pill fw-bold text-uppercase small px-3 py-2 {{ $saStatusBg }}">
                                                             {{ $saStatus }}
@@ -321,7 +325,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="5" class="px-4 py-5 text-center text-secondary border-secondary">
+                                                    <td colspan="6" class="px-4 py-5 text-center text-secondary border-secondary">
                                                         No sub-accounts allocated to this chargeable account.
                                                     </td>
                                                 </tr>

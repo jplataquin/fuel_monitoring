@@ -37,6 +37,20 @@ class FuelOrderController extends Controller
             });
         }
 
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('chargeable_account_id')) {
+            $accountId = $request->chargeable_account_id;
+            $query->where(function ($q) use ($accountId) {
+                $q->where('chargeable_account_id', $accountId)
+                    ->orWhereHas('utilizationEntries', function ($ueQ) use ($accountId) {
+                        $ueQ->where('chargeable_account_id', $accountId);
+                    });
+            });
+        }
+
         $fuelOrders = $query->latest()->paginate(10)->withQueryString();
 
         return view('fuel-orders.index', compact('fuelOrders'));

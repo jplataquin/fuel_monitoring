@@ -94,8 +94,13 @@
                                     <div class="text-success small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.65rem; color: #34d399 !important;">Total Calculated Quantity</div>
                                     <div class="h3 font-monospace fw-bold text-success mb-0" style="color: #34d399 !important;">{{ number_format($totalConsumed, 2) }} L</div>
                                 </div>
-                                <div class="p-3 bg-warning bg-opacity-10 rounded-3 text-center">
-                                    <div class="text-warning small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.65rem; color: #fbbf24 !important;">Total Actual Quantity</div>
+                                <div class="p-3 bg-warning bg-opacity-10 rounded-3 text-center position-relative">
+                                    <div class="text-warning small fw-bold text-uppercase tracking-wider mb-1 d-flex align-items-center justify-content-center gap-2" style="font-size: 0.65rem; color: #fbbf24 !important;">
+                                        Total Actual Quantity
+                                        <a href="{{ route('fuel-orders.index', ['chargeable_account_id' => $chargeableAccount->id, 'status' => 'DONE']) }}" class="text-warning hover-opacity-75 transition-all d-print-none" title="View associated fuel orders">
+                                            <i class="bi bi-box-arrow-up-right" style="font-size: 0.75rem;"></i>
+                                        </a>
+                                    </div>
                                     <div class="h3 font-monospace fw-bold text-warning mb-0" style="color: #fbbf24 !important;">{{ number_format($totalActualQuantity ?? 0, 2) }} L</div>
                                 </div>
                                 <div class="p-3 bg-info bg-opacity-10 rounded-3 text-center">
@@ -135,6 +140,7 @@
                                             <th class="px-4 py-3 border-secondary text-end">Total Budget (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end">Consumed (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end">Remaining (L)</th>
+                                            <th class="px-4 py-3 border-secondary text-end">Fuel Used (%)</th>
                                             <th class="px-4 py-3 border-secondary text-center" style="width: 15%">Utilization Status</th>
                                         </tr>
                                     </thead>
@@ -168,6 +174,9 @@
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info">
                                                     {{ number_format($sa['remaining'], 2) }}
                                                 </td>
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-light">
+                                                    {{ number_format($saPercent, 1) }}%
+                                                </td>
                                                 <td class="px-4 py-3 text-center border-secondary">
                                                     <span class="badge rounded-pill fw-bold text-uppercase small px-3 py-2 {{ $saStatusBg }}">
                                                         {{ $saStatus }}
@@ -176,7 +185,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="5" class="px-4 py-5 text-center text-secondary border-secondary">
+                                                <td colspan="6" class="px-4 py-5 text-center text-secondary border-secondary">
                                                     No sub-accounts allocated to this chargeable account.
                                                 </td>
                                             </tr>

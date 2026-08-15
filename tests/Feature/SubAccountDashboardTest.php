@@ -300,4 +300,79 @@ class SubAccountDashboardTest extends TestCase
         $response->assertSee('EX-900');
         $response->assertSee('#'.$order->id);
     }
+
+    public function test_fuel_orders_index_filters_by_chargeable_account_id_and_status(): void
+    {
+        $account1 = ChargeableAccount::create([
+            'name' => 'Account 1',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+        $account2 = ChargeableAccount::create([
+            'name' => 'Account 2',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount1 = SubAccount::create([
+            'chargeable_account_id' => $account1->id,
+            'name' => 'Sub 1',
+        ]);
+        $subAccount2 = SubAccount::create([
+            'chargeable_account_id' => $account2->id,
+            'name' => 'Sub 2',
+        ]);
+
+        // Direct order for account 1
+        $order1 = FuelOrder::create([
+            'status' => 'DONE',
+            'actual_quantity' => 100,
+            'chargeable_account_id' => $account1->id,
+        ]);
+
+        // Direct order for account 2
+        $order2 = FuelOrder::create([
+            'status' => 'DONE',
+            'actual_quantity' => 200,
+            'chargeable_account_id' => $account2->id,
+        ]);
+
+        // Nested order for account 1 via utilization entry
+        $order3 = FuelOrder::create([
+            'status' => 'DONE',
+            'actual_quantity' => 300,
+        ]);
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-08-15',
+            'start_time' => '08:00',
+            'end_time' => '13:00',
+            'chargeable_account_id' => $account1->id,
+            'sub_account_id' => $subAccount1->id,
+            'fuel_order_id' => $order3->id,
+            'calculation_type' => 'Actual Hours',
+            'actual_hours' => 5,
+            'driver_operator_name' => 'John Operator',
+            'reference' => 'REF-1234',
+            'particulars' => 'Road Work',
+        ]);
+
+        // Assert dashboard renders the box arrow link
+        $dashboardResponse = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account1));
+        $dashboardResponse->assertStatus(200);
+        $dashboardResponse->assertSee('bi-box-arrow-up-right');
+
+        // Test filtering by chargeable_account_id
+        $filterResponse = $this->actingAs($this->admin)->get(route('fuel-orders.index', [
+            'chargeable_account_id' => $account1->id,
+            'status' => 'DONE',
+        ]));
+
+        $filterResponse->assertStatus(200);
+        // Should see order 1 and order 3
+        $filterResponse->assertSee('#' . str_pad($order1->id, 5, '0', STR_PAD_LEFT));
+        $filterResponse->assertSee('#' . str_pad($order3->id, 5, '0', STR_PAD_LEFT));
+        // Should NOT see order 2
+        $filterResponse->assertDontSee('#' . str_pad($order2->id, 5, '0', STR_PAD_LEFT));
+    }
 }
