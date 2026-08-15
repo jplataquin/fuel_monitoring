@@ -5,7 +5,27 @@
                 {{ __('Fuel Orders') }}
             </h2>
             <div class="d-flex align-items-center gap-3">
-                <form action="{{ route('fuel-orders.index') }}" method="GET" class="d-flex">
+                <form action="{{ route('fuel-orders.index') }}" method="GET" class="d-flex align-items-center gap-2">
+                    <select name="chargeable_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 rounded-pill px-3 py-2 text-sm" style="width: 200px;" onchange="this.form.submit()">
+                        <option value="">All Accounts</option>
+                        @foreach($chargeableAccounts as $acc)
+                            <option value="{{ $acc->id }}" {{ request('chargeable_account_id') == $acc->id ? 'selected' : '' }}>
+                                {{ $acc->name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="sub_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 rounded-pill px-3 py-2 text-sm" style="width: 200px;" onchange="this.form.submit()">
+                        <option value="">All Sub-Accounts</option>
+                        @foreach($subAccounts as $sub)
+                            @if(!request('chargeable_account_id') || $sub->chargeable_account_id == request('chargeable_account_id'))
+                                <option value="{{ $sub->id }}" {{ request('sub_account_id') == $sub->id ? 'selected' : '' }}>
+                                    {{ $sub->name }}
+                                </option>
+                            @endif
+                        @endforeach
+                    </select>
+
                     <div class="input-group">
                         <input type="text" name="fleet_no" value="{{ request('fleet_no') }}" placeholder="Search Fleet No / Order ID..." class="form-control bg-dark text-light border-secondary border-opacity-50 rounded-start-pill px-4 py-2 text-sm" style="width: 200px;">
                         <button type="submit" class="btn btn-secondary border-secondary border-opacity-50 rounded-end-pill px-4 py-2">
@@ -42,6 +62,8 @@
                             <tr class="bg-secondary bg-opacity-10">
                                 <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">ID</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Asset</th>
+                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Chargeable Account</th>
+                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Sub-Account</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Calculated</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Say Qty</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest text-center">Status</th>
@@ -61,17 +83,21 @@
                                             <div class="fw-bold text-light small tracking-tight">{{ $order->asset->fleet_no }}</div>
                                             <div class="text-secondary small text-uppercase tracking-widest" style="font-size: 10px;">{{ $order->asset->plate_no ?? 'No Plate' }}</div>
                                         @else
-                                            <div class="fw-bold text-primary small tracking-tight">Direct Account</div>
-                                            <div class="text-secondary small text-uppercase tracking-widest font-monospace" style="font-size: 10px;">
-                                                {{ $order->chargeableAccount->name ?? 'Unassigned' }}
-                                                @if($order->subAccount)
-                                                    - {{ $order->subAccount->name }}
-                                                @endif
-                                                @if($order->unbudgeted)
-                                                    <span class="badge bg-danger bg-opacity-10 text-danger ms-1" style="font-size: 8px; padding: 1px 4px;">UNBUDGETED</span>
-                                                @endif
-                                            </div>
+                                            <div class="text-secondary small tracking-tight">Direct Order</div>
+                                            @if($order->unbudgeted)
+                                                <span class="badge bg-danger bg-opacity-10 text-danger" style="font-size: 8px; padding: 1px 4px;">UNBUDGETED</span>
+                                            @endif
                                         @endif
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="fw-bold text-light small tracking-tight">
+                                            {{ $order->chargeableAccount->name ?? '—' }}
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="fw-bold text-light small tracking-tight">
+                                            {{ $order->subAccount->name ?? '—' }}
+                                        </div>
                                     </td>
                                     <td class="px-4 py-3">
                                         <span class="text-light font-monospace small">{{ number_format($order->calculated_quantity, 2) }} L</span>
@@ -123,13 +149,13 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="px-4 py-5 text-center border-0">
+                                    <td colspan="10" class="px-4 py-5 text-center border-0">
                                         <div class="d-flex flex-column align-items-center justify-content-center py-5">
                                             <div class="bg-secondary bg-opacity-20 rounded-4 d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
                                                 <svg width="32" height="32" class="text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                             </div>
                                             <p class="fw-bold text-light mb-1">No fuel orders found.</p>
-                                            @if(request('fleet_no'))
+                                            @if(request('fleet_no') || request('chargeable_account_id') || request('sub_account_id'))
                                                 <p class="text-secondary small mb-3">Try adjusting your search filter.</p>
                                                 <a href="{{ route('fuel-orders.index') }}" class="btn btn-link text-primary fw-bold text-decoration-none small text-uppercase tracking-widest">Clear Filter</a>
                                             @endif

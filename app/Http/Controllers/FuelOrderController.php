@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChargeableAccount;
 use App\Models\FuelOrder;
+use App\Models\SubAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -45,15 +47,22 @@ class FuelOrderController extends Controller
             $accountId = $request->chargeable_account_id;
             $query->where(function ($q) use ($accountId) {
                 $q->where('chargeable_account_id', $accountId)
-                    ->orWhereHas('utilizationEntries', function ($ueQ) use ($accountId) {
-                        $ueQ->where('chargeable_account_id', $accountId);
-                    });
+                  ->orWhereHas('utilizationEntries', function ($ueQ) use ($accountId) {
+                      $ueQ->where('chargeable_account_id', $accountId);
+                  });
             });
+        }
+
+        if ($request->filled('sub_account_id')) {
+            $query->where('sub_account_id', $request->sub_account_id);
         }
 
         $fuelOrders = $query->latest()->paginate(10)->withQueryString();
 
-        return view('fuel-orders.index', compact('fuelOrders'));
+        $chargeableAccounts = ChargeableAccount::where('status', 'Active')->orderBy('name')->get();
+        $subAccounts = SubAccount::orderBy('name')->get();
+
+        return view('fuel-orders.index', compact('fuelOrders', 'chargeableAccounts', 'subAccounts'));
     }
 
     /**
