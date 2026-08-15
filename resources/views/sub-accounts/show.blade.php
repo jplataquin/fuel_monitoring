@@ -143,6 +143,7 @@
                             <thead>
                                 <tr class="bg-secondary bg-opacity-5">
                                     <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Date / Reference</th>
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Order ID</th>
                                     <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Asset / Equipment</th>
                                     <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Operating Interval / Hours</th>
                                     <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Odometer Interval / KM</th>
@@ -179,10 +180,19 @@
                                             $estFuel = $hoursOperated * $entry->fuel_factor_hr;
                                         }
                                     @endphp
-                                    <tr>
+                                    <tr onclick="window.location='{{ route('utilization-entries.show', $entry) }}'" style="cursor: pointer;">
                                         <td class="px-4 py-3">
                                             <span class="text-white small fw-bold d-block">{{ $entry->date ? $entry->date->format('M d, Y') : 'N/A' }}</span>
                                             <span class="text-secondary smaller fw-bold font-monospace text-uppercase">{{ $entry->reference ?: '—' }}</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            @if($entry->fuel_order_id)
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-1 font-monospace fw-bold text-uppercase small">
+                                                    #{{ $entry->fuel_order_id }}
+                                                </span>
+                                            @else
+                                                <span class="text-secondary small">—</span>
+                                            @endif
                                         </td>
                                         <td class="px-4 py-3">
                                             <span class="text-white font-monospace small fw-bold d-block">{{ $entry->asset->fleet_no ?? '—' }}</span>

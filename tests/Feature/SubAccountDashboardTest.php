@@ -270,6 +270,13 @@ class SubAccountDashboardTest extends TestCase
             'name' => 'Sub Active',
         ]);
 
+        $order = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'sub_account_id' => $subAccount->id,
+            'status' => 'DONE',
+            'actual_quantity' => 150,
+        ]);
+
         $entry = UtilizationEntry::create([
             'asset_id' => $this->asset->id,
             'date' => '2026-08-15',
@@ -277,6 +284,7 @@ class SubAccountDashboardTest extends TestCase
             'end_time' => '12:00',
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
+            'fuel_order_id' => $order->id,
             'calculation_type' => 'Timeframe',
             'driver_operator_name' => 'John Operator',
             'reference' => 'REF-1234',
@@ -290,5 +298,6 @@ class SubAccountDashboardTest extends TestCase
         $response->assertSee('REF-1234');
         $response->assertSee('Road Work');
         $response->assertSee('EX-900');
+        $response->assertSee('#'.$order->id);
     }
 }
