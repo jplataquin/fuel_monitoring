@@ -28,6 +28,46 @@
                     </div>
                 </form>
             </div>
+
+            @if(Auth::user()->role === 'administrator')
+                <div class="card bg-dark border-danger border-start border-4 shadow-lg rounded-4 p-4 mt-5">
+                    <div class="mb-4">
+                        <h3 class="h5 fw-bold text-danger mb-1">Merge Sub-Account</h3>
+                        <p class="text-secondary small">Merge this sub-account into another. This action is irreversible. All associated fuel orders, utilization entries, and budgets will be retroactively moved to the selected target sub-account, and this sub-account will be soft-deleted.</p>
+                    </div>
+
+                    <form method="POST" action="{{ route('sub-accounts.merge', $subAccount) }}">
+                        @csrf
+
+                        <div class="mb-4">
+                            <label for="merged_to_id" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Target Sub-Account (Merge Into)</label>
+                            <select id="merged_to_id" name="merged_to_id" class="form-select bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-danger" required>
+                                <option value="" disabled selected>Select target sub-account...</option>
+                                @foreach($subAccount->chargeableAccount->subAccounts->where('id', '!=', $subAccount->id) as $target)
+                                    <option value="{{ $target->id }}">{{ $target->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('merged_to_id')
+                                <div class="text-danger small mt-2 fw-bold">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="merge_remarks" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Merge Remarks</label>
+                            <textarea id="merge_remarks" name="merge_remarks" rows="3" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-danger" placeholder="Provide context or reason for this merge..." required>{{ old('merge_remarks') }}</textarea>
+                            @error('merge_remarks')
+                                <div class="text-danger small mt-2 fw-bold">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-end pt-4 border-top border-secondary border-opacity-25 gap-3">
+                            <button type="submit" class="btn btn-danger px-5 py-3 rounded-pill fw-bold small text-uppercase tracking-wider shadow" onclick="return confirm('Are you sure you want to merge this sub-account? This will permanently reassign all its history and soft-delete this sub-account.');">
+                                {{ __('Merge Sub-Account') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

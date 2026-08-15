@@ -23,7 +23,7 @@ class FuelOrderController extends Controller
 
             $query->where(function ($q) use ($searchTerm, $searchId, $searchIdInt) {
                 $q->where('id', 'like', '%'.$searchTerm.'%');
-                
+
                 if ($searchId !== '') {
                     $q->orWhere('id', 'like', '%'.$searchId.'%');
                 }

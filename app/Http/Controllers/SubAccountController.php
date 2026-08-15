@@ -3,10 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChargeableAccount;
+use App\Models\FuelOrder;
 use App\Models\SubAccount;
+use App\Models\SubAccountBudget;
+use App\Models\UtilizationEntry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -70,5 +75,49 @@ class SubAccountController extends Controller
         $subAccount->delete();
 
         return redirect()->route('chargeable-accounts.show', $chargeableAccount)->with('status', 'Sub-account deleted successfully.');
+    }
+
+    public function merge(Request $request, SubAccount $subAccount): RedirectResponse
+    {
+        if (Auth::user()->role !== 'administrator') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'merged_to_id' => [
+                'required',
+                'exists:sub_accounts,id',
+                Rule::exists('sub_accounts', 'id')
+                    ->where('chargeable_account_id', $subAccount->chargeable_account_id)
+                    ->whereNull('deleted_at'),
+                Rule::notIn([$subAccount->id]),
+            ],
+            'merge_remarks' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $targetSubAccount = SubAccount::findOrFail($validated['merged_to_id']);
+
+        DB::transaction(function () use ($subAccount, $targetSubAccount, $validated) {
+            SubAccountBudget::where('sub_account_id', $subAccount->id)
+                ->update(['sub_account_id' => $targetSubAccount->id]);
+
+            UtilizationEntry::where('sub_account_id', $subAccount->id)
+                ->update(['sub_account_id' => $targetSubAccount->id]);
+
+            FuelOrder::where('sub_account_id', $subAccount->id)
+                ->update(['sub_account_id' => $targetSubAccount->id]);
+
+            $subAccount->update([
+                'merged_to_id' => $targetSubAccount->id,
+                'merged_by' => Auth::id(),
+                'merged_at' => now(),
+                'merge_remarks' => $validated['merge_remarks'] ?? null,
+            ]);
+
+            $subAccount->delete();
+        });
+
+        return redirect()->route('chargeable-accounts.show', $subAccount->chargeableAccount)
+            ->with('status', sprintf('Sub-account "%s" has been successfully merged into "%s".', $subAccount->name, $targetSubAccount->name));
     }
 }

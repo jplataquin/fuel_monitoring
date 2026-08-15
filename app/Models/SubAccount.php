@@ -12,7 +12,18 @@ class SubAccount extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['chargeable_account_id', 'name'];
+    protected $fillable = [
+        'chargeable_account_id',
+        'name',
+        'merged_to_id',
+        'merged_by',
+        'merged_at',
+        'merge_remarks',
+    ];
+
+    protected $casts = [
+        'merged_at' => 'datetime',
+    ];
 
     public function chargeableAccount(): BelongsTo
     {
@@ -22,5 +33,15 @@ class SubAccount extends Model
     public function budgets(): HasMany
     {
         return $this->hasMany(SubAccountBudget::class);
+    }
+
+    public function mergedTo(): BelongsTo
+    {
+        return $this->belongsTo(SubAccount::class, 'merged_to_id')->withTrashed();
+    }
+
+    public function mergedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'merged_by');
     }
 }
