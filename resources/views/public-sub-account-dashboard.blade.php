@@ -27,6 +27,46 @@
             .transition-all {
                 transition: all 0.2s ease-in-out;
             }
+            @media print {
+                html, [data-bs-theme="dark"] {
+                    color-scheme: light !important;
+                }
+                body {
+                    background-color: white !important;
+                    color: black !important;
+                }
+                .public-header {
+                    background-color: transparent !important;
+                    color: black !important;
+                    border-bottom: 1px solid #dee2e6 !important;
+                    box-shadow: none !important;
+                    padding-top: 10px !important;
+                    padding-bottom: 10px !important;
+                    margin-bottom: 20px !important;
+                }
+                .public-header h1, .public-header p {
+                    color: black !important;
+                }
+                .card {
+                    background-color: white !important;
+                    color: black !important;
+                    border: 1px solid #dee2e6 !important;
+                }
+                .text-light, .text-white, .text-secondary, .text-info {
+                    color: black !important;
+                }
+                .d-print-none {
+                    display: none !important;
+                }
+                .shadow-sm, .shadow-lg {
+                    box-shadow: none !important;
+                }
+                .container-xl {
+                    max-width: 100% !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+            }
         </style>
     </head>
     <body class="font-sans antialiased">
@@ -63,7 +103,10 @@
                             @endif
                         </p>
                     </div>
-                    <div>
+                    <div class="d-flex gap-2 d-print-none">
+                        <button onclick="window.print()" class="btn btn-outline-info rounded-pill px-4 shadow-sm fw-bold text-uppercase small d-flex align-items-center gap-2">
+                            <i class="bi bi-printer"></i> Print
+                        </button>
                         <a href="{{ route('public.dashboard', $link->slug) }}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm fw-bold text-uppercase small d-flex align-items-center gap-2">
                             <i class="bi bi-arrow-left"></i> Back to Dashboard
                         </a>
