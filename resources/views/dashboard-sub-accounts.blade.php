@@ -1,36 +1,40 @@
 @php
     $title = __('Sub-Account Balances - ') . $chargeableAccount->name;
+    $isPrint = request()->query('print') == 1;
+    $layout = $isPrint ? 'print-layout' : 'app-layout';
 @endphp
 
-<x-app-layout :title="$title">
-    <x-slot name="header">
-        <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3">
-            <div>
-                <h2 class="h4 font-weight-bold text-light mb-1">
-                    {{ $title }}
-                </h2>
-                <p class="text-secondary small mb-0 text-uppercase tracking-wider fw-bold">
-                    Account Type: {{ $chargeableAccount->classification }}
-                    @if($chargeableAccount->classification === 'Scoped')
-                        ({{ $chargeableAccount->start_date ? $chargeableAccount->start_date->format('M d, Y') : 'N/A' }} - {{ $chargeableAccount->end_date ? $chargeableAccount->end_date->format('M d, Y') : 'N/A' }})
-                    @endif
-                </p>
+<x-dynamic-component :component="$layout" :title="$title">
+    @if(!$isPrint)
+        <x-slot name="header">
+            <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3">
+                <div>
+                    <h2 class="h4 font-weight-bold text-light mb-1">
+                        {{ $title }}
+                    </h2>
+                    <p class="text-secondary small mb-0 text-uppercase tracking-wider fw-bold">
+                        Account Type: {{ $chargeableAccount->classification }}
+                        @if($chargeableAccount->classification === 'Scoped')
+                            ({{ $chargeableAccount->start_date ? $chargeableAccount->start_date->format('M d, Y') : 'N/A' }} - {{ $chargeableAccount->end_date ? $chargeableAccount->end_date->format('M d, Y') : 'N/A' }})
+                        @endif
+                    </p>
+                </div>
+                <div class="d-flex gap-2 d-print-none">
+                    <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" target="_blank" class="btn btn-outline-info rounded-pill px-4 shadow-sm fw-bold text-uppercase small d-flex align-items-center gap-2">
+                        <i class="bi bi-printer"></i> Print Dashboard
+                    </a>
+                    <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm fw-bold text-uppercase small d-flex align-items-center gap-2">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
             </div>
-            <div class="d-flex gap-2 d-print-none">
-                <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" target="_blank" class="btn btn-outline-info rounded-pill px-4 shadow-sm fw-bold text-uppercase small d-flex align-items-center gap-2">
-                    <i class="bi bi-printer"></i> Print Dashboard
-                </a>
-                <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm fw-bold text-uppercase small d-flex align-items-center gap-2">
-                    <i class="bi bi-arrow-left"></i> Back to Dashboard
-                </a>
-            </div>
-        </div>
-    </x-slot>
+        </x-slot>
+    @endif
 
-    <div class="py-5">
+    <div class="{{ $isPrint ? 'py-1' : 'py-5' }}">
         <div class="container-fluid px-md-5">
             <!-- Print-Only Header -->
-            <div class="d-none d-print-block mb-5 pb-3 border-bottom border-dark border-opacity-25">
+            <div class="{{ $isPrint ? 'mb-4 pb-3 border-bottom border-dark border-opacity-25' : 'd-none d-print-block mb-5 pb-3 border-bottom border-dark border-opacity-25' }}">
                 <h1 class="h2 fw-bold text-dark mb-1">
                     {{ $title }}
                 </h1>
@@ -298,4 +302,4 @@
             });
         </script>
     @endif
-</x-app-layout>
+</x-dynamic-component>

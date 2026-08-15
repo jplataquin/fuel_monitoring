@@ -43,9 +43,10 @@
                 font-size: 1.15rem !important;
                 margin-bottom: 0.5rem !important;
             }
-            .compact-print-view h3, .compact-print-view .h3 {
+            .compact-print-view h3, .compact-print-view .h3, .compact-print-view h3.text-light {
                 font-size: 0.95rem !important;
                 margin-bottom: 0.25rem !important;
+                color: #000000 !important;
             }
             .compact-print-view h4, .compact-print-view .h4,
             .compact-print-view h5, .compact-print-view .h5,
@@ -95,6 +96,9 @@
             .compact-print-view .table th, .compact-print-view .table td {
                 padding: 3px 6px !important;
                 font-size: 0.7rem !important;
+            }
+            .compact-print-view .table, .compact-print-view .table tr, .compact-print-view .table th, .compact-print-view .table td, .compact-print-view .table * {
+                color: #000000 !important;
             }
             .compact-print-view .bg-dark, .compact-print-view .table-dark, .compact-print-view .modal-content, .compact-print-view .bg-secondary {
                 background-color: white !important;
