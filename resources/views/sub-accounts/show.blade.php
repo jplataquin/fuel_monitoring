@@ -129,7 +129,99 @@
                 </div>
             @endif
 
-           
+            <!-- Utilization Entries History -->
+            <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden mt-5">
+                <div class="card-header bg-secondary bg-opacity-10 border-secondary border-opacity-25 p-4 d-flex justify-content-between align-items-center">
+                    <h3 class="h5 fw-bold text-white mb-0">Utilization History</h3>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2 fw-bold text-uppercase small">
+                        {{ $subAccount->utilizationEntries()->count() }} Entries
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr class="bg-secondary bg-opacity-5">
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Date / Reference</th>
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Asset / Equipment</th>
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Operating Interval / Hours</th>
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Odometer Interval / KM</th>
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Est. Fuel Consumed</th>
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Driver / Operator</th>
+                                    <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Particulars</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($subAccount->utilizationEntries()->orderBy('date', 'desc')->orderBy('created_at', 'desc')->get() as $entry)
+                                    @php
+                                        $hasHours = $entry->start_hour_reading !== null && $entry->end_hour_reading !== null;
+                                        $hasKm = $entry->start_kilometer_reading !== null && $entry->end_kilometer_reading !== null;
+                                        $hoursOperated = $hasHours ? ($entry->end_hour_reading - $entry->start_hour_reading) : 0;
+                                        $kmOperated = $hasKm ? ($entry->end_kilometer_reading - $entry->start_kilometer_reading) : 0;
+                                        
+                                        $estFuel = 0;
+                                        if ($entry->calculation_type === 'Kilometer' || $entry->calculation_type === 'Odometer') {
+                                            $estFuel = $kmOperated * $entry->fuel_factor_km;
+                                        } elseif ($entry->calculation_type === 'Hour' || $entry->calculation_type === 'Engine Hours') {
+                                            $estFuel = $hoursOperated * $entry->fuel_factor_hr;
+                                        } elseif ($entry->calculation_type === 'Timeframe' || $entry->calculation_type === 'Actual Hours') {
+                                            $estFuel = ($entry->actual_hours ?? 0) * $entry->fuel_factor_hr;
+                                        }
+                                    @endphp
+                                    <tr>
+                                        <td class="px-4 py-3">
+                                            <span class="text-white small fw-bold d-block">{{ $entry->date ? $entry->date->format('M d, Y') : 'N/A' }}</span>
+                                            <span class="text-secondary smaller fw-bold font-monospace text-uppercase">{{ $entry->reference ?: '—' }}</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="text-white font-monospace small fw-bold d-block">{{ $entry->asset->fleet_no ?? '—' }}</span>
+                                            <span class="text-secondary smaller">{{ $entry->asset->assetType->name ?? 'N/A' }}</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-end">
+                                            @if($hasHours)
+                                                <span class="text-white small d-block font-monospace">{{ number_format($entry->start_hour_reading, 1) }} - {{ number_format($entry->end_hour_reading, 1) }}</span>
+                                                <span class="text-secondary smaller fw-bold font-monospace text-uppercase">Hours: {{ number_format($hoursOperated, 1) }}</span>
+                                            @elseif($entry->calculation_type === 'Timeframe' || $entry->calculation_type === 'Actual Hours')
+                                                <span class="text-white small d-block font-monospace">{{ $entry->start_time ?: '00:00' }} - {{ $entry->end_time ?: '00:00' }}</span>
+                                                <span class="text-secondary smaller fw-bold font-monospace text-uppercase">Actual: {{ number_format($entry->actual_hours ?? 0, 1) }} hrs</span>
+                                            @else
+                                                <span class="text-secondary small">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3 text-end">
+                                            @if($hasKm)
+                                                <span class="text-white small d-block font-monospace">{{ number_format($entry->start_kilometer_reading, 0) }} - {{ number_format($entry->end_kilometer_reading, 0) }}</span>
+                                                <span class="text-secondary smaller fw-bold font-monospace text-uppercase">KM: {{ number_format($kmOperated, 0) }}</span>
+                                            @else
+                                                <span class="text-secondary small">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3 text-end align-middle font-monospace fw-bold text-success">
+                                            {{ number_format($estFuel, 2) }} L
+                                        </td>
+                                        <td class="px-4 py-3 text-white small">
+                                            {{ $entry->driver_operator_name ?: '—' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-secondary small">
+                                            {{ Str::limit($entry->particulars, 50) ?: '—' }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="px-4 py-5 text-center text-secondary">
+                                            <svg class="mb-2" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                            </svg>
+                                            <h3 class="h6 text-white">No utilization history found</h3>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </x-app-layout>

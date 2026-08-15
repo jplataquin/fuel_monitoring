@@ -334,6 +334,7 @@ trait DashboardDataTrait
             $remainingBalances[] = round($remaining, 2);
 
             $subAccountData[] = [
+                'id' => $sa->id,
                 'name' => $sa->name,
                 'total_budget' => $totalBudget,
                 'consumed' => $consumed,

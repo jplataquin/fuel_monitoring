@@ -35,6 +35,11 @@ class SubAccount extends Model
         return $this->hasMany(SubAccountBudget::class);
     }
 
+    public function utilizationEntries(): HasMany
+    {
+        return $this->hasMany(UtilizationEntry::class);
+    }
+
     public function mergedTo(): BelongsTo
     {
         return $this->belongsTo(SubAccount::class, 'merged_to_id')->withTrashed();

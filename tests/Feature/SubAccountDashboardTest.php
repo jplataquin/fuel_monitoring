@@ -256,4 +256,39 @@ class SubAccountDashboardTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    public function test_sub_account_show_page_displays_utilization_entries(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Main Account',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Sub Active',
+        ]);
+
+        $entry = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-08-15',
+            'start_time' => '08:00',
+            'end_time' => '12:00',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'calculation_type' => 'Timeframe',
+            'driver_operator_name' => 'John Operator',
+            'reference' => 'REF-1234',
+            'particulars' => 'Road Work',
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('sub-accounts.show', $subAccount));
+
+        $response->assertStatus(200);
+        $response->assertSee('John Operator');
+        $response->assertSee('REF-1234');
+        $response->assertSee('Road Work');
+        $response->assertSee('EX-900');
+    }
 }
