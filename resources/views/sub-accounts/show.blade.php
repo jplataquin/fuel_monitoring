@@ -154,18 +154,29 @@
                             <tbody>
                                 @forelse($subAccount->utilizationEntries()->orderBy('date', 'desc')->orderBy('created_at', 'desc')->get() as $entry)
                                     @php
+                                        $calcType = strtolower($entry->calculation_type ?? '');
+                                        $estFuel = 0;
+
                                         $hasHours = $entry->start_hour_reading !== null && $entry->end_hour_reading !== null;
                                         $hasKm = $entry->start_kilometer_reading !== null && $entry->end_kilometer_reading !== null;
                                         $hoursOperated = $hasHours ? ($entry->end_hour_reading - $entry->start_hour_reading) : 0;
                                         $kmOperated = $hasKm ? ($entry->end_kilometer_reading - $entry->start_kilometer_reading) : 0;
-                                        
-                                        $estFuel = 0;
-                                        if ($entry->calculation_type === 'Kilometer' || $entry->calculation_type === 'Odometer') {
-                                            $estFuel = $kmOperated * $entry->fuel_factor_km;
-                                        } elseif ($entry->calculation_type === 'Hour' || $entry->calculation_type === 'Engine Hours') {
-                                            $estFuel = $hoursOperated * $entry->fuel_factor_hr;
-                                        } elseif ($entry->calculation_type === 'Timeframe' || $entry->calculation_type === 'Actual Hours') {
+
+                                        $calcHours = 0;
+
+                                        if (str_contains($calcType, 'kilometer')) {
+                                            $estFuel = $entry->fuel_factor_km > 0 ? $kmOperated / $entry->fuel_factor_km : 0;
+                                        } elseif (str_contains($calcType, 'timeframe')) {
+                                            if ($entry->end_time && $entry->start_time) {
+                                                $start = \Illuminate\Support\Carbon::parse($entry->start_time);
+                                                $end = \Illuminate\Support\Carbon::parse($entry->end_time);
+                                                $calcHours = max(0, $start->diffInMinutes($end) / 60);
+                                                $estFuel = $calcHours * $entry->fuel_factor_hr;
+                                            }
+                                        } elseif (str_contains($calcType, 'actual')) {
                                             $estFuel = ($entry->actual_hours ?? 0) * $entry->fuel_factor_hr;
+                                        } elseif (str_contains($calcType, 'hour')) {
+                                            $estFuel = $hoursOperated * $entry->fuel_factor_hr;
                                         }
                                     @endphp
                                     <tr>
@@ -181,11 +192,17 @@
                                             @if($hasHours)
                                                 <span class="text-white small d-block font-monospace">{{ number_format($entry->start_hour_reading, 1) }} - {{ number_format($entry->end_hour_reading, 1) }}</span>
                                                 <span class="text-secondary smaller fw-bold font-monospace text-uppercase">Hours: {{ number_format($hoursOperated, 1) }}</span>
-                                            @elseif($entry->calculation_type === 'Timeframe' || $entry->calculation_type === 'Actual Hours')
-                                                <span class="text-white small d-block font-monospace">{{ $entry->start_time ?: '00:00' }} - {{ $entry->end_time ?: '00:00' }}</span>
+                                            @elseif(str_contains($calcType, 'timeframe'))
+                                                <span class="text-white small d-block font-monospace">
+                                                    {{ $entry->start_time ? \Illuminate\Support\Carbon::parse($entry->start_time)->format('H:i') : '00:00' }} - 
+                                                    {{ $entry->end_time ? \Illuminate\Support\Carbon::parse($entry->end_time)->format('H:i') : '00:00' }}
+                                                </span>
+                                                <span class="text-secondary smaller fw-bold font-monospace text-uppercase">Interval: {{ number_format($calcHours, 1) }} hrs</span>
+                                            @elseif(str_contains($calcType, 'actual'))
+                                                <span class="text-white small d-block font-monospace">—</span>
                                                 <span class="text-secondary smaller fw-bold font-monospace text-uppercase">Actual: {{ number_format($entry->actual_hours ?? 0, 1) }} hrs</span>
                                             @else
-                                                <span class="text-secondary small">N/A</span>
+                                                <span class="text-secondary small">—</span>
                                             @endif
                                         </td>
                                         <td class="px-4 py-3 text-end">
@@ -193,7 +210,7 @@
                                                 <span class="text-white small d-block font-monospace">{{ number_format($entry->start_kilometer_reading, 0) }} - {{ number_format($entry->end_kilometer_reading, 0) }}</span>
                                                 <span class="text-secondary smaller fw-bold font-monospace text-uppercase">KM: {{ number_format($kmOperated, 0) }}</span>
                                             @else
-                                                <span class="text-secondary small">N/A</span>
+                                                <span class="text-secondary small">—</span>
                                             @endif
                                         </td>
                                         <td class="px-4 py-3 text-end align-middle font-monospace fw-bold text-success">
