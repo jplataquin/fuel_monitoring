@@ -56,6 +56,8 @@ class ReplicateProductionDatabaseTest extends TestCase
         ->expectsOutput('Copying 2 rows from dummy_products...')
         ->expectsOutput('Replicating 1 views...')
         ->expectsOutput('Database replication completed successfully via PHP!')
+        ->expectsOutput('=== Replication Summary ===')
+        ->expectsOutput('Total replicated objects: 2')
         ->assertExitCode(0);
 
         // 5. Verify the table and data were copied to the local/test database

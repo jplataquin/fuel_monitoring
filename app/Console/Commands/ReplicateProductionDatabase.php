@@ -108,12 +108,19 @@ class ReplicateProductionDatabase extends Command
 
         if ($useCli) {
             if ($this->replicateViaCli($credentials, $localConfig)) {
+                $this->showReplicationSummary($localConn);
                 return 0;
             }
             $this->warn('CLI replication failed or is not available. Falling back to PHP-based replication...');
         }
 
-        return $this->replicateViaPhp($prodConnectionName, $localConn, $prodDriver, $localDriver);
+        $exitCode = $this->replicateViaPhp($prodConnectionName, $localConn, $prodDriver, $localDriver);
+
+        if ($exitCode === 0) {
+            $this->showReplicationSummary($localConn);
+        }
+
+        return $exitCode;
     }
 
     /**
@@ -361,6 +368,71 @@ class ReplicateProductionDatabase extends Command
             } else {
                 DB::connection($localConn)->statement('SET FOREIGN_KEY_CHECKS = 1;');
             }
+        }
+    }
+
+    /**
+     * Show a beautiful summary table of all replicated tables and their row counts.
+     */
+    protected function showReplicationSummary(string $connectionName)
+    {
+        $this->newLine();
+        $this->info('=== Replication Summary ===');
+
+        $driver = DB::connection($connectionName)->getDriverName();
+        $ignoredTables = ['migrations', 'cache', 'cache_locks', 'jobs', 'job_batches', 'sessions', 'failed_jobs'];
+        $rows = [];
+
+        try {
+            if ($driver === 'sqlite') {
+                $tables = DB::connection($connectionName)->select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
+                foreach ($tables as $table) {
+                    if (in_array(strtolower($table->name), $ignoredTables)) {
+                        continue;
+                    }
+                    $count = DB::connection($connectionName)->table($table->name)->count();
+                    $rows[] = [$table->name, $count, 'Base Table'];
+                }
+
+                $views = DB::connection($connectionName)->select("SELECT name FROM sqlite_master WHERE type='view' AND name NOT LIKE 'sqlite_%'");
+                foreach ($views as $view) {
+                    if (in_array(strtolower($view->name), $ignoredTables)) {
+                        continue;
+                    }
+                    $rows[] = [$view->name, '-', 'View'];
+                }
+            } else {
+                $tablesResult = DB::connection($connectionName)->select('SHOW FULL TABLES');
+                foreach ($tablesResult as $table) {
+                    $tableArray = (array) $table;
+                    $tableName = array_values($tableArray)[0];
+                    if (in_array(strtolower($tableName), $ignoredTables)) {
+                        continue;
+                    }
+                    $tableType = $tableArray['Table_type'] ?? 'BASE TABLE';
+
+                    if ($tableType === 'VIEW') {
+                        $rows[] = [$tableName, '-', 'View'];
+                    } else {
+                        $count = DB::connection($connectionName)->table($tableName)->count();
+                        $rows[] = [$tableName, $count, 'Base Table'];
+                    }
+                }
+            }
+
+            if (empty($rows)) {
+                $this->warn('No tables or views found in the database.');
+                return;
+            }
+
+            // Sort alphabetically by table name
+            usort($rows, fn($a, $b) => strcmp($a[0], $b[0]));
+
+            $this->table(['Table Name', 'Row Count', 'Type'], $rows);
+            $this->info('Total replicated objects: ' . count($rows));
+
+        } catch (\Exception $e) {
+            $this->warn('Could not generate replication summary: ' . $e->getMessage());
         }
     }
 }
