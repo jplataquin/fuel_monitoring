@@ -24,7 +24,7 @@
         <div class="container" style="max-width: 1000px;">
             <!-- Account Info -->
             <div class="card bg-dark border-secondary shadow-lg rounded-4 p-4 mb-5">
-                <div class="row align-items-center">
+                <div class="row align-items-center mb-4 pb-4 border-bottom border-secondary border-opacity-25">
                     <div class="col-md-3">
                         <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Name</h3>
                         <span class="h5 text-white fw-bold text-uppercase">{{ $chargeableAccount->name }}</span>
@@ -47,6 +47,26 @@
                     <div class="col-md-3 text-md-end">
                         <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Total Sub-Accounts</h3>
                         <p class="display-6 fw-bold text-white mb-0">{{ $chargeableAccount->subAccounts->count() }}</p>
+                    </div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="col-md-6 col-12 mb-3 mb-md-0">
+                        <h3 class="text-success small fw-bold text-uppercase tracking-widest mb-2">Total Approved Budget</h3>
+                        <p class="display-6 fw-bold text-success mb-0 font-monospace">
+                            @php
+                                $totalApproved = $chargeableAccount->subAccounts->flatMap->budgets->where('status', 'Approved')->sum('budget_quantity');
+                            @endphp
+                            {{ number_format($totalApproved, 2) }} <span class="h6 text-secondary text-uppercase">L</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6 col-12 text-md-end">
+                        <h3 class="text-warning small fw-bold text-uppercase tracking-widest mb-2">Total Pending Budget</h3>
+                        <p class="display-6 fw-bold text-warning mb-0 font-monospace">
+                            @php
+                                $totalPending = $chargeableAccount->subAccounts->flatMap->budgets->where('status', 'Pending')->sum('budget_quantity');
+                            @endphp
+                            {{ number_format($totalPending, 2) }} <span class="h6 text-secondary text-uppercase">L</span>
+                        </p>
                     </div>
                 </div>
             </div>
