@@ -43,17 +43,12 @@
 
                 @if(Auth::user()->role === 'administrator')
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('asset-types.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('asset-types.index') }}">{{ __('Classifications') }}</a>
+                    <a class="nav-link {{ request()->routeIs('settings.*') || request()->routeIs('users.*') || request()->routeIs('asset-types.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('settings.index') }}">{{ __('Settings') }}</a>
                 </li>
                 @endif
                 @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('chargeable-accounts.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('chargeable-accounts.index') }}">{{ __('Accounts') }}</a>
-                </li>
-                @endif
-                @if(in_array(Auth::user()->role, ['administrator', 'moderator']))
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('users.index') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('users.index') }}">{{ __('Users') }}</a>
                 </li>
                 @endif
                 @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))

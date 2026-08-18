@@ -22,12 +22,12 @@ class UserManagementTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_moderator_can_access_data_logger_creation_page()
+    public function test_moderator_cannot_access_data_logger_creation_page()
     {
         $moderator = User::factory()->create(['role' => 'moderator']);
 
         $response = $this->actingAs($moderator)->get(route('users.create-data-logger'));
-        $response->assertStatus(200);
+        $response->assertStatus(403);
     }
 
     public function test_moderator_cannot_access_moderator_creation_page()
@@ -70,7 +70,7 @@ class UserManagementTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'mod@example.com']);
     }
 
-    public function test_moderator_can_store_data_logger()
+    public function test_moderator_cannot_store_data_logger()
     {
         $this->withoutMiddleware([ValidateCsrfToken::class]); // Disable CSRF middleware to bypass CSRF issues in this test environment
         $moderator = User::factory()->create(['role' => 'moderator']);
@@ -82,8 +82,8 @@ class UserManagementTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $response->assertRedirect(route('users.index'));
-        $this->assertDatabaseHas('users', ['email' => 'dl@example.com', 'role' => 'data_logger']);
+        $response->assertStatus(403);
+        $this->assertDatabaseMissing('users', ['email' => 'dl@example.com']);
     }
 
     public function test_administrator_can_update_user_role()
@@ -114,8 +114,26 @@ class UserManagementTest extends TestCase
             'role' => 'administrator',
         ]);
 
-        $response->assertRedirect(route('users.index'));
-        // The name and email should be updated, but the role should remain 'data_logger'
-        $this->assertDatabaseHas('users', ['email' => 'updated@example.com', 'role' => 'data_logger']);
+        $response->assertStatus(403);
+        $this->assertDatabaseMissing('users', ['email' => 'updated@example.com']);
+    }
+
+    public function test_administrator_can_access_settings_index()
+    {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $response = $this->actingAs($admin)->get(route('settings.index'));
+        $response->assertStatus(200);
+        $response->assertSee('Settings');
+        $response->assertSee('Users');
+        $response->assertSee('Classifications');
+    }
+
+    public function test_moderator_cannot_access_settings_index()
+    {
+        $moderator = User::factory()->create(['role' => 'moderator']);
+
+        $response = $this->actingAs($moderator)->get(route('settings.index'));
+        $response->assertStatus(403);
     }
 }
