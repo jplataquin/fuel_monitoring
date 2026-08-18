@@ -54,7 +54,6 @@
                                 $grandTotalUnbudgeted += $account['unbudgeted_fuel'];
                                 $grandTotalTotalCalc += $account['total_calculated_fuel'];
                                 $grandTotalTotalBudget += $account['total_budget'];
-                                $accountOffset = $account['offset_fuel'] ?? 0;
                             @endphp
                             <tr class="table-active fw-bold">
                                 <td>
@@ -68,9 +67,6 @@
                                             Period: {{ $dateFrom ? \Carbon\Carbon::parse($dateFrom)->format('M d, Y') : 'Start' }} - {{ $dateTo ? \Carbon\Carbon::parse($dateTo)->format('M d, Y') : 'End' }}
                                         </div>
                                     @endif
-                                    @if($accountOffset > 0)
-                                        <div style="font-size: 7px; color: #666; font-weight: normal;">Off: {{ number_format($accountOffset, 2) }}</div>
-                                    @endif
                                 </td>
                                 <td class="text-end">—</td>
                                 <td class="text-end">—</td>
@@ -80,7 +76,7 @@
                                 <td class="text-end">—</td>
                                 <td class="text-end">
                                     @php 
-                                        $remaining = ($account['total_budget'] - ($account['total_calculated_fuel'] + $accountOffset)); 
+                                        $remaining = ($account['total_budget'] - $account['total_calculated_fuel']); 
                                         if ($account['total_budget'] > 0) {
                                             $grandTotalRemaining += $remaining; 
                                         }

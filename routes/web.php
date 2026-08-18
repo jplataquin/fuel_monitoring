@@ -3,15 +3,14 @@
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AssetTypeController;
 use App\Http\Controllers\ChargeableAccountController;
-use App\Http\Controllers\ChargeableAccountOffsetController;
 use App\Http\Controllers\FuelOrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicDashboardController;
 use App\Http\Controllers\PublicDashboardLinkController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SubAccountBudgetController;
 use App\Http\Controllers\SubAccountController;
-use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UtilizationEntryController;
 use Illuminate\Support\Facades\Route;
@@ -64,12 +63,6 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
         Route::patch('sub-accounts/{sub_account}', [SubAccountController::class, 'update'])->name('sub-accounts.update');
         Route::post('chargeable-accounts/{chargeable_account}/sub-accounts', [SubAccountController::class, 'store'])->name('chargeable-accounts.sub-accounts.store');
         Route::delete('sub-accounts/{sub_account}', [SubAccountController::class, 'destroy'])->name('sub-accounts.destroy');
-
-        // Chargeable Account Offsets
-        Route::post('chargeable-accounts/{chargeable_account}/offsets', [ChargeableAccountOffsetController::class, 'store'])->name('chargeable-accounts.offsets.store');
-        Route::get('chargeable-accounts/{chargeable_account}/offsets/{offset}/edit', [ChargeableAccountOffsetController::class, 'edit'])->name('chargeable-accounts.offsets.edit');
-        Route::patch('chargeable-accounts/{chargeable_account}/offsets/{offset}', [ChargeableAccountOffsetController::class, 'update'])->name('chargeable-accounts.offsets.update');
-        Route::delete('chargeable-accounts/{chargeable_account}/offsets/{offset}', [ChargeableAccountOffsetController::class, 'destroy'])->name('chargeable-accounts.offsets.destroy');
     });
 
     // Admin and Moderator only routes for budget approval

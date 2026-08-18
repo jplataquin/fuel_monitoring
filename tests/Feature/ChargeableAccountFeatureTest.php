@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\ChargeableAccount;
-use App\Models\ChargeableAccountOffset;
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -188,60 +187,32 @@ class ChargeableAccountFeatureTest extends TestCase
         ]);
     }
 
-    public function test_administrator_can_add_and_delete_offsets(): void
+    public function test_chargeable_accounts_show_page_displays_sub_accounts_budgets(): void
     {
-        $this->withoutMiddleware([ValidateCsrfToken::class]);
-        $admin = User::factory()->create(['role' => 'administrator']);
-        $account = ChargeableAccount::create(['name' => 'Offset Account', 'status' => 'Active']);
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active', 'classification' => 'Running']);
 
-        // Test storing offset
-        $response = $this->actingAs($admin)->post("/chargeable-accounts/{$account->id}/offsets", [
-            'quantity' => 150.50,
-            'remarks' => 'Pre-system fuel',
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Alpha']);
+
+        // Create an Approved budget
+        $subAccount->budgets()->create([
+            'budget_quantity' => 1250.00,
+            'status' => 'Approved',
+            'created_by' => $user->id,
         ]);
 
-        $response->assertRedirect("/chargeable-accounts/{$account->id}");
-        $this->assertDatabaseHas('chargeable_account_offsets', [
-            'chargeable_account_id' => $account->id,
-            'quantity' => 150.50,
-            'remarks' => 'Pre-system fuel',
-            'created_by' => $admin->id,
+        // Create a Pending budget
+        $subAccount->budgets()->create([
+            'budget_quantity' => 350.50,
+            'status' => 'Pending',
+            'created_by' => $user->id,
         ]);
 
-        $offset = ChargeableAccountOffset::first();
+        $response = $this->actingAs($user)->get(route('chargeable-accounts.show', $account));
 
-        // Test updating offset
-        $updateResponse = $this->actingAs($admin)->patch("/chargeable-accounts/{$account->id}/offsets/{$offset->id}", [
-            'quantity' => 200.00,
-            'remarks' => 'Updated remarks',
-        ]);
-
-        $updateResponse->assertRedirect("/chargeable-accounts/{$account->id}");
-        $this->assertDatabaseHas('chargeable_account_offsets', [
-            'id' => $offset->id,
-            'quantity' => 200.00,
-            'remarks' => 'Updated remarks',
-        ]);
-
-        // Test deleting offset
-        $deleteResponse = $this->actingAs($admin)->delete("/chargeable-accounts/{$account->id}/offsets/{$offset->id}");
-
-        $deleteResponse->assertRedirect("/chargeable-accounts/{$account->id}");
-        $this->assertDatabaseMissing('chargeable_account_offsets', [
-            'id' => $offset->id,
-        ]);
-    }
-
-    public function test_non_administrator_cannot_manage_offsets(): void
-    {
-        $this->withoutMiddleware([ValidateCsrfToken::class]);
-        $user = User::factory()->create(['role' => 'data_logger']);
-        $account = ChargeableAccount::create(['name' => 'Another Account', 'status' => 'Active']);
-
-        $response = $this->actingAs($user)->post("/chargeable-accounts/{$account->id}/offsets", [
-            'quantity' => 150.50,
-        ]);
-
-        $response->assertForbidden();
+        $response->assertStatus(200);
+        $response->assertSee('Sub Alpha');
+        $response->assertSee('1,250.00 L');
+        $response->assertSee('350.50 L');
     }
 }

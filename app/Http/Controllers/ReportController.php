@@ -263,7 +263,6 @@ class ReportController extends Controller
                 if (! isset($accountSummaries[$accountName])) {
                     // Fetch the sum of all approved budgets for all sub-accounts of this chargeable account
                     $totalBudget = 0;
-                    $offsetFuel = 0;
                     if ($account) {
                         foreach ($account->subAccounts as $sa) {
                             $sumSubBudget = SubAccountBudget::where('sub_account_id', $sa->id)
@@ -271,7 +270,6 @@ class ReportController extends Controller
                                 ->sum('budget_quantity');
                             $totalBudget += $sumSubBudget;
                         }
-                        $offsetFuel = $account->offsets()->sum('quantity');
                     }
 
                     $accountSummaries[$accountName] = [
@@ -280,7 +278,6 @@ class ReportController extends Controller
                         'start_date' => $account && $account->start_date ? $account->start_date->format('Y-m-d') : null,
                         'end_date' => $account && $account->end_date ? $account->end_date->format('Y-m-d') : null,
                         'total_budget' => $totalBudget,
-                        'offset_fuel' => $offsetFuel,
                         'total_km' => 0,
                         'total_hours' => 0,
                         'budgeted_fuel' => 0,

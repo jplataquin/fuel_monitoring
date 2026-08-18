@@ -104,14 +104,12 @@ trait DashboardDataTrait
 
                 if (! isset($accountSummaries[$accountName])) {
                     $totalBudget = 0;
-                    $offsetFuel = 0;
                     if ($account) {
                         foreach ($account->subAccounts as $sa) {
                             $totalBudget += SubAccountBudget::where('sub_account_id', $sa->id)
                                 ->where('status', 'Approved')
                                 ->sum('budget_quantity');
                         }
-                        $offsetFuel = $account->offsets()->sum('quantity');
                     }
 
                     $accountSummaries[$accountName] = [
@@ -121,7 +119,6 @@ trait DashboardDataTrait
                         'start_date' => $account && $account->start_date ? $account->start_date->format('Y-m-d') : null,
                         'end_date' => $account && $account->end_date ? $account->end_date->format('Y-m-d') : null,
                         'total_budget' => $totalBudget,
-                        'offset_fuel' => $offsetFuel,
                         'actual_fuel' => 0,
                         'budgeted_fuel' => 0,
                         'unbudgeted_fuel' => 0,
@@ -158,16 +155,13 @@ trait DashboardDataTrait
             $accountName = $account->name;
             if (! isset($accountSummaries[$accountName])) {
                 $totalBudget = 0;
-                $offsetFuel = 0;
                 foreach ($account->subAccounts as $sa) {
                     $totalBudget += SubAccountBudget::where('sub_account_id', $sa->id)
                         ->where('status', 'Approved')
                         ->sum('budget_quantity');
                 }
 
-                $offsetFuel = $account->offsets()->sum('quantity');
-
-                if ($totalBudget > 0 || $offsetFuel > 0) {
+                if ($totalBudget > 0) {
                     $accountSummaries[$accountName] = [
                         'name' => $accountName,
                         'account_id' => $account ? $account->id : null,
@@ -175,7 +169,6 @@ trait DashboardDataTrait
                         'start_date' => $account && $account->start_date ? $account->start_date->format('Y-m-d') : null,
                         'end_date' => $account && $account->end_date ? $account->end_date->format('Y-m-d') : null,
                         'total_budget' => $totalBudget,
-                        'offset_fuel' => $offsetFuel,
                         'actual_fuel' => 0,
                         'budgeted_fuel' => 0,
                         'unbudgeted_fuel' => 0,

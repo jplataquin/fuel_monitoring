@@ -134,12 +134,10 @@
                 const totalBudget = data.total_budget;
                 const budgeted = data.budgeted_fuel;
                 const unbudgeted = data.unbudgeted_fuel;
-                const offsetFuel = data.offset_fuel || 0;
                 
-                const totalConsumed = budgeted + offsetFuel + unbudgeted;
+                const totalConsumed = budgeted + unbudgeted;
                 let displayBudgeted = Math.min(totalBudget, budgeted);
-                let displayOffset = Math.min(Math.max(0, totalBudget - budgeted), offsetFuel);
-                let displayUnbudgeted = Math.min(Math.max(0, totalBudget - (budgeted + offsetFuel)), unbudgeted);
+                let displayUnbudgeted = Math.min(Math.max(0, totalBudget - budgeted), unbudgeted);
                 
                 let remaining = Math.max(0, totalBudget - totalConsumed);
                 let overage = Math.max(0, totalConsumed - totalBudget);
@@ -158,12 +156,7 @@
                     statusColor = '#f59e0b';
                 }
 
-                if (totalBudget === 0 && (budgeted > 0 || unbudgeted > 0 || offsetFuel > 0)) {
-                    if (offsetFuel > 0) {
-                        datasetsData.push(offsetFuel);
-                        backgroundColor.push('#fbbf24');
-                        labels.push('Pre-System Offset');
-                    }
+                if (totalBudget === 0 && (budgeted > 0 || unbudgeted > 0)) {
                     if (budgeted > 0) {
                         datasetsData.push(budgeted);
                         backgroundColor.push(budgetedColor);
@@ -175,11 +168,6 @@
                         labels.push('Unbudgeted Consumed');
                     }
                 } else {
-                    if (displayOffset > 0) {
-                        datasetsData.push(displayOffset);
-                        backgroundColor.push('#fbbf24');
-                        labels.push('Pre-System Offset');
-                    }
                     if (displayBudgeted > 0) {
                         datasetsData.push(displayBudgeted);
                         backgroundColor.push(budgetedColor);

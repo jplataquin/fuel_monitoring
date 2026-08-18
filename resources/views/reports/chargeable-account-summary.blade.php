@@ -94,7 +94,6 @@
                                         $grandTotalUnbudgeted += $account['unbudgeted_fuel'];
                                         $grandTotalTotalCalc += $account['total_calculated_fuel'];
                                         $grandTotalTotalBudget += $account['total_budget'];
-                                        $accountOffset = $account['offset_fuel'] ?? 0;
                                     @endphp
                                     <tr class="table-active">
                                         <td class="px-4 py-3 fw-bold text-white border-secondary">
@@ -108,9 +107,6 @@
                                                     Period: {{ $dateFrom ? \Carbon\Carbon::parse($dateFrom)->format('M d, Y') : 'Start' }} - {{ $dateTo ? \Carbon\Carbon::parse($dateTo)->format('M d, Y') : 'End' }}
                                                 </div>
                                             @endif
-                                            @if($accountOffset > 0)
-                                                <div class="small text-warning fw-normal">Offset: {{ number_format($accountOffset, 2) }} L</div>
-                                            @endif
                                         </td>
                                         <td class="px-4 py-3 text-end border-secondary">—</td>
                                         <td class="px-4 py-3 text-end border-secondary">—</td>
@@ -120,7 +116,7 @@
                                         <td class="px-4 py-3 text-end border-secondary">—</td>
                                         <td class="px-4 py-3 text-end border-secondary">
                                             @php 
-                                                $remaining = ($account['total_budget'] - ($account['total_calculated_fuel'] + $accountOffset));
+                                                $remaining = ($account['total_budget'] - $account['total_calculated_fuel']);
                                                 if ($account['total_budget'] > 0) {
                                                     $grandTotalRemaining += $remaining;
                                                 }
