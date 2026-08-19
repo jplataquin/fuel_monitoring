@@ -255,4 +255,33 @@ class ChargeableAccountFeatureTest extends TestCase
         // Combined pending budget = 450.25 L
         $response->assertSee('450.25 L');
     }
+
+    public function test_chargeable_account_print_route_renders_correctly(): void
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'Print Test Account', 'status' => 'Active', 'classification' => 'Running']);
+
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Printable']);
+
+        $subAccount->budgets()->create([
+            'budget_quantity' => 1250.00,
+            'status' => 'Approved',
+            'created_by' => $user->id,
+        ]);
+
+        $subAccount->budgets()->create([
+            'budget_quantity' => 350.50,
+            'status' => 'Pending',
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('chargeable-accounts.print', $account));
+
+        $response->assertStatus(200);
+        $response->assertSee('Print Test Account');
+        $response->assertSee('Sub Printable');
+        $response->assertSee('1,250.00 L');
+        $response->assertSee('350.50 L');
+        $response->assertSee('Sub-Account Budget Breakdown');
+    }
 }

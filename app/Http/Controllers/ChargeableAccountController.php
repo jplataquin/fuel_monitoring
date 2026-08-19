@@ -35,6 +35,13 @@ class ChargeableAccountController extends Controller
         return view('chargeable-accounts.show', compact('chargeableAccount'));
     }
 
+    public function print(ChargeableAccount $chargeableAccount): View
+    {
+        $chargeableAccount->load(['subAccounts.budgets']);
+
+        return view('chargeable-accounts.print', compact('chargeableAccount'));
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([

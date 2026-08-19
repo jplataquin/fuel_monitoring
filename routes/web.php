@@ -58,6 +58,7 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     // Admin, Moderator and Budgeteer routes for accounts
     Route::middleware('role:administrator,moderator,budgeteer')->group(function () {
         Route::resource('chargeable-accounts', ChargeableAccountController::class);
+        Route::get('chargeable-accounts/{chargeable_account}/print', [ChargeableAccountController::class, 'print'])->name('chargeable-accounts.print');
         Route::get('sub-accounts/{sub_account}', [SubAccountController::class, 'show'])->name('sub-accounts.show');
         Route::get('sub-accounts/{sub_account}/edit', [SubAccountController::class, 'edit'])->name('sub-accounts.edit');
         Route::patch('sub-accounts/{sub_account}', [SubAccountController::class, 'update'])->name('sub-accounts.update');
