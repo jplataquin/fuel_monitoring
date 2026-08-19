@@ -1,6 +1,5 @@
 <x-print-layout :title="__('Chargeable Account Report')">
     <div class="mb-4">
-        <h2 class="h3 fw-bold text-uppercase border-bottom border-dark pb-2 mb-3">Account Information</h2>
         <div class="row g-3">
             <div class="col-md-3">
                 <h4 class="small fw-bold text-uppercase text-secondary tracking-wider mb-1">Account Name</h4>
@@ -22,8 +21,8 @@
                 </span>
             </div>
             <div class="col-md-3">
-                <h4 class="small fw-bold text-uppercase text-secondary tracking-wider mb-1">Total Sub-Accounts</h4>
-                <p class="h5 fw-bold text-dark mb-0 font-monospace">{{ $chargeableAccount->subAccounts->count() }}</p>
+                <h4 class="small fw-bold text-uppercase text-secondary tracking-wider mb-1">Print Date</h4>
+                <p class="h5 fw-bold text-dark mb-0 font-monospace">{{ now()->format('M d, Y') }}</p>
             </div>
         </div>
     </div>

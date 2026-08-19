@@ -283,5 +283,8 @@ class ChargeableAccountFeatureTest extends TestCase
         $response->assertSee('1,250.00 L');
         $response->assertSee('350.50 L');
         $response->assertSee('Sub-Account Budget Breakdown');
+        $response->assertSee('Print Date');
+        $response->assertSee(now()->format('M d, Y'));
+        $response->assertDontSee('Account Information');
     }
 }
