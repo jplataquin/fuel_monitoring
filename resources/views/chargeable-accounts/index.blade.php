@@ -45,6 +45,9 @@
                 if (this.sortBy === 'sub-account') {
                     return (parseInt(valA) - parseInt(valB)) * (this.sortAsc ? 1 : -1);
                 }
+                if (this.sortBy === 'approved-budget' || this.sortBy === 'pending-budget') {
+                    return (parseFloat(valA) - parseFloat(valB)) * (this.sortAsc ? 1 : -1);
+                }
                 
                 return valA.localeCompare(valB, undefined, {numeric: true, sensitivity: 'base'}) * (this.sortAsc ? 1 : -1);
             });
@@ -104,6 +107,24 @@
                                     <i class="bi bi-arrow-down-up" style="font-size: 0.8rem;"></i>
                                 </span>
                             </th>
+                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider" style="cursor: pointer; user-select: none;" @click="sort('approved-budget')">
+                                Total Approved Budget
+                                <span class="ms-1" x-show="sortBy === 'approved-budget'">
+                                    <i :class="sortAsc ? 'bi bi-arrow-up-short' : 'bi bi-arrow-down-short'"></i>
+                                </span>
+                                <span class="ms-1 opacity-25" x-show="sortBy !== 'approved-budget'">
+                                    <i class="bi bi-arrow-down-up" style="font-size: 0.8rem;"></i>
+                                </span>
+                            </th>
+                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider" style="cursor: pointer; user-select: none;" @click="sort('pending-budget')">
+                                Total Pending Budget
+                                <span class="ms-1" x-show="sortBy === 'pending-budget'">
+                                    <i :class="sortAsc ? 'bi bi-arrow-up-short' : 'bi bi-arrow-down-short'"></i>
+                                </span>
+                                <span class="ms-1 opacity-25" x-show="sortBy !== 'pending-budget'">
+                                    <i class="bi bi-arrow-down-up" style="font-size: 0.8rem;"></i>
+                                </span>
+                            </th>
                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider" style="cursor: pointer; user-select: none;" @click="sort('status')">
                                 Status
                                 <span class="ms-1" x-show="sortBy === 'status'">
@@ -122,6 +143,8 @@
                                 data-account="{{ strtolower($account->name) }}"
                                 data-type="{{ strtolower($account->classification) }}"
                                 data-sub-account="{{ $account->sub_accounts_count }}"
+                                data-approved-budget="{{ $account->total_approved_budget ?? 0 }}"
+                                data-pending-budget="{{ $account->total_pending_budget ?? 0 }}"
                                 data-status="{{ strtolower($account->status) }}">
                                 <td class="px-4 py-3 align-middle">
                                     <span class="fw-bold text-light">{{ $account->name }}</span>
@@ -138,6 +161,12 @@
                                 </td>
                                 <td class="px-4 py-3 align-middle">
                                     <span class="text-light small fw-bold">{{ $account->sub_accounts_count }}</span>
+                                </td>
+                                <td class="px-4 py-3 align-middle">
+                                    <span class="text-success small fw-bold font-monospace">{{ number_format($account->total_approved_budget ?? 0, 2) }} L</span>
+                                </td>
+                                <td class="px-4 py-3 align-middle">
+                                    <span class="text-warning small fw-bold font-monospace">{{ number_format($account->total_pending_budget ?? 0, 2) }} L</span>
                                 </td>
                                 <td class="px-4 py-3 align-middle">
                                     <span class="badge rounded-pill {{ $account->status === 'Active' ? 'bg-success' : 'bg-danger' }}">

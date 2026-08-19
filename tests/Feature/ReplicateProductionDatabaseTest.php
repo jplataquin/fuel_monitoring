@@ -33,7 +33,7 @@ class ReplicateProductionDatabaseTest extends TestCase
     {
         // 1. Create a table and insert some data in the mock production database
         $prodConn = DB::connection('production_replica');
-        
+
         $prodConn->statement('CREATE TABLE dummy_products (id INTEGER PRIMARY KEY, name TEXT, price REAL)');
         $prodConn->table('dummy_products')->insert([
             ['id' => 1, 'name' => 'Laptop', 'price' => 999.99],
@@ -51,14 +51,14 @@ class ReplicateProductionDatabaseTest extends TestCase
             '--prod-connection' => 'production_replica',
             '--force' => true,
         ])
-        ->expectsOutput('Executing PHP-based schema and data replication...')
-        ->expectsOutput('Replicating 1 base tables...')
-        ->expectsOutput('Copying 2 rows from dummy_products...')
-        ->expectsOutput('Replicating 1 views...')
-        ->expectsOutput('Database replication completed successfully via PHP!')
-        ->expectsOutput('=== Replication Summary ===')
-        ->expectsOutput('Total replicated objects: 2')
-        ->assertExitCode(0);
+            ->expectsOutput('Executing PHP-based schema and data replication...')
+            ->expectsOutput('Replicating 1 base tables...')
+            ->expectsOutput('Copying 2 rows from dummy_products...')
+            ->expectsOutput('Replicating 1 views...')
+            ->expectsOutput('Database replication completed successfully via PHP!')
+            ->expectsOutput('=== Replication Summary ===')
+            ->expectsOutput('Total replicated objects: 2')
+            ->assertExitCode(0);
 
         // 5. Verify the table and data were copied to the local/test database
         $this->assertTrue(Schema::hasTable('dummy_products'));
@@ -84,7 +84,7 @@ class ReplicateProductionDatabaseTest extends TestCase
         // 1. Create dummy product table and framework tables in production_replica
         $prodConn = DB::connection('production_replica');
         $prodConn->statement('CREATE TABLE dummy_products (id INTEGER PRIMARY KEY, name TEXT, price REAL)');
-        
+
         $frameworkTables = ['migrations', 'cache', 'cache_locks', 'jobs', 'job_batches', 'sessions', 'failed_jobs'];
         foreach ($frameworkTables as $table) {
             $prodConn->statement("CREATE TABLE {$table} (id INTEGER PRIMARY KEY, payload TEXT)");
@@ -101,7 +101,7 @@ class ReplicateProductionDatabaseTest extends TestCase
             '--prod-connection' => 'production_replica',
             '--force' => true,
         ])
-        ->assertExitCode(0);
+            ->assertExitCode(0);
 
         // 4. Verify dummy_products was copied
         $this->assertTrue(Schema::hasTable('dummy_products'));

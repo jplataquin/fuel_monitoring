@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ChargeableAccount extends Model
@@ -32,5 +33,10 @@ class ChargeableAccount extends Model
     public function subAccounts(): HasMany
     {
         return $this->hasMany(SubAccount::class);
+    }
+
+    public function budgets(): HasManyThrough
+    {
+        return $this->hasManyThrough(SubAccountBudget::class, SubAccount::class);
     }
 }

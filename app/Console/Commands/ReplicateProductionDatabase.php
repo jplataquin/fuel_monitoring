@@ -2,10 +2,11 @@
 
 namespace App\Console\Commands;
 
+use Dotenv\Dotenv;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Schema;
 
 class ReplicateProductionDatabase extends Command
 {
@@ -39,9 +40,10 @@ class ReplicateProductionDatabase extends Command
         $localConfig = config("database.connections.{$localConn}");
         $localDatabase = $localConfig['database'] ?? '';
 
-        if (!$this->option('force')) {
-            if (!$this->confirm("Are you sure you want to replicate the production database? This will OVERWRITE your local database '{$localDatabase}'.", false)) {
+        if (! $this->option('force')) {
+            if (! $this->confirm("Are you sure you want to replicate the production database? This will OVERWRITE your local database '{$localDatabase}'.", false)) {
                 $this->info('Replication cancelled.');
+
                 return 1;
             }
         }
@@ -50,8 +52,9 @@ class ReplicateProductionDatabase extends Command
         $credentials = [];
 
         if ($prodConnectionName) {
-            if (!config("database.connections.{$prodConnectionName}")) {
+            if (! config("database.connections.{$prodConnectionName}")) {
                 $this->error("Connection '{$prodConnectionName}' is not defined in database configuration.");
+
                 return 1;
             }
             $prodConfig = config("database.connections.{$prodConnectionName}");
@@ -76,6 +79,7 @@ class ReplicateProductionDatabase extends Command
 
             if (empty($credentials['database'])) {
                 $this->error('Production database name is required.');
+
                 return 1;
             }
 
@@ -97,7 +101,8 @@ class ReplicateProductionDatabase extends Command
         try {
             DB::connection($prodConnectionName)->getPdo();
         } catch (\Exception $e) {
-            $this->error("Could not connect to the production database: " . $e->getMessage());
+            $this->error('Could not connect to the production database: '.$e->getMessage());
+
             return 1;
         }
 
@@ -109,6 +114,7 @@ class ReplicateProductionDatabase extends Command
         if ($useCli) {
             if ($this->replicateViaCli($credentials, $localConfig)) {
                 $this->showReplicationSummary($localConn);
+
                 return 0;
             }
             $this->warn('CLI replication failed or is not available. Falling back to PHP-based replication...');
@@ -140,7 +146,7 @@ class ReplicateProductionDatabase extends Command
             try {
                 $content = file_get_contents(base_path('.env.production'));
                 if (class_exists('\Dotenv\Dotenv')) {
-                    $parsed = \Dotenv\Dotenv::parse($content);
+                    $parsed = Dotenv::parse($content);
                     $credentials['host'] = $credentials['host'] ?: ($parsed['DB_HOST'] ?? null);
                     $credentials['port'] = $credentials['port'] ?: ($parsed['DB_PORT'] ?? '3306');
                     $credentials['database'] = $credentials['database'] ?: ($parsed['DB_DATABASE'] ?? null);
@@ -148,7 +154,7 @@ class ReplicateProductionDatabase extends Command
                     $credentials['password'] = $credentials['password'] ?: ($parsed['DB_PASSWORD'] ?? null);
                 }
             } catch (\Exception $e) {
-                $this->warn("Failed parsing .env.production: " . $e->getMessage());
+                $this->warn('Failed parsing .env.production: '.$e->getMessage());
             }
         }
 
@@ -167,7 +173,7 @@ class ReplicateProductionDatabase extends Command
         $ignoredTables = ['migrations', 'cache', 'cache_locks', 'jobs', 'job_batches', 'sessions', 'failed_jobs'];
         $ignoreArgs = '';
         foreach ($ignoredTables as $table) {
-            $ignoreArgs .= ' --ignore-table=' . escapeshellarg(($prodConfig['database'] ?? '') . '.' . $table);
+            $ignoreArgs .= ' --ignore-table='.escapeshellarg(($prodConfig['database'] ?? '').'.'.$table);
         }
 
         $dumpCmd = sprintf(
@@ -181,14 +187,15 @@ class ReplicateProductionDatabase extends Command
 
         // Run export command
         $dumpResult = Process::env([
-            'MYSQL_PWD' => $prodConfig['password'] ?? ''
-        ])->run('sh -c ' . escapeshellarg($dumpCmd . ' > ' . escapeshellarg($tempSqlPath)));
+            'MYSQL_PWD' => $prodConfig['password'] ?? '',
+        ])->run('sh -c '.escapeshellarg($dumpCmd.' > '.escapeshellarg($tempSqlPath)));
 
-        if (!$dumpResult->successful()) {
-            $this->warn('mysqldump failed: ' . $dumpResult->errorOutput());
+        if (! $dumpResult->successful()) {
+            $this->warn('mysqldump failed: '.$dumpResult->errorOutput());
             if (file_exists($tempSqlPath)) {
                 unlink($tempSqlPath);
             }
+
             return false;
         }
 
@@ -204,20 +211,22 @@ class ReplicateProductionDatabase extends Command
 
         // Run import command
         $importResult = Process::env([
-            'MYSQL_PWD' => $localConfig['password'] ?? ''
-        ])->run('sh -c ' . escapeshellarg($importCmd . ' < ' . escapeshellarg($tempSqlPath)));
+            'MYSQL_PWD' => $localConfig['password'] ?? '',
+        ])->run('sh -c '.escapeshellarg($importCmd.' < '.escapeshellarg($tempSqlPath)));
 
         // Clean up temp file
         if (file_exists($tempSqlPath)) {
             unlink($tempSqlPath);
         }
 
-        if (!$importResult->successful()) {
-            $this->warn('mysql import failed: ' . $importResult->errorOutput());
+        if (! $importResult->successful()) {
+            $this->warn('mysql import failed: '.$importResult->errorOutput());
+
             return false;
         }
 
         $this->info('Database replication completed successfully via CLI!');
+
         return true;
     }
 
@@ -271,7 +280,7 @@ class ReplicateProductionDatabase extends Command
                 }
             }
 
-            $this->info('Replicating ' . count($baseTables) . ' base tables...');
+            $this->info('Replicating '.count($baseTables).' base tables...');
 
             // 3. Replicate base tables
             foreach ($baseTables as $tableName) {
@@ -281,7 +290,7 @@ class ReplicateProductionDatabase extends Command
                 // Get CREATE TABLE statement
                 $createSql = null;
                 if ($prodDriver === 'sqlite') {
-                    $createResult = DB::connection($prodConn)->select("SELECT sql FROM sqlite_master WHERE name = ?", [$tableName]);
+                    $createResult = DB::connection($prodConn)->select('SELECT sql FROM sqlite_master WHERE name = ?', [$tableName]);
                     $createSql = $createResult[0]->sql ?? null;
                 } else {
                     $createResult = DB::connection($prodConn)->select("SHOW CREATE TABLE `{$tableName}`");
@@ -289,8 +298,9 @@ class ReplicateProductionDatabase extends Command
                     $createSql = $createArray['Create Table'] ?? null;
                 }
 
-                if (!$createSql) {
+                if (! $createSql) {
                     $this->error("Failed to get schema for table {$tableName}");
+
                     continue;
                 }
 
@@ -312,9 +322,9 @@ class ReplicateProductionDatabase extends Command
                         ->limit($chunkSize)
                         ->get();
 
-                    $data = $rows->map(fn($row) => (array) $row)->toArray();
+                    $data = $rows->map(fn ($row) => (array) $row)->toArray();
 
-                    if (!empty($data)) {
+                    if (! empty($data)) {
                         DB::connection($localConn)->table($tableName)->insert($data);
                     }
 
@@ -326,8 +336,8 @@ class ReplicateProductionDatabase extends Command
             }
 
             // 4. Replicate views
-            if (!empty($views)) {
-                $this->info('Replicating ' . count($views) . ' views...');
+            if (! empty($views)) {
+                $this->info('Replicating '.count($views).' views...');
                 foreach ($views as $viewName) {
                     // Drop local view if exists
                     if ($localDriver === 'sqlite') {
@@ -339,7 +349,7 @@ class ReplicateProductionDatabase extends Command
                     // Get CREATE VIEW statement
                     $createSql = null;
                     if ($prodDriver === 'sqlite') {
-                        $createResult = DB::connection($prodConn)->select("SELECT sql FROM sqlite_master WHERE name = ?", [$viewName]);
+                        $createResult = DB::connection($prodConn)->select('SELECT sql FROM sqlite_master WHERE name = ?', [$viewName]);
                         $createSql = $createResult[0]->sql ?? null;
                     } else {
                         $createResult = DB::connection($prodConn)->select("SHOW CREATE VIEW `{$viewName}`");
@@ -356,10 +366,12 @@ class ReplicateProductionDatabase extends Command
             }
 
             $this->info('Database replication completed successfully via PHP!');
+
             return 0;
 
         } catch (\Exception $e) {
-            $this->error("An error occurred during PHP-based replication: " . $e->getMessage());
+            $this->error('An error occurred during PHP-based replication: '.$e->getMessage());
+
             return 1;
         } finally {
             // 5. Re-enable foreign key checks
@@ -422,17 +434,18 @@ class ReplicateProductionDatabase extends Command
 
             if (empty($rows)) {
                 $this->warn('No tables or views found in the database.');
+
                 return;
             }
 
             // Sort alphabetically by table name
-            usort($rows, fn($a, $b) => strcmp($a[0], $b[0]));
+            usort($rows, fn ($a, $b) => strcmp($a[0], $b[0]));
 
             $this->table(['Table Name', 'Row Count', 'Type'], $rows);
-            $this->info('Total replicated objects: ' . count($rows));
+            $this->info('Total replicated objects: '.count($rows));
 
         } catch (\Exception $e) {
-            $this->warn('Could not generate replication summary: ' . $e->getMessage());
+            $this->warn('Could not generate replication summary: '.$e->getMessage());
         }
     }
 }

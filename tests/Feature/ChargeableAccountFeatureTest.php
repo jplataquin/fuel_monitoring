@@ -215,4 +215,44 @@ class ChargeableAccountFeatureTest extends TestCase
         $response->assertSee('1,250.00 L');
         $response->assertSee('350.50 L');
     }
+
+    public function test_chargeable_accounts_index_page_displays_total_budgets(): void
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'Consolidated Account', 'status' => 'Active', 'classification' => 'Running']);
+
+        $subAccount1 = $account->subAccounts()->create(['name' => 'Sub One']);
+        $subAccount2 = $account->subAccounts()->create(['name' => 'Sub Two']);
+
+        // Approved budgets on SubOne and SubTwo
+        $subAccount1->budgets()->create([
+            'budget_quantity' => 2000.00,
+            'status' => 'Approved',
+            'created_by' => $user->id,
+        ]);
+        $subAccount2->budgets()->create([
+            'budget_quantity' => 1500.50,
+            'status' => 'Approved',
+            'created_by' => $user->id,
+        ]);
+
+        // Pending budget on SubOne
+        $subAccount1->budgets()->create([
+            'budget_quantity' => 450.25,
+            'status' => 'Pending',
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('chargeable-accounts.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Total Approved Budget');
+        $response->assertSee('Total Pending Budget');
+
+        // Combined approved budget = 2000.00 + 1500.50 = 3500.50 L
+        $response->assertSee('3,500.50 L');
+
+        // Combined pending budget = 450.25 L
+        $response->assertSee('450.25 L');
+    }
 }

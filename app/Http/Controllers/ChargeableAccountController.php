@@ -11,7 +11,14 @@ class ChargeableAccountController extends Controller
 {
     public function index(): View
     {
-        $chargeableAccounts = ChargeableAccount::withCount('subAccounts')->get();
+        $chargeableAccounts = ChargeableAccount::withCount('subAccounts')
+            ->withSum(['budgets as total_approved_budget' => function ($query) {
+                $query->where('status', 'Approved');
+            }], 'budget_quantity')
+            ->withSum(['budgets as total_pending_budget' => function ($query) {
+                $query->where('status', 'Pending');
+            }], 'budget_quantity')
+            ->get();
 
         return view('chargeable-accounts.index', compact('chargeableAccounts'));
     }

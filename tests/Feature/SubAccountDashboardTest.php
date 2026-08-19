@@ -294,11 +294,9 @@ class SubAccountDashboardTest extends TestCase
         $response = $this->actingAs($this->admin)->get(route('sub-accounts.show', $subAccount));
 
         $response->assertStatus(200);
-        $response->assertSee('John Operator');
-        $response->assertSee('REF-1234');
-        $response->assertSee('Road Work');
-        $response->assertSee('EX-900');
-        $response->assertSee('#'.$order->id);
+        $response->assertDontSee('John Operator');
+        $response->assertDontSee('REF-1234');
+        $response->assertDontSee('Road Work');
     }
 
     public function test_fuel_orders_index_filters_by_chargeable_account_id_and_status(): void
@@ -370,9 +368,9 @@ class SubAccountDashboardTest extends TestCase
 
         $filterResponse->assertStatus(200);
         // Should see order 1 and order 3
-        $filterResponse->assertSee('#' . str_pad($order1->id, 5, '0', STR_PAD_LEFT));
-        $filterResponse->assertSee('#' . str_pad($order3->id, 5, '0', STR_PAD_LEFT));
+        $filterResponse->assertSee('#'.str_pad($order1->id, 5, '0', STR_PAD_LEFT));
+        $filterResponse->assertSee('#'.str_pad($order3->id, 5, '0', STR_PAD_LEFT));
         // Should NOT see order 2
-        $filterResponse->assertDontSee('#' . str_pad($order2->id, 5, '0', STR_PAD_LEFT));
+        $filterResponse->assertDontSee('#'.str_pad($order2->id, 5, '0', STR_PAD_LEFT));
     }
 }

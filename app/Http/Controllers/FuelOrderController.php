@@ -47,9 +47,9 @@ class FuelOrderController extends Controller
             $accountId = $request->chargeable_account_id;
             $query->where(function ($q) use ($accountId) {
                 $q->where('chargeable_account_id', $accountId)
-                  ->orWhereHas('utilizationEntries', function ($ueQ) use ($accountId) {
-                      $ueQ->where('chargeable_account_id', $accountId);
-                  });
+                    ->orWhereHas('utilizationEntries', function ($ueQ) use ($accountId) {
+                        $ueQ->where('chargeable_account_id', $accountId);
+                    });
             });
         }
 
