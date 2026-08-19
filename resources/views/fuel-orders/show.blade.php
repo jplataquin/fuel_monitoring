@@ -79,14 +79,12 @@
                 <div class="{{ $isPrint ? '' : 'card bg-dark border-secondary border-opacity-25 shadow-lg rounded-4 overflow-hidden' }}">
                     <div class="{{ $isPrint ? '' : 'card-body p-4 p-md-5' }}">
                         
-                        @if(!$isPrint)
-                            <!-- Web View Header -->
-                            <div class="text-center mb-5 pb-5 border-bottom border-secondary border-opacity-25">
-                                <h1 class="h3 fw-black text-light tracking-tight text-uppercase mb-2">Fuel Order Form</h1>
-                                <p class="text-secondary fw-medium mb-1">Issue Date: {{ $fuelOrder->created_at->format('F d, Y') }}</p>
-                                <p class="text-secondary fw-medium mb-0">Order Number: #{{ str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT) }}</p>
-                            </div>
-                        @endif
+                        <!-- Header -->
+                        <div class="text-center mb-4 pb-4 border-bottom {{ $isPrint ? 'border-dark' : 'border-secondary border-opacity-25' }}">
+                            <h1 class="h3 fw-black {{ $isPrint ? 'text-dark' : 'text-light' }} tracking-tight text-uppercase mb-2">Fuel Order Form</h1>
+                            <p class="{{ $isPrint ? 'text-dark fw-bold' : 'text-secondary fw-medium' }} mb-1">Issue Date: {{ $fuelOrder->created_at->format('F d, Y') }}</p>
+                            <p class="{{ $isPrint ? 'text-dark fw-bold' : 'text-secondary fw-medium' }} mb-0">Order Number: #{{ str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT) }}</p>
+                        </div>
 
                         <div class="row g-4 mb-4">
                             <div class="col-6">

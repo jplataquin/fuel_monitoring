@@ -523,4 +523,27 @@ class FuelOrderFeatureTest extends TestCase
         $response->assertSee('Say Fuel Quantity:');
         $response->assertDontSee('Say Fuel Quantity (');
     }
+
+    public function test_show_fuel_order_displays_issue_date_and_order_number_in_printed_view()
+    {
+        $user = User::factory()->create(['role' => 'data_logger']);
+        $account = ChargeableAccount::create(['name' => 'Project Alpha', 'status' => 'Active']);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'calculated_quantity' => 0,
+            'say_quantity' => 100,
+            'status' => 'PEND',
+            'created_by' => $user->id,
+            'remarks' => 'Monthly generator replenishment',
+        ]);
+
+        // Request printed view by adding print=1 query param
+        $response = $this->actingAs($user)->get(route('fuel-orders.show', $fuelOrder).'?print=1');
+
+        $response->assertStatus(200);
+        $response->assertSee('Issue Date:');
+        $response->assertSee('Order Number: #'.str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT));
+    }
 }
