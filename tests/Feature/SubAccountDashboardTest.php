@@ -48,6 +48,7 @@ class SubAccountDashboardTest extends TestCase
         $subAccount = SubAccount::create([
             'chargeable_account_id' => $account->id,
             'name' => 'Sub Active',
+            'accomplishment' => 45.5,
         ]);
 
         SubAccountBudget::create([
@@ -63,6 +64,14 @@ class SubAccountDashboardTest extends TestCase
         $response->assertViewHasAll(['chargeableAccount', 'chartLabels', 'remainingBalances', 'subAccountData']);
         $response->assertSee('Sub Active');
         $response->assertSee('1,000.00'); // Check budget is shown
+
+        $subAccountData = $response->viewData('subAccountData');
+        $this->assertEquals(45.5, $subAccountData[0]['accomplishment']);
+
+        // Check that Chart.js has datasets for both Fuel Consumption and Accomplishment
+        $response->assertSee('accomplishmentValues');
+        $response->assertSee('Fuel Consumption (%)');
+        $response->assertSee('Accomplishment (%)');
     }
 
     public function test_sub_account_dashboard_calculates_remaining_balance_correctly(): void

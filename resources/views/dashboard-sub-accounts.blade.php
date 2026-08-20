@@ -210,23 +210,27 @@
                 const budgetValues = @json(collect($subAccountData)->pluck('total_budget'));
                 const consumedValues = @json(collect($subAccountData)->pluck('consumed'));
                 const remainingValues = @json(collect($subAccountData)->pluck('remaining'));
+                const accomplishmentValues = @json(collect($subAccountData)->pluck('accomplishment'));
 
                 const percentages = budgetValues.map((budget, index) => {
                     const consumed = consumedValues[index];
                     return budget > 0 ? Math.round((consumed / budget) * 100) : (consumed > 0 ? 100 : 0);
                 });
 
-                const backgroundColors = percentages.map(percent => {
+                const fuelBackgroundColors = percentages.map(percent => {
                     if (percent >= 100) return 'rgba(239, 68, 68, 0.75)'; // Red for Exhausted
                     if (percent >= 75) return 'rgba(245, 158, 11, 0.75)';  // Orange for Warning
                     return 'rgba(52, 211, 153, 0.75)';                    // Green for Healthy
                 });
 
-                const borderColors = percentages.map(percent => {
+                const fuelBorderColors = percentages.map(percent => {
                     if (percent >= 100) return 'rgb(239, 68, 68)';
                     if (percent >= 75) return 'rgb(245, 158, 11)';
                     return 'rgb(52, 211, 153)';
                 });
+
+                const accomplishmentBackgroundColors = accomplishmentValues.map(() => 'rgba(56, 189, 248, 0.75)'); // Material Blue
+                const accomplishmentBorderColors = accomplishmentValues.map(() => 'rgb(56, 189, 248)');
 
                 new Chart(ctx, {
                     type: 'bar',
@@ -234,10 +238,18 @@
                         labels: labels,
                         datasets: [
                             {
-                                label: 'Budget Utilization (%)',
+                                label: 'Fuel Consumption (%)',
                                 data: percentages,
-                                backgroundColor: backgroundColors,
-                                borderColor: borderColors,
+                                backgroundColor: fuelBackgroundColors,
+                                borderColor: fuelBorderColors,
+                                borderWidth: 1,
+                                borderRadius: 4
+                            },
+                            {
+                                label: 'Accomplishment (%)',
+                                data: accomplishmentValues,
+                                backgroundColor: accomplishmentBackgroundColors,
+                                borderColor: accomplishmentBorderColors,
                                 borderWidth: 1,
                                 borderRadius: 4
                             }
@@ -249,23 +261,33 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                display: false
+                                display: true,
+                                labels: {
+                                    color: '#f1f5f9'
+                                }
                             },
                             tooltip: {
+                                mode: 'index',
+                                intersect: false,
                                 callbacks: {
                                     label: function(context) {
                                         const idx = context.dataIndex;
-                                        const percent = percentages[idx];
-                                        const budget = budgetValues[idx].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                        const consumed = consumedValues[idx].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                        const remaining = remainingValues[idx].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                        
-                                        return [
-                                            `Utilization: ${percent}%`,
-                                            `Budget: ${budget} L`,
-                                            `Consumed: ${consumed} L`,
-                                            `Remaining: ${remaining} L`
-                                        ];
+                                        if (context.datasetIndex === 0) {
+                                            const percent = percentages[idx];
+                                            const budget = budgetValues[idx].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                            const consumed = consumedValues[idx].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                            const remaining = remainingValues[idx].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                            
+                                            return [
+                                                `Fuel Consumption: ${percent}%`,
+                                                `  Budget: ${budget} L`,
+                                                `  Consumed: ${consumed} L`,
+                                                `  Remaining: ${remaining} L`
+                                            ];
+                                        } else {
+                                            const accomplishment = accomplishmentValues[idx] || 0;
+                                            return `Accomplishment: ${accomplishment.toFixed(2)}%`;
+                                        }
                                     }
                                 },
                                 backgroundColor: '#1e293b',
@@ -289,7 +311,7 @@
                                 },
                                 title: {
                                     display: true,
-                                    text: 'Utilization Percentage (%)',
+                                    text: 'Percentage (%)',
                                     color: '#94a3b8'
                                 }
                             },

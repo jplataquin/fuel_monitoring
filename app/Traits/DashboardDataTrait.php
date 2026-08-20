@@ -332,6 +332,7 @@ trait DashboardDataTrait
                 'total_budget' => $totalBudget,
                 'consumed' => $consumed,
                 'remaining' => $remaining,
+                'accomplishment' => $sa->accomplishment,
             ];
         }
 
