@@ -56,14 +56,12 @@
                 <table class="table table-bordered mb-1">
                     <thead class="table-light">
                         <tr class="text-uppercase fw-bold text-nowrap">
-                            <th style="width: 10%;">Date</th>
-                            <th style="width: 10%;">Asset</th>
-                            <th style="width: 15%;">Driver/Operator</th>
-                            <th style="width: 20%;">Chargeable Account</th>
-                            <th style="width: 15%;">Sub-Account</th>
-                            <th style="width: 12%;">Calc Type</th>
-                            <th class="text-end" style="width: 10%;">Readings / Hours</th>
-                            <th class="text-end" style="width: 8%;">Comp Qty</th>
+                            <th style="width: 15%;">Date</th>
+                            <th style="width: 15%;">Asset</th>
+                            <th style="width: 25%;">Driver/Operator</th>
+                            <th style="width: 15%;">Calc Type</th>
+                            <th class="text-end" style="width: 15%;">Readings / Hours</th>
+                            <th class="text-end" style="width: 15%;">Comp Qty</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -82,14 +80,6 @@
                                     @endif
                                 </td>
                                 <td class="align-middle small">{{ $entry->driver_operator_name }}</td>
-                                <td class="align-middle small">{{ $entry->chargeableAccount->name ?? '—' }}</td>
-                                <td class="align-middle small">
-                                    @if($entry->unbudgeted)
-                                        <span class="text-danger fw-bold" style="font-size: 8px;">UNBUDGETED</span>
-                                    @else
-                                        {{ $entry->subAccount->name ?? '—' }}
-                                    @endif
-                                </td>
                                 <td class="align-middle small">{{ $entry->calculation_type }}</td>
                                 <td class="align-middle text-end font-monospace small">
                                     @if($entry->calculation_type === 'Kilometer Reading')
@@ -106,7 +96,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4 text-secondary small">No utilization entries found.</td>
+                                <td colspan="6" class="text-center py-4 text-secondary small">No utilization entries found.</td>
                             </tr>
                         @endforelse
                     </tbody>

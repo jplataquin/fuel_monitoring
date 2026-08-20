@@ -89,8 +89,6 @@
                                 <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Date</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Asset</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Driver/Operator</th>
-                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Chargeable Account</th>
-                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Sub-Account</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Calculation Type</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest text-end">Readings / Hours</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest text-end">Calculated Fuel</th>
@@ -120,16 +118,6 @@
                                     </td>
                                     <td class="px-4 py-3 text-light small fw-medium">
                                         {{ $entry->driver_operator_name }}
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <span class="text-light small fw-medium">{{ $entry->chargeableAccount->name ?? '—' }}</span>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        @if($entry->unbudgeted)
-                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20 rounded-pill px-2 py-0.5" style="font-size: 9px;">UNBUDGETED</span>
-                                        @else
-                                            <span class="text-light small fw-medium">{{ $entry->subAccount->name ?? '—' }}</span>
-                                        @endif
                                     </td>
                                     <td class="px-4 py-3 text-secondary small">
                                         {{ $entry->calculation_type }}
