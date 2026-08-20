@@ -546,4 +546,112 @@ class UtilizationEntryFeatureTest extends TestCase
         $response->assertSee('Operator A');
         $response->assertDontSee('Operator B');
     }
+
+    public function test_utilization_entries_index_filters_by_asset_and_shows_grand_total(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Account A',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Sub A',
+        ]);
+
+        $asset2 = Asset::create([
+            'fleet_no' => 'EX-123',
+            'asset_type_id' => $this->asset->asset_type_id,
+            'fuel_factor_km' => 0,
+            'fuel_factor_hr' => 3.0,
+            'tank_capacity' => 150,
+        ]);
+
+        // Entry 1 for this->asset
+        $entry1 = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-08-15',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'Operator A',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-A',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'First run',
+            'fuel_factor_hr' => $this->asset->fuel_factor_hr,
+            'fuel_factor_km' => $this->asset->fuel_factor_km,
+        ]);
+
+        // Entry 2 for asset2
+        $entry2 = UtilizationEntry::create([
+            'asset_id' => $asset2->id,
+            'date' => '2026-08-15',
+            'start_time' => '11:00',
+            'end_time' => '13:00',
+            'driver_operator_name' => 'Operator B',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-B',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Second run',
+            'fuel_factor_hr' => $asset2->fuel_factor_hr,
+            'fuel_factor_km' => $asset2->fuel_factor_km,
+        ]);
+
+        // Filter by asset 2
+        $response = $this->actingAs($this->admin)->get(route('utilization-entries.index', [
+            'asset_id' => $asset2->id,
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertSee('Operator B');
+        $response->assertDontSee('Operator A');
+
+        // Check the grand total is shown for entry 2 (2 hours * 3.0 = 6.00 liters)
+        $response->assertSee('6.00');
+    }
+
+    public function test_utilization_entries_print_renders_correctly_with_filters(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Print Account',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Print Sub',
+        ]);
+
+        // Entry for this->asset
+        $entry = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-08-15',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'Print Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-P',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Print run',
+            'fuel_factor_hr' => $this->asset->fuel_factor_hr,
+            'fuel_factor_km' => $this->asset->fuel_factor_km,
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('utilization-entries.print', [
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertSee('Utilization Entries List');
+        $response->assertSee('Print Operator');
+        $response->assertSee('Print Account');
+        $response->assertSee('Print Sub');
+        $response->assertSee('Total Consumed Fuel:');
+        // Total consumed fuel is (2 hours * 1.5 = 3.00 L)
+        $response->assertSee('3.00 L');
+    }
 }

@@ -26,17 +26,51 @@
                         @endforeach
                     </select>
 
-                    @if(request('chargeable_account_id') || request('sub_account_id'))
-                        <a href="{{ route('utilization-entries.index') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 text-sm">
+                    <select name="asset_id" class="form-select bg-dark text-light border-secondary border-opacity-50 rounded-pill px-3 py-2 text-sm" style="width: 200px;" onchange="this.form.submit()">
+                        <option value="">All Assets</option>
+                        @foreach($assets as $ast)
+                            <option value="{{ $ast->id }}" {{ request('asset_id') == $ast->id ? 'selected' : '' }}>
+                                {{ $ast->fleet_no }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    @if(request('chargeable_account_id') || request('sub_account_id') || request('asset_id'))
+                        <a href="{{ route('utilization-entries.index') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 text-sm text-decoration-none">
                             Clear
                         </a>
                     @endif
+
+                    <a href="{{ route('utilization-entries.print', request()->query()) }}" target="_blank" class="btn btn-outline-info rounded-pill px-3 py-2 text-sm text-decoration-none d-flex align-items-center gap-2">
+                        <i class="bi bi-printer"></i> Print List
+                    </a>
                 </form>
             </div>
         </div>
     </x-slot>
 
     <div class="container-xl py-5">
+        <!-- Grand Total Card -->
+        <div class="row mb-4">
+            <div class="col-12 col-md-4">
+                <div class="card bg-dark border-secondary border-opacity-50 rounded-4 p-4 shadow-sm">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h3 class="h6 fw-bold text-secondary text-uppercase tracking-wider mb-2" style="font-size: 0.75rem;">Grand Total Calculated Fuel</h3>
+                            <div class="h2 font-monospace fw-bold text-info mb-0" style="color: #38bdf8 !important;">
+                                {{ number_format($totalCalculatedFuel, 2) }} L
+                            </div>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded-4" style="color: #38bdf8 !important;">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card bg-dark border-secondary border-opacity-25 shadow-sm overflow-hidden">
             <div class="card-body p-4">
                 @if (session('status'))
@@ -130,7 +164,7 @@
                                                 <svg width="32" height="32" class="text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                             </div>
                                             <p class="fw-bold text-light mb-1">No utilization entries found.</p>
-                                            @if(request('chargeable_account_id') || request('sub_account_id'))
+                                            @if(request('chargeable_account_id') || request('sub_account_id') || request('asset_id'))
                                                 <p class="text-secondary small mb-3">Try adjusting your search filter.</p>
                                                 <a href="{{ route('utilization-entries.index') }}" class="btn btn-link text-primary fw-bold text-decoration-none small text-uppercase tracking-widest">Clear Filter</a>
                                             @endif

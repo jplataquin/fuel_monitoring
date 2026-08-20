@@ -28,12 +28,47 @@ class UtilizationEntryController extends Controller
             $query->where('sub_account_id', $request->sub_account_id);
         }
 
+        if ($request->filled('asset_id')) {
+            $query->where('asset_id', $request->asset_id);
+        }
+
+        // Get total calculated fuel across all matched entries (before pagination)
+        $totalCalculatedFuel = $query->get()->sum('calculated_quantity');
+
         $utilizationEntries = $query->latest('date')->latest('start_time')->paginate(10)->withQueryString();
 
         $chargeableAccounts = ChargeableAccount::where('status', 'Active')->orderBy('name')->get();
         $subAccounts = SubAccount::orderBy('name')->get();
+        $assets = Asset::orderBy('fleet_no')->get();
 
-        return view('utilization-entries.index', compact('utilizationEntries', 'chargeableAccounts', 'subAccounts'));
+        return view('utilization-entries.index', compact('utilizationEntries', 'chargeableAccounts', 'subAccounts', 'assets', 'totalCalculatedFuel'));
+    }
+
+    public function print(Request $request): View
+    {
+        $query = UtilizationEntry::with(['asset', 'chargeableAccount', 'subAccount', 'fuelOrder', 'creator']);
+
+        if ($request->filled('chargeable_account_id')) {
+            $query->where('chargeable_account_id', $request->chargeable_account_id);
+        }
+
+        if ($request->filled('sub_account_id')) {
+            $query->where('sub_account_id', $request->sub_account_id);
+        }
+
+        if ($request->filled('asset_id')) {
+            $query->where('asset_id', $request->asset_id);
+        }
+
+        $utilizationEntries = $query->latest('date')->latest('start_time')->get();
+
+        $totalCalculatedFuel = $utilizationEntries->sum('calculated_quantity');
+
+        $chargeableAccount = $request->filled('chargeable_account_id') ? ChargeableAccount::find($request->chargeable_account_id) : null;
+        $subAccount = $request->filled('sub_account_id') ? SubAccount::find($request->sub_account_id) : null;
+        $asset = $request->filled('asset_id') ? Asset::find($request->asset_id) : null;
+
+        return view('utilization-entries.print', compact('utilizationEntries', 'totalCalculatedFuel', 'chargeableAccount', 'subAccount', 'asset'));
     }
 
     public function store(Request $request): JsonResponse|RedirectResponse
