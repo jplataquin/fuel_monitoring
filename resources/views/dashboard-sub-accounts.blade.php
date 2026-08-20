@@ -162,7 +162,7 @@
                                                     $saStatusBg = 'bg-warning bg-opacity-10 text-warning';
                                                 }
                                             @endphp
-                                            <tr onclick="window.location='{{ route('sub-accounts.show', $sa['id']) }}'" style="cursor: pointer;">
+                                            <tr onclick="window.location='{{ route('fuel-orders.index', ['chargeable_account_id' => $chargeableAccount->id, 'sub_account_id' => $sa['id']]) }}'" style="cursor: pointer;">
                                                 <td class="px-4 py-3 fw-bold text-white border-secondary">
                                                     {{ $sa['name'] }}
                                                 </td>

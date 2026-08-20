@@ -386,4 +386,29 @@ class SubAccountDashboardTest extends TestCase
         // Should NOT see order 2
         $filterResponse->assertDontSee('#'.str_pad($order2->id, 5, '0', STR_PAD_LEFT));
     }
+
+    public function test_sub_account_dashboard_row_onclick_redirects_to_prefiltered_fuel_orders(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Redirection Account',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Sub Target',
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account));
+
+        $response->assertStatus(200);
+
+        $expectedUrl = route('fuel-orders.index', [
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+        ]);
+
+        $response->assertSee("window.location='" . e($expectedUrl) . "'", false);
+    }
 }
