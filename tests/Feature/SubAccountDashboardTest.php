@@ -387,7 +387,7 @@ class SubAccountDashboardTest extends TestCase
         $filterResponse->assertDontSee('#'.str_pad($order2->id, 5, '0', STR_PAD_LEFT));
     }
 
-    public function test_sub_account_dashboard_row_onclick_redirects_to_prefiltered_fuel_orders(): void
+    public function test_sub_account_dashboard_row_onclick_opens_prefiltered_utilization_entries_in_new_tab(): void
     {
         $account = ChargeableAccount::create([
             'name' => 'Redirection Account',
@@ -404,11 +404,11 @@ class SubAccountDashboardTest extends TestCase
 
         $response->assertStatus(200);
 
-        $expectedUrl = route('fuel-orders.index', [
+        $expectedUrl = route('utilization-entries.index', [
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
         ]);
 
-        $response->assertSee("window.location='" . e($expectedUrl) . "'", false);
+        $response->assertSee("window.open('" . e($expectedUrl) . "', '_blank')", false);
     }
 }

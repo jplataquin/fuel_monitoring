@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\ChargeableAccount;
+use App\Models\SubAccount;
 use App\Models\UtilizationEntry;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -15,6 +16,26 @@ use Illuminate\View\View;
 
 class UtilizationEntryController extends Controller
 {
+    public function index(Request $request): View
+    {
+        $query = UtilizationEntry::with(['asset', 'chargeableAccount', 'subAccount', 'fuelOrder', 'creator']);
+
+        if ($request->filled('chargeable_account_id')) {
+            $query->where('chargeable_account_id', $request->chargeable_account_id);
+        }
+
+        if ($request->filled('sub_account_id')) {
+            $query->where('sub_account_id', $request->sub_account_id);
+        }
+
+        $utilizationEntries = $query->latest('date')->latest('start_time')->paginate(10)->withQueryString();
+
+        $chargeableAccounts = ChargeableAccount::where('status', 'Active')->orderBy('name')->get();
+        $subAccounts = SubAccount::orderBy('name')->get();
+
+        return view('utilization-entries.index', compact('utilizationEntries', 'chargeableAccounts', 'subAccounts'));
+    }
+
     public function store(Request $request): JsonResponse|RedirectResponse
     {
         $asset = Asset::findOrFail($request->asset_id);

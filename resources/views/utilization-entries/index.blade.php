@@ -1,0 +1,153 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3">
+            <h2 class="h4 fw-bold text-light mb-0">
+                {{ __('Utilization Entries') }}
+            </h2>
+            <div class="d-flex align-items-center gap-3">
+                <form action="{{ route('utilization-entries.index') }}" method="GET" class="d-flex align-items-center gap-2">
+                    <select name="chargeable_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 rounded-pill px-3 py-2 text-sm" style="width: 200px;" onchange="this.form.submit()">
+                        <option value="">All Accounts</option>
+                        @foreach($chargeableAccounts as $acc)
+                            <option value="{{ $acc->id }}" {{ request('chargeable_account_id') == $acc->id ? 'selected' : '' }}>
+                                {{ $acc->name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="sub_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 rounded-pill px-3 py-2 text-sm" style="width: 200px;" onchange="this.form.submit()">
+                        <option value="">All Sub-Accounts</option>
+                        @foreach($subAccounts as $sub)
+                            @if(!request('chargeable_account_id') || $sub->chargeable_account_id == request('chargeable_account_id'))
+                                <option value="{{ $sub->id }}" {{ request('sub_account_id') == $sub->id ? 'selected' : '' }}>
+                                    {{ $sub->name }}
+                                </option>
+                            @endif
+                        @endforeach
+                    </select>
+
+                    @if(request('chargeable_account_id') || request('sub_account_id'))
+                        <a href="{{ route('utilization-entries.index') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 text-sm">
+                            Clear
+                        </a>
+                    @endif
+                </form>
+            </div>
+        </div>
+    </x-slot>
+
+    <div class="container-xl py-5">
+        <div class="card bg-dark border-secondary border-opacity-25 shadow-sm overflow-hidden">
+            <div class="card-body p-4">
+                @if (session('status'))
+                    <div class="alert alert-success bg-success bg-opacity-10 border-success border-opacity-20 text-success d-flex align-items-center mb-4 rounded-3" role="alert">
+                        <svg class="me-2" width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        <div class="fw-bold small">{{ session('status') }}</div>
+                    </div>
+                @endif
+
+                <div class="table-responsive rounded-3 border border-secondary border-opacity-25">
+                    <table class="table table-dark table-hover align-middle mb-0">
+                        <thead>
+                            <tr class="bg-secondary bg-opacity-10">
+                                <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Date</th>
+                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Asset</th>
+                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Driver/Operator</th>
+                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Chargeable Account</th>
+                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Sub-Account</th>
+                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Calculation Type</th>
+                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest text-end">Readings / Hours</th>
+                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest text-end">Calculated Fuel</th>
+                                <th class="pe-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($utilizationEntries as $entry)
+                                <tr onclick="window.location='{{ route('utilization-entries.show', $entry) }}'" style="cursor: pointer;">
+                                    <td class="ps-4 py-3">
+                                        <div class="fw-bold text-light small">{{ $entry->date->format('M d, Y') }}</div>
+                                        <div class="text-secondary small" style="font-size: 11px;">
+                                            @if($entry->start_time && $entry->end_time)
+                                                {{ $entry->start_time->format('H:i') }} - {{ $entry->end_time->format('H:i') }}
+                                            @else
+                                                —
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        @if($entry->asset)
+                                            <div class="fw-bold text-light small tracking-tight">{{ $entry->asset->fleet_no }}</div>
+                                            <div class="text-secondary small text-uppercase tracking-widest" style="font-size: 10px;">{{ $entry->asset->plate_no ?? 'No Plate' }}</div>
+                                        @else
+                                            <span class="text-secondary small">Direct</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-3 text-light small fw-medium">
+                                        {{ $entry->driver_operator_name }}
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="text-light small fw-medium">{{ $entry->chargeableAccount->name ?? '—' }}</span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        @if($entry->unbudgeted)
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20 rounded-pill px-2 py-0.5" style="font-size: 9px;">UNBUDGETED</span>
+                                        @else
+                                            <span class="text-light small fw-medium">{{ $entry->subAccount->name ?? '—' }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-3 text-secondary small">
+                                        {{ $entry->calculation_type }}
+                                    </td>
+                                    <td class="px-4 py-3 text-end font-monospace small text-light">
+                                        @if($entry->calculation_type === 'Kilometer Reading')
+                                            {{ number_format($entry->start_kilometer_reading, 1) }} - {{ number_format($entry->end_kilometer_reading, 1) }} km
+                                        @elseif($entry->calculation_type === 'Hour Reading')
+                                            {{ number_format($entry->start_hour_reading, 1) }} - {{ number_format($entry->end_hour_reading, 1) }} hrs
+                                        @elseif($entry->calculation_type === 'Actual Hours')
+                                            {{ number_format($entry->actual_hours, 1) }} hrs (Actual)
+                                        @else
+                                            Timeframe
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-3 text-end font-monospace small fw-bold text-info">
+                                        {{ number_format($entry->calculated_quantity, 2) }} L
+                                    </td>
+                                    <td class="pe-4 py-3 text-end">
+                                        <div class="d-flex justify-content-end gap-1" onclick="event.stopPropagation()">
+                                            <a href="{{ route('utilization-entries.show', $entry) }}" class="btn btn-link text-primary p-2 rounded-circle hover-bg-light hover-bg-opacity-10" title="View Entry">
+                                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="9" class="px-4 py-5 text-center border-0">
+                                        <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                                            <div class="bg-secondary bg-opacity-20 rounded-4 d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                                <svg width="32" height="32" class="text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                            </div>
+                                            <p class="fw-bold text-light mb-1">No utilization entries found.</p>
+                                            @if(request('chargeable_account_id') || request('sub_account_id'))
+                                                <p class="text-secondary small mb-3">Try adjusting your search filter.</p>
+                                                <a href="{{ route('utilization-entries.index') }}" class="btn btn-link text-primary fw-bold text-decoration-none small text-uppercase tracking-widest">Clear Filter</a>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                @if($utilizationEntries->hasPages())
+                    <div class="mt-4">
+                        {{ $utilizationEntries->links() }}
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</x-app-layout>

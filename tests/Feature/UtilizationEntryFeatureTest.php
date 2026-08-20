@@ -485,4 +485,65 @@ class UtilizationEntryFeatureTest extends TestCase
 
         $response->assertSessionHasErrors(['end_time']);
     }
+
+    public function test_utilization_entries_index_filters_by_chargeable_account_and_sub_account(): void
+    {
+        $account1 = ChargeableAccount::create([
+            'name' => 'Account A',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+        $account2 = ChargeableAccount::create([
+            'name' => 'Account B',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount1 = SubAccount::create([
+            'chargeable_account_id' => $account1->id,
+            'name' => 'Sub A',
+        ]);
+        $subAccount2 = SubAccount::create([
+            'chargeable_account_id' => $account2->id,
+            'name' => 'Sub B',
+        ]);
+
+        // Entry for account 1 / sub 1
+        $entry1 = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-08-15',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'Operator A',
+            'chargeable_account_id' => $account1->id,
+            'sub_account_id' => $subAccount1->id,
+            'reference' => 'REF-A',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'First run',
+        ]);
+
+        // Entry for account 2 / sub 2
+        $entry2 = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-08-15',
+            'start_time' => '11:00',
+            'end_time' => '13:00',
+            'driver_operator_name' => 'Operator B',
+            'chargeable_account_id' => $account2->id,
+            'sub_account_id' => $subAccount2->id,
+            'reference' => 'REF-B',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Second run',
+        ]);
+
+        // Filter by account 1 and sub 1
+        $response = $this->actingAs($this->admin)->get(route('utilization-entries.index', [
+            'chargeable_account_id' => $account1->id,
+            'sub_account_id' => $subAccount1->id,
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertSee('Operator A');
+        $response->assertDontSee('Operator B');
+    }
 }

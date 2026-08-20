@@ -48,7 +48,7 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::get('chargeable-accounts/{chargeable_account}/sub-accounts/json', [SubAccountController::class, 'byAccount'])->name('chargeable-accounts.sub-accounts.json');
 
     // Utilization Entries
-    Route::resource('utilization-entries', UtilizationEntryController::class)->except(['index', 'create']);
+    Route::resource('utilization-entries', UtilizationEntryController::class)->except(['create']);
 
     // Fuel Orders
     Route::resource('fuel-orders', FuelOrderController::class)->except(['destroy']);
