@@ -50,9 +50,6 @@
                 
 
                 @if(Auth::user()->role === 'administrator')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('public-dashboard-links.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('public-dashboard-links.index') }}">{{ __('Shared Links') }}</a>
-                </li>
                 
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('settings.*') || request()->routeIs('users.*') || request()->routeIs('asset-types.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('settings.index') }}">{{ __('Settings') }}</a>
