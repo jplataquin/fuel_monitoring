@@ -59,6 +59,7 @@
                 <thead>
                     <tr class="bg-light">
                         <th class="ps-4 py-2 small fw-bold text-dark text-uppercase">Sub Account</th>
+                        <th class="px-4 py-2 small fw-bold text-dark text-uppercase text-end">Accomplishment</th>
                         <th class="px-4 py-2 small fw-bold text-dark text-uppercase text-end">Approved Budget (L)</th>
                         <th class="px-4 py-2 small fw-bold text-dark text-uppercase text-end">Pending Budget (L)</th>
                     </tr>
@@ -67,6 +68,9 @@
                     @forelse($chargeableAccount->subAccounts as $subAccount)
                         <tr>
                             <td class="ps-4 py-2 small fw-bold text-dark">{{ $subAccount->name }}</td>
+                            <td class="px-4 py-2 small text-dark fw-bold text-end font-monospace">
+                                {{ number_format($subAccount->accomplishment, 2) }}%
+                            </td>
                             <td class="px-4 py-2 small text-success fw-bold text-end font-monospace">
                                 {{ number_format($subAccount->budgets->where('status', 'Approved')->sum('budget_quantity'), 2) }} L
                             </td>
@@ -76,7 +80,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="px-4 py-4 text-center text-secondary small">
+                            <td colspan="4" class="px-4 py-4 text-center text-secondary small">
                                 No sub-accounts found.
                             </td>
                         </tr>

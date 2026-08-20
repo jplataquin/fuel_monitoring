@@ -44,6 +44,7 @@ class SubAccountController extends Controller
                     ->ignore($subAccount->id)
                     ->whereNull('deleted_at'),
             ],
+            'accomplishment' => 'required|numeric|min:0|max:100',
         ]);
 
         $subAccount->update($validated);

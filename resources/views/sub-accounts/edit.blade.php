@@ -20,6 +20,14 @@
                         @enderror
                     </div>
 
+                    <div class="mb-4">
+                        <label for="accomplishment" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Accomplishment (%)</label>
+                        <input id="accomplishment" name="accomplishment" type="number" step="0.01" min="0" max="100" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-primary" value="{{ old('accomplishment', $subAccount->accomplishment) }}" required>
+                        @error('accomplishment')
+                            <div class="text-danger small mt-2 fw-bold">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <div class="d-flex align-items-center justify-content-end pt-4 border-top border-secondary border-opacity-25 gap-3">
                         <a href="{{ route('chargeable-accounts.show', $subAccount->chargeableAccount) }}" class="btn btn-link text-secondary text-decoration-none small fw-bold text-uppercase tracking-widest me-3">Cancel</a>
                         <button type="submit" class="btn btn-primary px-5 py-3 rounded-pill fw-bold small text-uppercase tracking-wider shadow">

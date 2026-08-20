@@ -384,4 +384,57 @@ class SubAccountTest extends TestCase
 
         $response->assertSessionHasErrors('merged_to_id');
     }
+
+    public function test_authorized_user_can_update_sub_account_accomplishment(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Account A', 'accomplishment' => 10.5]);
+
+        $response = $this->actingAs($admin)->patch(route('sub-accounts.update', $subAccount), [
+            'name' => 'Updated Sub Account Name',
+            'accomplishment' => 85.5,
+        ]);
+
+        $response->assertRedirect(route('chargeable-accounts.show', $account));
+        $this->assertDatabaseHas('sub_accounts', [
+            'id' => $subAccount->id,
+            'name' => 'Updated Sub Account Name',
+            'accomplishment' => 85.5,
+        ]);
+    }
+
+    public function test_sub_account_accomplishment_validation_fails_beyond_100(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Account A']);
+
+        $response = $this->actingAs($admin)->patch(route('sub-accounts.update', $subAccount), [
+            'name' => 'Sub Account A',
+            'accomplishment' => 100.1,
+        ]);
+
+        $response->assertSessionHasErrors('accomplishment');
+    }
+
+    public function test_sub_account_accomplishment_validation_fails_below_0(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Account A']);
+
+        $response = $this->actingAs($admin)->patch(route('sub-accounts.update', $subAccount), [
+            'name' => 'Sub Account A',
+            'accomplishment' => -0.5,
+        ]);
+
+        $response->assertSessionHasErrors('accomplishment');
+    }
 }

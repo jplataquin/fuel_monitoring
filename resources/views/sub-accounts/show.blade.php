@@ -18,11 +18,16 @@
             <!-- Sub-Account Info -->
             <div class="card bg-dark border-secondary shadow-lg rounded-4 p-4 mb-5">
                 <div class="row align-items-center">
-                    <div class="col-md-8">
+                    <div class="col-md-5">
                         <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Sub-Account Name</h3>
                         <span class="h4 text-white fw-bold">{{ $subAccount->name }}</span>
                     </div>
                
+                    <div class="col-md-3">
+                        <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Accomplishment</h3>
+                        <span class="h4 text-white fw-bold font-monospace">{{ number_format($subAccount->accomplishment, 2) }}%</span>
+                    </div>
+
                     <div class="col-md-4 text-md-end">
                         <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Total Approved Budget</h3>
                         <p class="display-6 fw-bold text-white mb-0 font-monospace">

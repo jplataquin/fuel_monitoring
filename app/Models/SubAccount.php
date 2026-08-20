@@ -20,10 +20,12 @@ class SubAccount extends Model
         'merged_by',
         'merged_at',
         'merge_remarks',
+        'accomplishment',
     ];
 
     protected $casts = [
         'merged_at' => 'datetime',
+        'accomplishment' => 'float',
     ];
 
     public function chargeableAccount(): BelongsTo

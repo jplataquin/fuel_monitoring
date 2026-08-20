@@ -105,6 +105,7 @@
                                     <thead>
                                         <tr class="bg-secondary bg-opacity-10">
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Sub Account</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Accomplishment</th>
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Approved Budget</th>
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Pending Budget</th>
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Actions</th>
@@ -117,6 +118,9 @@
                                                     <div class="d-flex align-items-center">
                                                         <span class="text-light fw-medium">{{ $subAccount->name }}</span>
                                                     </div>
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end font-monospace text-info fw-bold">
+                                                    {{ number_format($subAccount->accomplishment, 2) }}%
                                                 </td>
                                                 <td class="px-4 py-3 align-middle text-end font-monospace text-success fw-bold">
                                                     {{ number_format($subAccount->budgets->where('status', 'Approved')->sum('budget_quantity'), 2) }} L
@@ -146,7 +150,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4" class="px-4 py-5 text-center text-secondary">
+                                                <td colspan="5" class="px-4 py-5 text-center text-secondary">
                                                     <svg class="mb-2" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                                     </svg>
