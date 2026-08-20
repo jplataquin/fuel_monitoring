@@ -182,14 +182,18 @@ class FuelOrderFeatureTest extends TestCase
             ->assertSet('calculated_quantity', 50)
             ->assertSet('grouped_totals', [
                 'Account A' => [
-                    'kilometers' => 70, // (1050-1000) + (1100-1080) = 50 + 20
-                    'hours' => 0,
-                    'quantity' => 35, // 70 / 2 = 35
+                    'kilometers' => 70.0, // (1050-1000) + (1100-1080) = 50 + 20
+                    'hours' => 0.0,
+                    'quantity' => 35.0, // 70 / 2 = 35
+                    'remaining' => 0.0,
+                    'balance' => -35.0,
                 ],
                 'Account B' => [
-                    'kilometers' => 30, // (1080-1050) = 30
-                    'hours' => 0,
-                    'quantity' => 15, // 30 / 2 = 15
+                    'kilometers' => 30.0, // (1080-1050) = 30
+                    'hours' => 0.0,
+                    'quantity' => 15.0, // 30 / 2 = 15
+                    'remaining' => 0.0,
+                    'balance' => -15.0,
                 ],
             ]);
     }
@@ -664,5 +668,81 @@ class FuelOrderFeatureTest extends TestCase
         // Try to access print view directly with print=1
         $response = $this->actingAs($user)->get(route('fuel-orders.show', $fuelOrder).'?print=1');
         $response->assertStatus(403);
+    }
+
+    public function test_create_fuel_order_tracks_negative_balance_and_sets_has_negative_balance_true_for_asset()
+    {
+        $user = User::factory()->create(['role' => 'data_logger']);
+        $type = AssetType::create(['name' => 'Vehicle']);
+        $account = ChargeableAccount::create(['name' => 'Project Alpha', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Alpha']);
+        
+        // Approve a very small budget of 2.0 Liters
+        $subAccount->budgets()->create([
+            'budget_quantity' => 2.0,
+            'status' => 'Approved',
+            'allocated_by' => $user->id,
+        ]);
+
+        $asset = Asset::create([
+            'fleet_no' => 'V-001',
+            'asset_type_id' => $type->id,
+            'fuel_factor_km' => 2.5,
+            'fuel_factor_hr' => 1.5,
+            'tank_capacity' => 100,
+        ]);
+
+        // Create a utilization entry requiring 10.0 Liters
+        UtilizationEntry::create([
+            'asset_id' => $asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'end_time' => '18:00', // 10 hours * 1.5 L/hr = 15 L requested
+            'fuel_factor_hr' => 1.5,
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Some particulars',
+            'driver_operator_name' => 'Operator A',
+            'reference' => 'REF-001',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(CreateFuelOrder::class)
+            ->set('asset_id', $asset->id)
+            ->set('date_from', '2026-06-15')
+            ->set('date_to', '2026-06-15')
+            ->assertSet('has_negative_balance', true)
+            ->assertSet('grouped_totals', [
+                'Project Alpha - Sub Alpha' => [
+                    'kilometers' => 0.0,
+                    'hours' => 10.0,
+                    'quantity' => 15.0,
+                    'remaining' => 2.0,
+                    'balance' => -13.0,
+                ]
+            ]);
+    }
+
+    public function test_create_fuel_order_tracks_negative_balance_and_sets_has_negative_balance_true_for_direct_order()
+    {
+        $user = User::factory()->create(['role' => 'data_logger']);
+        $account = ChargeableAccount::create(['name' => 'Project Alpha', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Alpha']);
+        
+        // Approve a very small budget of 2.0 Liters
+        $subAccount->budgets()->create([
+            'budget_quantity' => 2.0,
+            'status' => 'Approved',
+            'allocated_by' => $user->id,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(CreateFuelOrder::class)
+            ->set('asset_id', null)
+            ->set('chargeable_account_id', $account->id)
+            ->set('sub_account_id', $subAccount->id)
+            ->set('say_quantity', 15.0)
+            ->assertSet('has_negative_balance', true);
     }
 }

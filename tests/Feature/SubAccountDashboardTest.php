@@ -72,6 +72,10 @@ class SubAccountDashboardTest extends TestCase
         $response->assertSee('accomplishmentValues');
         $response->assertSee('Fuel Consumption (%)');
         $response->assertSee('Accomplishment (%)');
+
+        // Check that the breakdown table includes the Accomplishment (%) column and formatted value
+        $response->assertSee('Accomplishment (%)');
+        $response->assertSee('45.50%');
     }
 
     public function test_sub_account_dashboard_calculates_remaining_balance_correctly(): void

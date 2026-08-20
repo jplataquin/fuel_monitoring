@@ -54,6 +54,8 @@ class CreateFuelOrder extends Component
 
     public $actual_quantity = 0;
 
+    public $has_negative_balance = false;
+
     public function mount()
     {
         $this->assets = Asset::all();
@@ -96,6 +98,36 @@ class CreateFuelOrder extends Component
         } else {
             $this->sub_accounts = [];
         }
+        $this->checkDirectNegativeBalance();
+    }
+
+    public function updatedSubAccountId()
+    {
+        $this->checkDirectNegativeBalance();
+    }
+
+    public function updatedSayQuantity()
+    {
+        $this->checkDirectNegativeBalance();
+    }
+
+    public function updatedUnbudgeted()
+    {
+        $this->checkDirectNegativeBalance();
+    }
+
+    public function checkDirectNegativeBalance()
+    {
+        $this->has_negative_balance = false;
+        if (! $this->asset_id && ! $this->unbudgeted && $this->sub_account_id && $this->say_quantity > 0) {
+            $subAccount = SubAccount::find($this->sub_account_id);
+            if ($subAccount) {
+                $remaining = $subAccount->remainingBudget();
+                if ((float) $this->say_quantity > $remaining) {
+                    $this->has_negative_balance = true;
+                }
+            }
+        }
     }
 
     public function updatedDateFrom()
@@ -134,7 +166,7 @@ class CreateFuelOrder extends Component
         $dateFrom = Carbon::parse($this->date_from)->startOfDay();
         $dateTo = Carbon::parse($this->date_to)->endOfDay();
 
-        $entries = UtilizationEntry::with('chargeableAccount')
+        $entries = UtilizationEntry::with(['chargeableAccount', 'subAccount'])
             ->where('asset_id', $this->asset_id)
             ->whereNull('fuel_order_id')
             ->whereBetween('date', [$dateFrom, $dateTo])
@@ -156,10 +188,13 @@ class CreateFuelOrder extends Component
             }
 
             if (! isset($this->grouped_totals[$accountName])) {
+                $remaining = $entry->subAccount ? $entry->subAccount->remainingBudget() : 0;
                 $this->grouped_totals[$accountName] = [
                     'kilometers' => 0,
                     'hours' => 0,
                     'quantity' => 0,
+                    'remaining' => $remaining,
+                    'balance' => $remaining,
                 ];
             }
 
@@ -222,6 +257,14 @@ class CreateFuelOrder extends Component
                 'calculated_hours' => $entry_calculated_hours,
                 'calculated_quantity' => $entry_calculated_quantity,
             ];
+        }
+
+        $this->has_negative_balance = false;
+        foreach ($this->grouped_totals as $name => &$total) {
+            $total['balance'] = $total['remaining'] - $total['quantity'];
+            if ($total['balance'] < 0) {
+                $this->has_negative_balance = true;
+            }
         }
     }
 

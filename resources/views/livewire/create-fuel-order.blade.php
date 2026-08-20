@@ -1,8 +1,12 @@
 <div x-data="{ 
     showEntriesModal: false,
+    showWaiverModal: false,
+    hasNegative: @entangle('has_negative_balance'),
     modal: null,
+    waiverModal: null,
     init() {
         this.modal = new bootstrap.Modal(document.getElementById('entriesModal'));
+        this.waiverModal = new bootstrap.Modal(document.getElementById('waiverModal'));
         this.$watch('showEntriesModal', value => {
             if (value) {
                 this.modal.show();
@@ -10,12 +14,29 @@
                 this.modal.hide();
             }
         });
+        this.$watch('showWaiverModal', value => {
+            if (value) {
+                this.waiverModal.show();
+            } else {
+                this.waiverModal.hide();
+            }
+        });
         document.getElementById('entriesModal').addEventListener('hidden.bs.modal', () => {
             this.showEntriesModal = false;
         });
+        document.getElementById('waiverModal').addEventListener('hidden.bs.modal', () => {
+            this.showWaiverModal = false;
+        });
+    },
+    handleSubmit() {
+        if (this.hasNegative) {
+            this.showWaiverModal = true;
+        } else {
+            $wire.submit();
+        }
     }
 }">
-    <form wire:submit="submit" class="row g-4">
+    <form @submit.prevent="handleSubmit()" class="row g-4">
         <div class="col-12">
             <label for="asset_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Select Asset</label>
             <select wire:model.live="asset_id" id="asset_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-3 px-4 rounded-3">
@@ -125,7 +146,9 @@
                                             <th class="ps-4 py-2 small fw-bold text-secondary text-uppercase">Account</th>
                                             <th class="px-4 py-2 small fw-bold text-secondary text-uppercase text-end">Total KM</th>
                                             <th class="px-4 py-2 small fw-bold text-secondary text-uppercase text-end">Total Hours</th>
-                                            <th class="pe-4 py-2 small fw-bold text-secondary text-uppercase text-end">Fuel (L)</th>
+                                            <th class="px-4 py-2 small fw-bold text-secondary text-uppercase text-end">Fuel (L)</th>
+                                            <th class="px-4 py-2 small fw-bold text-secondary text-uppercase text-end">Remaining (L)</th>
+                                            <th class="pe-4 py-2 small fw-bold text-secondary text-uppercase text-end">Balance (L)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -134,7 +157,9 @@
                                                 <td class="ps-4 py-3 small fw-bold text-light">{{ $account }}</td>
                                                 <td class="px-4 py-3 small text-primary text-end font-monospace">{{ number_format($totals['kilometers'], 2) }}</td>
                                                 <td class="px-4 py-3 small text-primary text-end font-monospace">{{ number_format($totals['hours'], 2) }}</td>
-                                                <td class="pe-4 py-3 small text-success text-end font-monospace fw-bold">{{ number_format($totals['quantity'], 2) }}</td>
+                                                <td class="px-4 py-3 small text-success text-end font-monospace fw-bold">{{ number_format($totals['quantity'], 2) }}</td>
+                                                <td class="px-4 py-3 small text-secondary text-end font-monospace fw-bold">{{ isset($totals['remaining']) ? number_format($totals['remaining'], 2) : '—' }}</td>
+                                                <td class="pe-4 py-3 small {{ $totals['balance'] < 0 ? 'text-danger' : 'text-info' }} text-end font-monospace fw-bold">{{ isset($totals['balance']) ? number_format($totals['balance'], 2) : '—' }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -265,6 +290,33 @@
                 <div class="modal-footer bg-dark border-top border-secondary border-opacity-25 px-4 px-md-5 py-3">
                     <button type="button" class="btn btn-secondary rounded-pill px-4 fw-bold text-uppercase small tracking-widest" @click="showEntriesModal = false">
                         Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Waiver Confirmation -->
+    <div class="modal fade" id="waiverModal" tabindex="-1" aria-labelledby="waiverModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border-danger border-start border-4 rounded-4 shadow-lg overflow-hidden">
+                <!-- Header -->
+                <div class="modal-header bg-dark border-bottom border-secondary border-opacity-25 px-4 py-3">
+                    <h3 class="modal-title h5 fw-black text-danger" id="waiverModalLabel">⚠️ Waiver Required</h3>
+                    <button type="button" class="btn-close btn-close-white" @click="showWaiverModal = false" aria-label="Close"></button>
+                </div>
+                <!-- Content -->
+                <div class="modal-body p-4 text-light">
+                    <p>The requested fuel quantity exceeds the remaining allocated budget for one or more sub-accounts.</p>
+                    <p class="mb-0 text-secondary small">This fuel order will be created in a <strong>PENDING WAIVER</strong> status and will require administrative approval before it can be processed or printed.</p>
+                </div>
+                <!-- Footer -->
+                <div class="modal-footer bg-dark border-top border-secondary border-opacity-25 px-4 py-3">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4 fw-bold text-uppercase small tracking-widest" @click="showWaiverModal = false">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold text-uppercase small tracking-widest" @click="showWaiverModal = false; $wire.submit();">
+                        Confirm & Submit
                     </button>
                 </div>
             </div>

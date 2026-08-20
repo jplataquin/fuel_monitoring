@@ -133,7 +133,7 @@
                         </div>
                         <div class="card-body p-0 text-light">
                             <div class="table-responsive">
-                                <table class="table table-dark table-hover mb-0 border-secondary align-middle">
+                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 1100px;">
                                     <thead class="table-secondary">
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
                                             <th class="px-4 py-3 border-secondary">Sub-Account Name</th>
@@ -141,6 +141,7 @@
                                             <th class="px-4 py-3 border-secondary text-end">Consumed (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end">Remaining (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end">Fuel Used (%)</th>
+                                            <th class="px-4 py-3 border-secondary text-end">Accomplishment (%)</th>
                                             <th class="px-4 py-3 border-secondary text-center" style="width: 15%">Utilization Status</th>
                                         </tr>
                                     </thead>
@@ -177,6 +178,9 @@
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-light">
                                                     {{ number_format($saPercent, 1) }}%
                                                 </td>
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info">
+                                                    {{ number_format($sa['accomplishment'] ?? 0.0, 2) }}%
+                                                </td>
                                                 <td class="px-4 py-3 text-center border-secondary">
                                                     <span class="badge rounded-pill fw-bold text-uppercase small px-3 py-2 {{ $saStatusBg }}">
                                                         {{ $saStatus }}
@@ -185,7 +189,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="6" class="px-4 py-5 text-center text-secondary border-secondary">
+                                                <td colspan="7" class="px-4 py-5 text-center text-secondary border-secondary">
                                                     No sub-accounts allocated to this chargeable account.
                                                 </td>
                                             </tr>
