@@ -10,7 +10,7 @@
     <div class="container-xl py-5">
         <div class="row g-4 justify-content-center">
             <!-- Users Card -->
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <div class="card bg-dark border-secondary border-opacity-25 shadow-sm h-100 overflow-hidden transition hover-shadow" style="transition: all 0.2s ease-in-out;">
                     <div class="card-body p-4 d-flex flex-column justify-content-between">
                         <div>
@@ -33,7 +33,7 @@
             </div>
 
             <!-- Classifications Card -->
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <div class="card bg-dark border-secondary border-opacity-25 shadow-sm h-100 overflow-hidden transition hover-shadow" style="transition: all 0.2s ease-in-out;">
                     <div class="card-body p-4 d-flex flex-column justify-content-between">
                         <div>
@@ -51,6 +51,29 @@
                         </div>
                         <a href="{{ route('asset-types.index') }}" class="btn btn-outline-success rounded-pill w-100 fw-bold text-uppercase small py-2.5 cursor-pointer">
                             Manage Classifications
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shared Links Card -->
+            <div class="col-md-4">
+                <div class="card bg-dark border-secondary border-opacity-25 shadow-sm h-100 overflow-hidden transition hover-shadow" style="transition: all 0.2s ease-in-out;">
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="bg-info bg-opacity-10 p-3 rounded-4 d-inline-block mb-3 text-info">
+                                <!-- Link SVG Icon -->
+                                <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622a4.5 4.5 0 0 1-1.242-7.244l4.5-4.5a4.5 4.5 0 0 1 6.364 6.364l-1.757 1.757" />
+                                </svg>
+                            </div>
+                            <h3 class="h5 fw-bold text-light mb-2">Shared Links</h3>
+                            <p class="text-secondary small mb-4">
+                                Generate, configure, and manage secure public dashboard links to share real-time fuel and sub-account consumption metrics with external viewers.
+                            </p>
+                        </div>
+                        <a href="{{ route('public-dashboard-links.index') }}" class="btn btn-outline-info rounded-pill w-100 fw-bold text-uppercase small py-2.5 cursor-pointer">
+                            Manage Shared Links
                         </a>
                     </div>
                 </div>
