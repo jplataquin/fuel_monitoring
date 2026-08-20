@@ -27,11 +27,11 @@
 
     <div class="container-xl py-5" x-data="{ 
         search: '',
-        activeTab: {{ $classifications->first() ? $classifications->first()->id : 'null' }},
+        activeTab: 'all',
         assets: {{ $assets->toJson() }},
         get filteredAssets() {
             let filtered = this.assets;
-            if (this.activeTab !== null) {
+            if (this.activeTab !== 'all' && this.activeTab !== null) {
                 filtered = filtered.filter(asset => asset.asset_type_id === this.activeTab);
             }
             if (this.search !== '') {
@@ -42,9 +42,18 @@
             }
             return filtered;
         }
-    }" @search-fleet.window="search = $event.detail">
+    }" @search-fleet.window="search = $event.detail; if (search !== '') activeTab = 'all';">
         <!-- Navigation Tabs -->
         <ul class="nav nav-tabs border-secondary border-opacity-25 mb-4" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold"
+                        :class="activeTab === 'all' ? 'active text-primary' : 'text-secondary border-transparent'"
+                        @click="activeTab = 'all'"
+                        type="button" 
+                        role="tab">
+                    All ({{ $assets->count() }})
+                </button>
+            </li>
             @foreach($classifications as $type)
                 @php
                     $count = $assets->where('asset_type_id', $type->id)->count();

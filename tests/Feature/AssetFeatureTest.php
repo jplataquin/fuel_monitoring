@@ -59,8 +59,15 @@ class AssetFeatureTest extends TestCase
 
         $response->assertStatus(200);
         
-        // Check that classifications and counts are rendered correctly
+        // Check that classifications and counts are rendered correctly including the "All" tab
+        $response->assertSee('All (4)');
         $response->assertSee('Backhoe (3)');
         $response->assertSee('Truck (1)');
+
+        // Check that Alpine.js state is initialized to 'all' as the default active tab
+        $response->assertSee("activeTab: 'all'", false);
+
+        // Check that searching automatically sets the active tab to 'all'
+        $response->assertSee("activeTab = 'all'", false);
     }
 }
