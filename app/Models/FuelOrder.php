@@ -36,12 +36,15 @@ class FuelOrder extends Model
         'void_at',
         'void_remarks',
         'deleted_by',
+        'is_waiver_pending',
+        'waived_by',
     ];
 
     protected $casts = [
         'actualized_at' => 'datetime',
         'void_at' => 'datetime',
         'unbudgeted' => 'boolean',
+        'is_waiver_pending' => 'boolean',
     ];
 
     public function asset(): BelongsTo
@@ -82,5 +85,10 @@ class FuelOrder extends Model
     public function voider(): BelongsTo
     {
         return $this->belongsTo(User::class, 'void_by')->withTrashed();
+    }
+
+    public function waivedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'waived_by')->withTrashed();
     }
 }

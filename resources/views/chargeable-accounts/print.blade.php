@@ -53,7 +53,7 @@
     </div>
 
     <div class="mb-4">
-        <h2 class="h3 fw-bold text-uppercase border-bottom border-dark pb-2 mb-3">Sub-Account Budget Breakdown</h2>
+        <h2 class="h3 fw-bold text-uppercase border-bottom border-dark pb-2 mb-3">Sub-Account Breakdown</h2>
         <div class="table-responsive rounded-3 border border-dark">
             <table class="table table-bordered text-dark mb-0">
                 <thead>

@@ -238,6 +238,8 @@ class CreateFuelOrder extends Component
             'say_quantity' => 'required|numeric|min:0',
         ]);
 
+        $isWaiverPending = false;
+
         if ($this->asset_id) {
             // Recalculate to ensure accurate data on submission
             $this->calculateQuantity();
@@ -247,9 +249,80 @@ class CreateFuelOrder extends Component
 
                 return;
             }
+
+            // Budget validation for Asset Orders
+            $dateFrom = Carbon::parse($this->date_from)->startOfDay();
+            $dateTo = Carbon::parse($this->date_to)->endOfDay();
+
+            $entries = UtilizationEntry::where('asset_id', $this->asset_id)
+                ->whereNull('fuel_order_id')
+                ->whereBetween('date', [$dateFrom, $dateTo])
+                ->get();
+
+            $subAccountQuantities = [];
+            foreach ($entries as $entry) {
+                if ($entry->unbudgeted) {
+                    $isWaiverPending = true;
+
+                    continue;
+                }
+
+                if (! $entry->sub_account_id) {
+                    continue;
+                }
+
+                $calcType = strtolower($entry->calculation_type ?? '');
+                $qty = 0;
+
+                if (str_contains($calcType, 'kilometer')) {
+                    $calcKm = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
+                    $qty = $this->fuel_factor_km > 0 ? $calcKm / $this->fuel_factor_km : 0;
+                } elseif (str_contains($calcType, 'timeframe')) {
+                    if ($entry->end_time && $entry->start_time) {
+                        $start = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
+                        $end = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
+                        $calcHours = max(0, $start->diffInMinutes($end) / 60);
+                        $qty = $calcHours * $this->fuel_factor_hr;
+                    }
+                } elseif (str_contains($calcType, 'actual')) {
+                    $qty = ($entry->actual_hours ?? 0) * $this->fuel_factor_hr;
+                } elseif (str_contains($calcType, 'hour')) {
+                    $calcHours = max(0, $entry->end_hour_reading - $entry->start_hour_reading);
+                    $qty = $calcHours * $this->fuel_factor_hr;
+                }
+
+                if (! isset($subAccountQuantities[$entry->sub_account_id])) {
+                    $subAccountQuantities[$entry->sub_account_id] = 0;
+                }
+                $subAccountQuantities[$entry->sub_account_id] += $qty;
+            }
+
+            foreach ($subAccountQuantities as $subAccountId => $requestedQty) {
+                $subAccount = SubAccount::find($subAccountId);
+                if ($subAccount) {
+                    $remaining = $subAccount->remainingBudget();
+                    if ($requestedQty > $remaining) {
+                        $isWaiverPending = true;
+                        break;
+                    }
+                }
+            }
+        } else {
+            // Budget validation for Direct Orders
+            if ($this->unbudgeted) {
+                $isWaiverPending = true;
+            } elseif ($this->sub_account_id) {
+                $subAccount = SubAccount::find($this->sub_account_id);
+                if ($subAccount) {
+                    $remaining = $subAccount->remainingBudget();
+                    if ((float) $this->say_quantity > $remaining) {
+                        $isWaiverPending = true;
+                    }
+                }
+            }
         }
 
-        DB::transaction(function () {
+        DB::transaction(function () use ($isWaiverPending) {
             $fuelOrder = FuelOrder::create([
                 'asset_id' => $this->asset_id ?: null,
                 'chargeable_account_id' => $this->asset_id ? null : ($this->chargeable_account_id ?: null),
@@ -265,6 +338,7 @@ class CreateFuelOrder extends Component
                 'date_from' => $this->asset_id ? $this->date_from : null,
                 'date_to' => $this->asset_id ? $this->date_to : null,
                 'status' => 'PEND',
+                'is_waiver_pending' => $isWaiverPending,
                 'actual_quantity' => $this->actual_quantity,
                 'created_by' => Auth::id(),
             ]);

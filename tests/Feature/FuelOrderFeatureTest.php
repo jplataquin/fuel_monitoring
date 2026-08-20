@@ -546,4 +546,123 @@ class FuelOrderFeatureTest extends TestCase
         $response->assertSee('Issue Date:');
         $response->assertSee('Order Number: #'.str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT));
     }
+
+    public function test_direct_fuel_order_over_budget_requires_waiver()
+    {
+        $user = User::factory()->create(['role' => 'data_logger']);
+        $account = ChargeableAccount::create(['name' => 'Project Alpha', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Alpha']);
+
+        // Allocate budget of 50.00 L
+        $subAccount->budgets()->create([
+            'budget_quantity' => 50.00,
+            'status' => 'Approved',
+            'created_by' => $user->id,
+        ]);
+
+        // Request 100.00 L (exceeds budget by 50.00 L)
+        Livewire::actingAs($user)
+            ->test(CreateFuelOrder::class)
+            ->set('asset_id', null)
+            ->set('chargeable_account_id', $account->id)
+            ->set('sub_account_id', $subAccount->id)
+            ->set('remarks', 'Direct replenishment')
+            ->set('say_quantity', 100)
+            ->call('submit');
+
+        $this->assertDatabaseHas('fuel_orders', [
+            'sub_account_id' => $subAccount->id,
+            'say_quantity' => 100.0,
+            'is_waiver_pending' => true,
+        ]);
+    }
+
+    public function test_only_administrator_can_approve_waiver()
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $user = User::factory()->create(['role' => 'data_logger']);
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'Project Alpha', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Alpha']);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'say_quantity' => 100,
+            'status' => 'PEND',
+            'is_waiver_pending' => true,
+            'created_by' => $user->id,
+            'remarks' => 'Direct replenishment',
+        ]);
+
+        // Attempt as data_logger (non-admin)
+        $response = $this->actingAs($user)->post(route('fuel-orders.approve-waiver', $fuelOrder));
+        $response->assertStatus(403);
+        $this->assertTrue($fuelOrder->fresh()->is_waiver_pending);
+
+        // Attempt as administrator
+        $response = $this->actingAs($admin)->post(route('fuel-orders.approve-waiver', $fuelOrder));
+        $response->assertRedirect();
+        $this->assertFalse($fuelOrder->fresh()->is_waiver_pending);
+        $this->assertEquals($admin->id, $fuelOrder->fresh()->waived_by);
+    }
+
+    public function test_actualization_is_blocked_for_fuel_orders_with_pending_waivers()
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $user = User::factory()->create(['role' => 'fuel_man']);
+        $account = ChargeableAccount::create(['name' => 'Project Alpha', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Alpha']);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'say_quantity' => 100,
+            'status' => 'PEND',
+            'is_waiver_pending' => true,
+            'created_by' => $user->id,
+            'remarks' => 'Direct replenishment',
+        ]);
+
+        // Try to access actualize form
+        $response = $this->actingAs($user)->get(route('fuel-orders.actualize', $fuelOrder));
+        $response->assertRedirect(route('fuel-orders.index'));
+        $response->assertSessionHas('error', 'This fuel order has a pending budget waiver and cannot be actualized.');
+
+        // Try to submit actualization
+        $response = $this->actingAs($user)->post(route('fuel-orders.store-actualization', $fuelOrder), [
+            'actual_quantity' => 100,
+        ]);
+        $response->assertRedirect(route('fuel-orders.index'));
+        $response->assertSessionHas('error', 'This fuel order has a pending budget waiver and cannot be actualized.');
+    }
+
+    public function test_printing_is_blocked_for_fuel_orders_with_pending_waivers()
+    {
+        $user = User::factory()->create(['role' => 'data_logger']);
+        $account = ChargeableAccount::create(['name' => 'Project Alpha', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Alpha']);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'say_quantity' => 100,
+            'status' => 'PEND',
+            'is_waiver_pending' => true,
+            'created_by' => $user->id,
+            'remarks' => 'Direct replenishment',
+        ]);
+
+        // Access web view and assert Print button is NOT visible
+        $response = $this->actingAs($user)->get(route('fuel-orders.show', $fuelOrder));
+        $response->assertStatus(200);
+        $response->assertDontSee('?print=1');
+
+        // Try to access print view directly with print=1
+        $response = $this->actingAs($user)->get(route('fuel-orders.show', $fuelOrder).'?print=1');
+        $response->assertStatus(403);
+    }
 }

@@ -98,6 +98,9 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
         // Void Fuel Order
         Route::post('fuel-orders/{fuel_order}/void', [FuelOrderController::class, 'void'])->name('fuel-orders.void');
 
+        // Approve Fuel Order Waiver
+        Route::post('fuel-orders/{fuel_order}/approve-waiver', [FuelOrderController::class, 'approveWaiver'])->name('fuel-orders.approve-waiver');
+
         // Merge Sub Account
         Route::post('sub-accounts/{sub_account}/merge', [SubAccountController::class, 'merge'])->name('sub-accounts.merge');
     });

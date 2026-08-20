@@ -85,6 +85,10 @@ class FuelOrderController extends Controller
         $fuelOrder->load(['asset.assetType', 'creator', 'updater', 'actualizer', 'voider', 'utilizationEntries.chargeableAccount', 'utilizationEntries.subAccount']);
         $isPrint = $request->boolean('print');
 
+        if ($isPrint && $fuelOrder->is_waiver_pending) {
+            abort(403, 'Unauthorized action. Fuel orders with pending budget waivers cannot be printed.');
+        }
+
         return view('fuel-orders.show', compact('fuelOrder', 'isPrint'));
     }
 
@@ -146,6 +150,10 @@ class FuelOrderController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        if ($fuelOrder->is_waiver_pending) {
+            return redirect()->route('fuel-orders.index')->with('error', 'This fuel order has a pending budget waiver and cannot be actualized.');
+        }
+
         if ($fuelOrder->status !== 'PEND') {
             return redirect()->route('fuel-orders.index')->with('error', 'Only pending fuel orders can be actualized.');
         }
@@ -162,6 +170,10 @@ class FuelOrderController extends Controller
     {
         if (! in_array(Auth::user()->role, ['data_logger', 'data logger', 'fuel_man', 'administrator'])) {
             abort(403, 'Unauthorized action.');
+        }
+
+        if ($fuelOrder->is_waiver_pending) {
+            return redirect()->route('fuel-orders.index')->with('error', 'This fuel order has a pending budget waiver and cannot be actualized.');
         }
 
         if ($fuelOrder->status !== 'PEND') {
@@ -220,5 +232,27 @@ class FuelOrderController extends Controller
         });
 
         return redirect()->route('fuel-orders.index')->with('message', 'Fuel order #'.str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT).' has been voided successfully.');
+    }
+
+    /**
+     * Approve the budget waiver for the specified fuel order.
+     */
+    public function approveWaiver(FuelOrder $fuelOrder)
+    {
+        if (Auth::user()->role !== 'administrator') {
+            abort(403, 'Unauthorized action. Only Administrators can approve budget waivers.');
+        }
+
+        if (! $fuelOrder->is_waiver_pending) {
+            return redirect()->back()->with('error', 'This fuel order does not require a waiver.');
+        }
+
+        $fuelOrder->update([
+            'is_waiver_pending' => false,
+            'waived_by' => Auth::id(),
+            'updated_by' => Auth::id(),
+        ]);
+
+        return redirect()->back()->with('message', 'Fuel order #'.str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT).' budget waiver approved successfully.');
     }
 }

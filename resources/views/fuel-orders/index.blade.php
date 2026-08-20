@@ -107,14 +107,20 @@
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         @php
-                                            $statusClass = match($order->status) {
-                                                'DONE' => 'bg-success text-success bg-opacity-10 border border-success border-opacity-20',
-                                                'VOID' => 'bg-danger text-danger bg-opacity-10 border border-danger border-opacity-20',
-                                                default => 'bg-warning text-warning bg-opacity-10 border border-warning border-opacity-20',
-                                            };
+                                            if ($order->is_waiver_pending) {
+                                                $statusClass = 'bg-danger text-danger bg-opacity-10 border border-danger border-opacity-20';
+                                                $statusLabel = 'PENDING WAIVER';
+                                            } else {
+                                                $statusClass = match($order->status) {
+                                                    'DONE' => 'bg-success text-success bg-opacity-10 border border-success border-opacity-20',
+                                                    'VOID' => 'bg-danger text-danger bg-opacity-10 border border-danger border-opacity-20',
+                                                    default => 'bg-warning text-warning bg-opacity-10 border border-warning border-opacity-20',
+                                                };
+                                                $statusLabel = $order->status;
+                                            }
                                         @endphp
                                         <span class="badge {{ $statusClass }} rounded-pill text-uppercase tracking-widest fw-bold px-3 py-1" style="font-size: 10px;">
-                                            {{ $order->status }}
+                                            {{ $statusLabel }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3">
@@ -136,7 +142,7 @@
                                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                                 </a>
                                             @endif
-                                            @if(in_array(Auth::user()->role, ['fuel_man', 'data_logger', 'data logger', 'administrator']) && $order->status === 'PEND')
+                                            @if(in_array(Auth::user()->role, ['fuel_man', 'data_logger', 'data logger', 'administrator']) && $order->status === 'PEND' && !$order->is_waiver_pending)
                                                 <a href="{{ route('fuel-orders.actualize', $order) }}" class="btn btn-link text-primary p-2 rounded-circle hover-bg-light hover-bg-opacity-10" title="Actualize Quantity">
                                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                 </a>

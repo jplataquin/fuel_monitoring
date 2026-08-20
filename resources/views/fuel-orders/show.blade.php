@@ -23,22 +23,33 @@
                             Void Order
                         </button>
                     @endif
+                    @if(Auth::user()->role === 'administrator' && $fuelOrder->is_waiver_pending)
+                        <form action="{{ route('fuel-orders.approve-waiver', $fuelOrder) }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold small text-uppercase tracking-widest shadow-sm">
+                                <svg width="16" height="16" class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                                Approve Waiver
+                            </button>
+                        </form>
+                    @endif
                     @if(Auth::user()->role === 'administrator')
                         <a href="{{ route('fuel-orders.edit', $fuelOrder) }}" class="btn btn-primary rounded-pill px-4 fw-bold small text-uppercase tracking-widest shadow-sm">
                             <svg width="16" height="16" class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             Edit Order
                         </a>
                     @endif
-                    @if(in_array(Auth::user()->role, ['fuel_man', 'administrator', 'data_logger', 'data logger']) && $fuelOrder->status === 'PEND')
+                    @if(in_array(Auth::user()->role, ['fuel_man', 'administrator', 'data_logger', 'data logger']) && $fuelOrder->status === 'PEND' && !$fuelOrder->is_waiver_pending)
                         <a href="{{ route('fuel-orders.actualize', $fuelOrder) }}" class="btn btn-info rounded-pill px-4 fw-bold small text-uppercase tracking-widest shadow-sm">
                             <svg width="16" height="16" class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             Actualize
                         </a>
                     @endif
-                    <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" target="_blank" class="btn btn-primary rounded-pill px-4 fw-bold small text-uppercase tracking-widest shadow-sm" style="background-color: #6366f1; border-color: #6366f1;">
-                        <svg width="16" height="16" class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                        Print
-                    </a>
+                    @if(!$fuelOrder->is_waiver_pending)
+                        <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" target="_blank" class="btn btn-primary rounded-pill px-4 fw-bold small text-uppercase tracking-widest shadow-sm" style="background-color: #6366f1; border-color: #6366f1;">
+                            <svg width="16" height="16" class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                            Print
+                        </a>
+                    @endif
                 </div>
             </div>
         </x-slot>
@@ -126,14 +137,20 @@
                                 <div>
                                     <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-1">Status</h4>
                                     @php
-                                        $statusClass = match($fuelOrder->status) {
-                                            'DONE' => 'bg-success text-success bg-opacity-10 border border-success border-opacity-20',
-                                            'VOID' => 'bg-danger text-danger bg-opacity-10 border border-danger border-opacity-20',
-                                            default => 'bg-warning text-warning bg-opacity-10 border border-warning border-opacity-20',
-                                        };
+                                        if ($fuelOrder->is_waiver_pending) {
+                                            $statusClass = 'bg-danger text-danger bg-opacity-10 border border-danger border-opacity-20';
+                                            $statusLabel = 'PENDING WAIVER';
+                                        } else {
+                                            $statusClass = match($fuelOrder->status) {
+                                                'DONE' => 'bg-success text-success bg-opacity-10 border border-success border-opacity-20',
+                                                'VOID' => 'bg-danger text-danger bg-opacity-10 border border-danger border-opacity-20',
+                                                default => 'bg-warning text-warning bg-opacity-10 border border-warning border-opacity-20',
+                                            };
+                                            $statusLabel = $fuelOrder->status;
+                                        }
                                     @endphp
                                     <span class="badge {{ $isPrint ? 'text-dark border-dark' : $statusClass }} rounded-pill px-4 py-2 fw-bold text-uppercase tracking-widest" style="font-size: 11px;">
-                                        {{ $fuelOrder->status }}
+                                        {{ $statusLabel }}
                                     </span>
                                 </div>
                                 <div>
