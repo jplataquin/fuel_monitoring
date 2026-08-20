@@ -27,15 +27,40 @@
 
     <div class="container-xl py-5" x-data="{ 
         search: '',
+        activeTab: {{ $classifications->first() ? $classifications->first()->id : 'null' }},
         assets: {{ $assets->toJson() }},
         get filteredAssets() {
-            if (this.search === '') return this.assets;
-            let term = this.search.toLowerCase();
-            return this.assets.filter(asset => 
-                asset.fleet_no.toLowerCase().includes(term)
-            );
+            let filtered = this.assets;
+            if (this.activeTab !== null) {
+                filtered = filtered.filter(asset => asset.asset_type_id === this.activeTab);
+            }
+            if (this.search !== '') {
+                let term = this.search.toLowerCase();
+                filtered = filtered.filter(asset => 
+                    asset.fleet_no.toLowerCase().includes(term)
+                );
+            }
+            return filtered;
         }
     }" @search-fleet.window="search = $event.detail">
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs border-secondary border-opacity-25 mb-4" role="tablist">
+            @foreach($classifications as $type)
+                @php
+                    $count = $assets->where('asset_type_id', $type->id)->count();
+                @endphp
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold"
+                            :class="activeTab === {{ $type->id }} ? 'active text-primary' : 'text-secondary border-transparent'"
+                            @click="activeTab = {{ $type->id }}"
+                            type="button" 
+                            role="tab">
+                        {{ $type->name }} ({{ $count }})
+                    </button>
+                </li>
+            @endforeach
+        </ul>
+
         <!-- Action Cards Grid -->
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             <template x-for="asset in filteredAssets" :key="asset.id">
