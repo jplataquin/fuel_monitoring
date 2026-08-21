@@ -44,16 +44,24 @@
                                         <p class="h5 fw-bold text-light mb-0">{{ $fuelOrder->asset->fleet_no }}</p>
                                         <p class="small text-secondary mb-0">{{ $fuelOrder->asset->assetType->name ?? 'N/A' }} | {{ $fuelOrder->asset->plate_no ?? 'No Plate' }}</p>
                                     @else
-                                        <h4 class="small fw-bold text-secondary text-uppercase tracking-wider mb-1">Charged Direct To</h4>
-                                        <p class="h5 fw-bold text-light mb-0">{{ $fuelOrder->chargeableAccount->name ?? 'Unassigned' }}</p>
+                                        <h4 class="small fw-bold text-secondary text-uppercase tracking-wider mb-2">Charged Direct To</h4>
+                                        <p class="h5 fw-bold text-light mb-3">{{ $fuelOrder->chargeableAccount->name ?? 'Unassigned' }}</p>
+                                        
+                                        <div class="mb-3">
+                                            <label for="sub_account_id" class="form-label text-secondary fw-bold small text-uppercase tracking-wider mb-2">Sub-Account <span class="text-danger">*</span></label>
+                                            <select name="sub_account_id" id="sub_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required>
+                                                @foreach($fuelOrder->chargeableAccount->subAccounts as $sub)
+                                                    <option value="{{ $sub->id }}" {{ old('sub_account_id', $fuelOrder->sub_account_id) == $sub->id ? 'selected' : '' }}>{{ $sub->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('sub_account_id')
+                                                <p class="text-danger small fw-bold mt-2">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+
                                         <p class="small text-secondary mb-0">
-                                            @if($fuelOrder->subAccount)
-                                                Sub-Account: {{ $fuelOrder->subAccount->name }}
-                                            @else
-                                                No Sub-Account
-                                            @endif
                                             @if($fuelOrder->unbudgeted)
-                                                | <span class="text-danger fw-bold">UNBUDGETED</span>
+                                                <span class="text-danger fw-bold">UNBUDGETED</span>
                                             @endif
                                         </p>
                                     @endif

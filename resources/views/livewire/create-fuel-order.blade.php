@@ -72,7 +72,7 @@
             </div>
 
             <div class="col-md-6">
-                <label for="sub_account_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Sub-Account</label>
+                <label for="sub_account_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Sub-Account <span class="text-danger">*</span></label>
                 <select wire:model="sub_account_id" id="sub_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-3 px-4 rounded-3" {{ empty($sub_accounts) ? 'disabled' : '' }}>
                     <option value="">-- Choose a Sub-Account --</option>
                     @foreach($sub_accounts as $sub)

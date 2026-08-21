@@ -273,7 +273,7 @@ class CreateFuelOrder extends Component
         $this->validate([
             'asset_id' => 'nullable|exists:assets,id',
             'chargeable_account_id' => 'required_without:asset_id|nullable|exists:chargeable_accounts,id',
-            'sub_account_id' => 'nullable|exists:sub_accounts,id',
+            'sub_account_id' => 'required_without:asset_id|exists:sub_accounts,id',
             'unbudgeted' => 'boolean',
             'remarks' => 'required_without:asset_id|nullable|string',
             'date_from' => 'required_with:asset_id|nullable|date',

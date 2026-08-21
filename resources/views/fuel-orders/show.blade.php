@@ -154,6 +154,10 @@
                                     </span>
                                 </div>
                                 <div>
+                                    <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-1">Chargeable Account</h4>
+                                    <p class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }} mb-0">{{ $fuelOrder->chargeableAccount->name ?? ($fuelOrder->utilizationEntries->first()?->chargeableAccount->name ?? 'Unassigned') }}</p>
+                                </div>
+                                <div>
                                     <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-1">KM Factor</h4>
                                     <p class="h5 fw-bold text-primary mb-0">{{ number_format($fuelOrder->fuel_factor_km, 2) }} KM/L</p>
                                 </div>
@@ -167,13 +171,10 @@
                         @php
                             $groupedTotals = [];
                             foreach ($fuelOrder->utilizationEntries as $entry) {
-                                $accountName = $entry->chargeableAccount->name ?? 'Unassigned';
                                 $subAccount = $entry->subAccount;
-                                if ($subAccount) {
-                                    $accountName .= ' - ' . $subAccount->name;
-                                }
-                                if (!isset($groupedTotals[$accountName])) {
-                                    $groupedTotals[$accountName] = [
+                                $subAccountName = $subAccount->name ?? ($entry->unbudgeted ? 'UNBUDGETED' : 'Unassigned');
+                                if (!isset($groupedTotals[$subAccountName])) {
+                                    $groupedTotals[$subAccountName] = [
                                         'km' => 0, 
                                         'hr' => 0, 
                                         'qty' => 0,
@@ -185,29 +186,29 @@
                                 $calcType = strtolower($entry->calculation_type ?? '');
                                 if (str_contains($calcType, 'kilometer')) {
                                     $diff = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
-                                    $groupedTotals[$accountName]['km'] += $diff;
-                                    $groupedTotals[$accountName]['qty'] += $fuelOrder->fuel_factor_km > 0 ? $diff / $fuelOrder->fuel_factor_km : 0;
+                                    $groupedTotals[$subAccountName]['km'] += $diff;
+                                    $groupedTotals[$subAccountName]['qty'] += $fuelOrder->fuel_factor_km > 0 ? $diff / $fuelOrder->fuel_factor_km : 0;
                                 } elseif (str_contains($calcType, 'timeframe')) {
                                     if ($entry->end_time && $entry->start_time) {
                                         $start = \Illuminate\Support\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
                                         $end = \Illuminate\Support\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
                                         $diffInHours = max(0, $start->diffInMinutes($end) / 60);
-                                        $groupedTotals[$accountName]['hr'] += $diffInHours;
-                                        $groupedTotals[$accountName]['qty'] += $diffInHours * $fuelOrder->fuel_factor_hr;
+                                        $groupedTotals[$subAccountName]['hr'] += $diffInHours;
+                                        $groupedTotals[$subAccountName]['qty'] += $diffInHours * $fuelOrder->fuel_factor_hr;
                                     }
                                 } elseif (str_contains($calcType, 'actual')) {
                                     $diffInHours = $entry->actual_hours ?? 0;
-                                    $groupedTotals[$accountName]['hr'] += $diffInHours;
-                                    $groupedTotals[$accountName]['qty'] += $diffInHours * $fuelOrder->fuel_factor_hr;
+                                    $groupedTotals[$subAccountName]['hr'] += $diffInHours;
+                                    $groupedTotals[$subAccountName]['qty'] += $diffInHours * $fuelOrder->fuel_factor_hr;
                                 } elseif (str_contains($calcType, 'hour')) {
                                     $diff = max(0, $entry->end_hour_reading - $entry->start_hour_reading);
-                                    $groupedTotals[$accountName]['hr'] += $diff;
-                                    $groupedTotals[$accountName]['qty'] += $diff * $fuelOrder->fuel_factor_hr;
+                                    $groupedTotals[$subAccountName]['hr'] += $diff;
+                                    $groupedTotals[$subAccountName]['qty'] += $diff * $fuelOrder->fuel_factor_hr;
                                 }
                             }
 
                             // Adjust remaining and calculate balance after the loop:
-                            foreach ($groupedTotals as $accountName => &$totals) {
+                            foreach ($groupedTotals as $subAccountName => &$totals) {
                                 if ($totals['subAccount']) {
                                     if ($fuelOrder->status === 'DONE') {
                                         // Current remaining budget in DB already has this order's quantity subtracted.
@@ -230,7 +231,7 @@
                                     <table class="table {{ $isPrint ? 'table-bordered text-dark mb-0' : 'table-dark table-hover mb-0 align-middle' }}">
                                         <thead>
                                             <tr class="{{ $isPrint ? 'bg-light' : 'bg-secondary bg-opacity-10' }}">
-                                                <th class="ps-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase">Account</th>
+                                                <th class="ps-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase">Sub-Account</th>
                                                 <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">KM</th>
                                                 <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Hours</th>
                                                 <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Fuel (L)</th>

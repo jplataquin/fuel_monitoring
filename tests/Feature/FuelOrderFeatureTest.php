@@ -439,11 +439,13 @@ class FuelOrderFeatureTest extends TestCase
     {
         $user = User::factory()->create(['role' => 'data_logger']);
         $account = ChargeableAccount::create(['name' => 'General Overhead', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Admin Ops']);
 
         Livewire::actingAs($user)
             ->test(CreateFuelOrder::class)
             ->set('asset_id', null)
             ->set('chargeable_account_id', $account->id)
+            ->set('sub_account_id', $subAccount->id)
             ->set('remarks', 'Monthly generator backup fuel replenishment')
             ->set('say_quantity', 150)
             ->call('submit')
@@ -452,7 +454,7 @@ class FuelOrderFeatureTest extends TestCase
         $this->assertDatabaseHas('fuel_orders', [
             'asset_id' => null,
             'chargeable_account_id' => $account->id,
-            'sub_account_id' => null,
+            'sub_account_id' => $subAccount->id,
             'unbudgeted' => false,
             'remarks' => 'Monthly generator backup fuel replenishment',
             'say_quantity' => 150,
@@ -474,6 +476,7 @@ class FuelOrderFeatureTest extends TestCase
             ->call('submit')
             ->assertHasErrors([
                 'chargeable_account_id' => 'required_without',
+                'sub_account_id' => 'required_without',
                 'remarks' => 'required_without',
             ]);
     }
@@ -816,5 +819,47 @@ class FuelOrderFeatureTest extends TestCase
         $response->assertSee('500.00');
         // Balance after order (500 - 4.00) should be 496.00
         $response->assertSee('496.00');
+    }
+
+    public function test_edit_direct_fuel_order_requires_and_updates_sub_account()
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'General Overhead', 'status' => 'Active']);
+        $sub1 = $account->subAccounts()->create(['name' => 'Sub One']);
+        $sub2 = $account->subAccounts()->create(['name' => 'Sub Two']);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub1->id,
+            'say_quantity' => 150,
+            'actual_quantity' => 150,
+            'status' => 'PEND',
+            'created_by' => $user->id,
+        ]);
+
+        // 1. Sending no sub_account_id returns validation error
+        $response = $this->actingAs($user)->put(route('fuel-orders.update', $fuelOrder), [
+            'say_quantity' => 200,
+            'actual_quantity' => 200,
+            'status' => 'PEND',
+            'sub_account_id' => '',
+        ]);
+
+        $response->assertSessionHasErrors(['sub_account_id']);
+
+        // 2. Sending valid sub_account_id updates correctly
+        $response = $this->actingAs($user)->put(route('fuel-orders.update', $fuelOrder), [
+            'say_quantity' => 200,
+            'actual_quantity' => 200,
+            'status' => 'PEND',
+            'sub_account_id' => $sub2->id,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect(route('fuel-orders.index'));
+
+        $this->assertEquals($sub2->id, $fuelOrder->fresh()->sub_account_id);
     }
 }

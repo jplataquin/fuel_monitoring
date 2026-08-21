@@ -115,19 +115,31 @@ class FuelOrderController extends Controller
             abort(403, 'Unauthorized action. Only Administrators can update fuel orders.');
         }
 
-        $validated = $request->validate([
+        $rules = [
             'say_quantity' => 'required|numeric|min:0',
             'actual_quantity' => 'required|numeric|min:0',
             'status' => 'required|in:PEND,DONE,VOID',
-        ]);
+        ];
+
+        if (!$fuelOrder->asset_id) {
+            $rules['sub_account_id'] = 'required|exists:sub_accounts,id';
+        }
+
+        $validated = $request->validate($rules);
 
         DB::transaction(function () use ($fuelOrder, $validated) {
-            $fuelOrder->update([
+            $updateData = [
                 'say_quantity' => $validated['say_quantity'],
                 'actual_quantity' => $validated['actual_quantity'],
                 'status' => $validated['status'],
                 'updated_by' => Auth::id(),
-            ]);
+            ];
+
+            if (!$fuelOrder->asset_id) {
+                $updateData['sub_account_id'] = $validated['sub_account_id'];
+            }
+
+            $fuelOrder->update($updateData);
 
             if ($validated['status'] === 'VOID') {
                 $fuelOrder->utilizationEntries()->update(['fuel_order_id' => null]);
