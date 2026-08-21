@@ -133,7 +133,7 @@
                         </div>
 
                         <div class="row g-4 mb-4">
-                            <div class="col-12 d-flex flex-wrap gap-4 align-items-center">
+                            <div class="col-6 d-flex flex-wrap gap-4 align-items-center">
                                 <div>
                                     <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-1">Status</h4>
                                     @php
@@ -153,10 +153,8 @@
                                         {{ $statusLabel }}
                                     </span>
                                 </div>
-                                <div>
-                                    <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-1">Chargeable Account</h4>
-                                    <p class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }} mb-0">{{ $fuelOrder->chargeableAccount->name ?? ($fuelOrder->utilizationEntries->first()?->chargeableAccount->name ?? 'Unassigned') }}</p>
-                                </div>
+                            </div>
+                            <div class="col-6 d-flex flex-wrap gap-4 align-items-center"> 
                                 <div>
                                     <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-1">KM Factor</h4>
                                     <p class="h5 fw-bold text-primary mb-0">{{ number_format($fuelOrder->fuel_factor_km, 2) }} KM/L</p>
@@ -168,6 +166,14 @@
                             </div>
                         </div>
 
+                        <div class="row g-4 mb-4">
+                            <div class="col-12 ">
+                                <div>
+                                    <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-1">Chargeable Account</h4>
+                                    <p class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }} mb-0">{{ $fuelOrder->chargeableAccount->name ?? ($fuelOrder->utilizationEntries->first()?->chargeableAccount->name ?? 'Unassigned') }}</p>
+                                </div>
+                            </div>
+                        </div>
                         @php
                             $groupedTotals = [];
                             foreach ($fuelOrder->utilizationEntries as $entry) {
