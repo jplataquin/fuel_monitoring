@@ -7,6 +7,7 @@ use App\Models\Asset;
 use App\Models\AssetType;
 use App\Models\ChargeableAccount;
 use App\Models\FuelOrder;
+use App\Models\SubAccount;
 use App\Models\User;
 use App\Models\UtilizationEntry;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
@@ -744,5 +745,76 @@ class FuelOrderFeatureTest extends TestCase
             ->set('sub_account_id', $subAccount->id)
             ->set('say_quantity', 15.0)
             ->assertSet('has_negative_balance', true);
+    }
+
+    public function test_show_fuel_order_displays_remaining_and_balance_in_breakdown_by_charged_to()
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $assetType = AssetType::create(['name' => 'Vehicle']);
+
+        $account = ChargeableAccount::create([
+            'name' => 'Project Alpha',
+            'classification' => 'Running',
+            'status' => 'Active'
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Sub X',
+        ]);
+
+        // Allocate budget of 500 liters
+        \App\Models\SubAccountBudget::create([
+            'sub_account_id' => $subAccount->id,
+            'budget_quantity' => 500,
+            'status' => 'Approved',
+            'allocated_by' => $user->id,
+        ]);
+
+        $asset = Asset::create([
+            'fleet_no' => 'V-100',
+            'asset_type_id' => $assetType->id,
+            'fuel_factor_km' => 2.5,
+            'fuel_factor_hr' => 2.0,
+            'tank_capacity' => 100,
+        ]);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $asset->id,
+            'calculated_quantity' => 4.0,
+            'say_quantity' => 4,
+            'status' => 'PEND',
+            'created_by' => $user->id,
+            'fuel_factor_km' => 2.5,
+            'fuel_factor_hr' => 2.0,
+        ]);
+
+        // Create a utilization entry for this fuel order
+        $entry = UtilizationEntry::create([
+            'asset_id' => $asset->id,
+            'date' => '2026-08-15',
+            'start_time' => '08:00',
+            'end_time' => '10:00', // 2 hours * 2.0 = 4.0 L
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-123',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Daily run',
+            'fuel_order_id' => $fuelOrder->id,
+            'fuel_factor_hr' => 2.0,
+            'fuel_factor_km' => 2.5,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('fuel-orders.show', $fuelOrder));
+
+        $response->assertStatus(200);
+        $response->assertSee('Remaining (L)');
+        $response->assertSee('Balance (L)');
+
+        // Remaining budget before order should be 500.00
+        $response->assertSee('500.00');
+        // Balance after order (500 - 4.00) should be 496.00
+        $response->assertSee('496.00');
     }
 }

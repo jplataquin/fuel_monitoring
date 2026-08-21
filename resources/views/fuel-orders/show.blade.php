@@ -168,11 +168,18 @@
                             $groupedTotals = [];
                             foreach ($fuelOrder->utilizationEntries as $entry) {
                                 $accountName = $entry->chargeableAccount->name ?? 'Unassigned';
-                                if ($entry->subAccount) {
-                                    $accountName .= ' - ' . $entry->subAccount->name;
+                                $subAccount = $entry->subAccount;
+                                if ($subAccount) {
+                                    $accountName .= ' - ' . $subAccount->name;
                                 }
                                 if (!isset($groupedTotals[$accountName])) {
-                                    $groupedTotals[$accountName] = ['km' => 0, 'hr' => 0, 'qty' => 0];
+                                    $groupedTotals[$accountName] = [
+                                        'km' => 0, 
+                                        'hr' => 0, 
+                                        'qty' => 0,
+                                        'subAccount' => $subAccount,
+                                        'remaining' => $subAccount ? $subAccount->remainingBudget() : 0,
+                                    ];
                                 }
                                 
                                 $calcType = strtolower($entry->calculation_type ?? '');
@@ -198,6 +205,22 @@
                                     $groupedTotals[$accountName]['qty'] += $diff * $fuelOrder->fuel_factor_hr;
                                 }
                             }
+
+                            // Adjust remaining and calculate balance after the loop:
+                            foreach ($groupedTotals as $accountName => &$totals) {
+                                if ($totals['subAccount']) {
+                                    if ($fuelOrder->status === 'DONE') {
+                                        // Current remaining budget in DB already has this order's quantity subtracted.
+                                        // So remaining budget BEFORE this order was: DB remaining + current order qty.
+                                        $totals['remaining'] = $totals['remaining'] + $totals['qty'];
+                                    }
+                                    $totals['balance'] = $totals['remaining'] - $totals['qty'];
+                                } else {
+                                    $totals['remaining'] = null;
+                                    $totals['balance'] = null;
+                                }
+                            }
+                            unset($totals);
                         @endphp
 
                         @if(count($groupedTotals) > 0)
@@ -210,7 +233,9 @@
                                                 <th class="ps-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase">Account</th>
                                                 <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">KM</th>
                                                 <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Hours</th>
-                                                <th class="pe-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Fuel (L)</th>
+                                                <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Fuel (L)</th>
+                                                <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Remaining (L)</th>
+                                                <th class="pe-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Balance (L)</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -219,7 +244,9 @@
                                                     <td class="ps-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }}">{{ $account }}</td>
                                                     <td class="px-4 py-2 small {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-end font-monospace">{{ number_format($totals['km'], 2) }}</td>
                                                     <td class="px-4 py-2 small {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-end font-monospace">{{ number_format($totals['hr'], 2) }}</td>
-                                                    <td class="pe-4 py-2 small text-primary fw-bold text-end font-monospace">{{ number_format($totals['qty'], 2) }}</td>
+                                                    <td class="px-4 py-2 small text-primary fw-bold text-end font-monospace">{{ number_format($totals['qty'], 2) }}</td>
+                                                    <td class="px-4 py-2 small {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-end font-monospace fw-bold">{{ isset($totals['remaining']) ? number_format($totals['remaining'], 2) : '—' }}</td>
+                                                    <td class="pe-4 py-2 small {{ isset($totals['balance']) && $totals['balance'] < 0 ? 'text-danger' : ($isPrint ? 'text-dark' : 'text-info') }} text-end font-monospace fw-bold">{{ isset($totals['balance']) ? number_format($totals['balance'], 2) : '—' }}</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
