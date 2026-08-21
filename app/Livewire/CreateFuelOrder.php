@@ -18,8 +18,6 @@ class CreateFuelOrder extends Component
 
     public $chargeable_accounts = [];
 
-    public $sub_accounts = [];
-
     public $asset_id = '';
 
     public $chargeable_account_id = '';
@@ -69,7 +67,6 @@ class CreateFuelOrder extends Component
         $this->date_to = '';
         $this->chargeable_account_id = '';
         $this->sub_account_id = '';
-        $this->sub_accounts = [];
         $this->unbudgeted = false;
         $this->remarks = '';
 
@@ -91,13 +88,6 @@ class CreateFuelOrder extends Component
     public function updatedChargeableAccountId()
     {
         $this->sub_account_id = '';
-        if ($this->chargeable_account_id) {
-            $this->sub_accounts = SubAccount::where('chargeable_account_id', $this->chargeable_account_id)
-                ->orderBy('name', 'asc')
-                ->get();
-        } else {
-            $this->sub_accounts = [];
-        }
         $this->checkDirectNegativeBalance();
     }
 
@@ -408,6 +398,15 @@ class CreateFuelOrder extends Component
 
     public function render()
     {
-        return view('livewire.create-fuel-order');
+        $sub_accounts = [];
+        if ($this->chargeable_account_id) {
+            $sub_accounts = SubAccount::where('chargeable_account_id', $this->chargeable_account_id)
+                ->orderBy('name', 'asc')
+                ->get();
+        }
+
+        return view('livewire.create-fuel-order', [
+            'sub_accounts' => $sub_accounts,
+        ]);
     }
 }
