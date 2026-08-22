@@ -15,6 +15,20 @@
                             @method('PATCH')
 
                             <div class="row g-4 mb-4">
+                                <div class="col-md-12">
+                                    <label for="calculation_type" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Calculation Type</label>
+                                    <select id="calculation_type" name="calculation_type" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required>
+                                        <option value="">-- Select Calculation Type --</option>
+                                        <option value="Kilometer Reading" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Kilometer Reading' ? 'selected' : '' }}>Kilometer Reading</option>
+                                        <option value="Hour Reading" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Hour Reading' ? 'selected' : '' }}>Hour Reading</option>
+                                        <option value="Timeframe" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Timeframe' ? 'selected' : '' }}>Timeframe</option>
+                                        <option value="Actual Hours" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Actual Hours' ? 'selected' : '' }}>Actual Hours</option>
+                                    </select>
+                                    @error('calculation_type') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
+                                </div>
+                            </div>
+
+                            <div class="row g-4 mb-4">
                                 <div class="col-md-6">
                                     <label for="date" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Utilization Date</label>
                                     <input type="date" id="date" name="date" class="form-control bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" value="{{ old('date', $utilizationEntry->date->format('Y-m-d')) }}" required>
@@ -49,17 +63,7 @@
                                     @error('reference') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label for="calculation_type" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Calculation Type</label>
-                                    <select id="calculation_type" name="calculation_type" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required>
-                                        <option value="">-- Select Calculation Type --</option>
-                                        <option value="Kilometer Reading" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Kilometer Reading' ? 'selected' : '' }}>Kilometer Reading</option>
-                                        <option value="Hour Reading" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Hour Reading' ? 'selected' : '' }}>Hour Reading</option>
-                                        <option value="Timeframe" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Timeframe' ? 'selected' : '' }}>Timeframe</option>
-                                        <option value="Actual Hours" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Actual Hours' ? 'selected' : '' }}>Actual Hours</option>
-                                    </select>
-                                    @error('calculation_type') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
-                                </div>
+                          
 
                                 <div class="col-12">
                                     <label for="unbudgeted" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Unbudgeted Utilization</label>
@@ -72,7 +76,7 @@
 
                                 <div class="col-12">
                                     <label for="particulars" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Particulars / Mission</label>
-                                    <input type="text" id="particulars" name="particulars" class="form-control bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" value="{{ old('particulars', $utilizationEntry->particulars) }}" required>
+                                    <textarea id="particulars" name="particulars" class="form-control bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required>{{ old('particulars', $utilizationEntry->particulars) }}</textarea>
                                     @error('particulars') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
                                 </div>
 
