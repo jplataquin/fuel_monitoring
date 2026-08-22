@@ -124,6 +124,8 @@
 
                                 <div class="col-md-6">
                                     <label for="chargeable_account_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Charged To</label>
+                                    
+                                    {{$utilizationEntry->chargeable_account_id}}
                                     <select id="chargeable_account_id" name="chargeable_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required onchange="fetchSubAccounts(this.value)">
                                         <option value="">-- Select Account --</option>
                                         @foreach($chargeableAccounts as $account)
@@ -133,12 +135,12 @@
                                                     data-start-date="{{ $account->start_date ? $account->start_date->format('Y-m-d') : '' }}"
                                                     data-end-date="{{ $account->end_date ? $account->end_date->format('Y-m-d') : '' }}"
                                                     
-                                                    @if(old('chargeable_account_id', $utilizationEntry->chargeable_account_id) == $account->id) 
+                                                    @if( $utilizationEntry->chargeable_account_id == $account->id) 
                                                         selected 
                                                     @endif
                                                     
                                             >
-                                                {{ $account->name }}
+                                                {{$account->id}} {{ $account->name }} 
                                                 @if($account->classification === 'Scoped')
                                                     ({{ $account->start_date ? $account->start_date->format('M d, Y') : 'N/A' }} - {{ $account->end_date ? $account->end_date->format('M d, Y') : 'N/A' }})
                                                 @endif
