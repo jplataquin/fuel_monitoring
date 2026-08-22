@@ -654,4 +654,39 @@ class UtilizationEntryFeatureTest extends TestCase
         // Total consumed fuel is (2 hours * 1.5 = 3.00 L)
         $response->assertSee('3.00 L');
     }
+
+    public function test_utilization_entry_edit_renders_prefilled_dropdowns()
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Active Account',
+            'status' => 'Active',
+        ]);
+
+        $sub = $account->subAccounts()->create([
+            'name' => 'Sub Active',
+        ]);
+
+        $entry = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-10',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'reference' => 'REF-123',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Daily run',
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('utilization-entries.edit', $entry));
+        $response->assertStatus(200);
+
+        // Assert that Charged To is selected on Active Account
+        $response->assertSee('value="' . $account->id . '"', false);
+        $response->assertSee('selected', false);
+
+        // Assert that Sub Account is rendered with Sub Active selected
+        $response->assertSee('value="' . $sub->id . '"', false);
+    }
 }
