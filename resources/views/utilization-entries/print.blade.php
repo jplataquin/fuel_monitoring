@@ -31,7 +31,7 @@
                         <span class="badge border border-dark text-dark me-1">Account: {{ $chargeableAccount->name }}</span>
                     @endif
                     @if($subAccount)
-                        <span class="badge border border-dark text-dark me-1">Sub-Account: {{ $subAccount->name }}</span>
+                        <span class="badge border border-dark text-dark me-1">Sub-Account: {{ $subAccount->display_name }}</span>
                     @endif
                     @if($asset)
                         <span class="badge border border-dark text-dark me-1">Asset: {{ $asset->fleet_no }}</span>

@@ -116,7 +116,7 @@
                                             <tr>
                                                 <td class="px-4 py-3 align-middle">
                                                     <div class="d-flex align-items-center">
-                                                        <span class="text-light fw-medium">{{ $subAccount->name }}</span>
+                                                        <span class="text-light fw-medium">{{ $subAccount->display_name }}</span>
                                                     </div>
                                                 </td>
                                                 <td class="px-4 py-3 align-middle text-end font-monospace text-info fw-bold">

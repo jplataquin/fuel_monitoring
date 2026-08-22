@@ -76,7 +76,7 @@
                 <select wire:model="sub_account_id" id="sub_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-3 px-4 rounded-3" {{ count($sub_accounts) === 0 ? 'disabled' : '' }}>
                     <option value="">-- Choose a Sub-Account --</option>
                     @foreach($sub_accounts as $sub)
-                        <option value="{{ $sub->id }}">{{ $sub->name }}</option>
+                        <option value="{{ $sub->id }}">{{ $sub->display_name }}</option>
                     @endforeach
                 </select>
                 @error('sub_account_id') <span class="text-danger small fw-semibold mt-1 d-block">{{ $message }}</span> @enderror

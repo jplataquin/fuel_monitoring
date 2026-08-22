@@ -28,6 +28,17 @@
                         @enderror
                     </div>
 
+                    <div class="mb-4">
+                        <div class="form-check form-switch p-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-10 rounded-3 d-flex align-items-center justify-content-between">
+                            <div class="flex-grow-1 pe-3">
+                                <label class="form-check-label text-secondary small fw-bold text-uppercase tracking-wider d-block mb-1" style="cursor: pointer;" for="type_toggle">Uncontrolled Sub-Account 🔓</label>
+                                <span class="text-secondary small d-block lh-sm" style="font-size: 0.8rem;">When enabled, this sub-account is exempt from overbudget controls and can go over budget without requiring a waiver.</span>
+                            </div>
+                            <input type="hidden" name="type" value="Controlled">
+                            <input class="form-check-input ms-0" type="checkbox" role="switch" id="type_toggle" name="type" value="Uncontrolled" {{ old('type', $subAccount->type) === 'Uncontrolled' ? 'checked' : '' }} style="transform: scale(1.5); cursor: pointer; float: none;">
+                        </div>
+                    </div>
+
                     <div class="d-flex align-items-center justify-content-end pt-4 border-top border-secondary border-opacity-25 gap-3">
                         <a href="{{ route('chargeable-accounts.show', $subAccount->chargeableAccount) }}" class="btn btn-link text-secondary text-decoration-none small fw-bold text-uppercase tracking-widest me-3">Cancel</a>
                         <button type="submit" class="btn btn-primary px-5 py-3 rounded-pill fw-bold small text-uppercase tracking-wider shadow">

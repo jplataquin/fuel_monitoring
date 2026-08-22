@@ -139,7 +139,7 @@
                     <td>{{ $entry->driver_operator_name }}</td>
                     <td>
                         <div class="fw-bold">{{ $entry->chargeableAccount ? $entry->chargeableAccount->name : '—' }}</div>
-                        <div style="font-size: 9px; color: #6c757d;">{{ $entry->subAccount ? $entry->subAccount->name : '—' }}</div>
+                        <div style="font-size: 9px; color: #6c757d;">{{ $entry->subAccount ? $entry->subAccount->display_name : '—' }}</div>
                     </td>
                     <td class="text-end nowrap font-monospace">
                         {{ number_format($entry->start_kilometer_reading, 2) }}<br>

@@ -47,7 +47,7 @@
                                     Sub Account
                                 </h3>
                                 <p class="h3 text-white fw-bold mb-1">
-                                    {{ $accountBudget->subAccount->name ?? '—' }}
+                                    {{ $accountBudget->subAccount->display_name ?? '—' }}
                                 </p>
                                 <p class="small text-secondary text-uppercase tracking-widest fw-medium mb-0">
                                     Parent: {{ $accountBudget->subAccount->chargeableAccount->name ?? '—' }}

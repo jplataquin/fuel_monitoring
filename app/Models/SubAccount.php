@@ -21,6 +21,11 @@ class SubAccount extends Model
         'merged_at',
         'merge_remarks',
         'accomplishment',
+        'type',
+    ];
+
+    protected $appends = [
+        'display_name',
     ];
 
     protected $casts = [
@@ -100,5 +105,10 @@ class SubAccount extends Model
         $approved = $this->budgets()->where('status', 'Approved')->sum('budget_quantity');
 
         return max(0.0, (float) $approved - $this->consumedBudget());
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->name . ($this->type === 'Uncontrolled' ? ' 🔓' : '');
     }
 }

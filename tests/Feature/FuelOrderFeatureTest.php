@@ -1008,4 +1008,60 @@ class FuelOrderFeatureTest extends TestCase
         $response->assertSee('onclick="window.open(\'' . $expectedUrl . '\', \'_blank\')"', false);
         $response->assertSee('style="cursor: pointer;"', false);
     }
+
+    public function test_uncontrolled_sub_accounts_bypass_overbudget_waiver_controls()
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $user = User::factory()->create(['role' => 'administrator']);
+        
+        $account = ChargeableAccount::create(['name' => 'General Overhead', 'status' => 'Active']);
+        
+        // 1. Controlled sub-account with some budget
+        $controlledSub = $account->subAccounts()->create(['name' => 'Controlled Sub', 'type' => 'Controlled']);
+        $controlledSub->budgets()->create([
+            'budget_quantity' => 100.0,
+            'status' => 'Approved',
+            'created_by' => $user->id,
+        ]);
+
+        // 2. Uncontrolled sub-account with some budget
+        $uncontrolledSub = $account->subAccounts()->create(['name' => 'Uncontrolled Sub', 'type' => 'Uncontrolled']);
+        $uncontrolledSub->budgets()->create([
+            'budget_quantity' => 100.0,
+            'status' => 'Approved',
+            'created_by' => $user->id,
+        ]);
+
+        // 3. Creating direct order for Controlled sub-account going overbudget (150L > 100L remaining)
+        // Should require a waiver (is_waiver_pending = true)
+        \Livewire\Livewire::actingAs($user)
+            ->test(\App\Livewire\CreateFuelOrder::class)
+            ->set('chargeable_account_id', $account->id)
+            ->set('sub_account_id', $controlledSub->id)
+            ->set('say_quantity', 150.0)
+            ->set('remarks', 'Controlled test')
+            ->call('submit')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('fuel-orders.index'));
+
+        // Assert that the created order has is_waiver_pending = true
+        $controlledOrder = FuelOrder::latest('id')->first();
+        $this->assertTrue((bool)$controlledOrder->is_waiver_pending);
+
+        // 4. Creating direct order for Uncontrolled sub-account going overbudget (150L > 100L remaining)
+        // Should NOT require a waiver (is_waiver_pending = false)
+        \Livewire\Livewire::actingAs($user)
+            ->test(\App\Livewire\CreateFuelOrder::class)
+            ->set('chargeable_account_id', $account->id)
+            ->set('sub_account_id', $uncontrolledSub->id)
+            ->set('say_quantity', 150.0)
+            ->set('remarks', 'Uncontrolled test')
+            ->call('submit')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('fuel-orders.index'));
+
+        // Assert that the created order has is_waiver_pending = false
+        $uncontrolledOrder = FuelOrder::latest('id')->first();
+        $this->assertFalse((bool)$uncontrolledOrder->is_waiver_pending);
+    }
 }

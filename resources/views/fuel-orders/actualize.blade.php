@@ -42,7 +42,7 @@
                                         <p class="h5 fw-bold text-light mb-0">{{ $fuelOrder->chargeableAccount->name ?? 'Unassigned' }}</p>
                                         <p class="small text-secondary mb-0">
                                             @if($fuelOrder->subAccount)
-                                                Sub-Account: {{ $fuelOrder->subAccount->name }}
+                                                Sub-Account: {{ $fuelOrder->subAccount->display_name }}
                                             @else
                                                 No Sub-Account
                                             @endif

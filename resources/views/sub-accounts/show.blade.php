@@ -6,7 +6,7 @@
                     <ol class="breadcrumb mb-0 text-uppercase small fw-bold tracking-widest">
                         <li class="breadcrumb-item"><a href="{{ route('chargeable-accounts.index') }}" class="text-info text-decoration-none">Accounts</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('chargeable-accounts.show', $subAccount->chargeableAccount) }}" class="text-info text-decoration-none">{{ $subAccount->chargeableAccount->name }}</a></li>
-                        <li class="breadcrumb-item active text-secondary" aria-current="page">{{ $subAccount->name }}</li>
+                        <li class="breadcrumb-item active text-secondary" aria-current="page">{{ $subAccount->display_name }}</li>
                     </ol>
                 </nav>
             </div>
@@ -20,7 +20,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-5">
                         <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Sub-Account Name</h3>
-                        <span class="h4 text-white fw-bold">{{ $subAccount->name }}</span>
+                        <span class="h4 text-white fw-bold">{{ $subAccount->display_name }}</span>
                     </div>
                
                     <div class="col-md-3">

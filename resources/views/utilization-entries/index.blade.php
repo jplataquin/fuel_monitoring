@@ -20,7 +20,7 @@
                         @foreach($subAccounts as $sub)
                             @if(!request('chargeable_account_id') || $sub->chargeable_account_id == request('chargeable_account_id'))
                                 <option value="{{ $sub->id }}" {{ request('sub_account_id') == $sub->id ? 'selected' : '' }}>
-                                    {{ $sub->name }}
+                                    {{ $sub->display_name }}
                                 </option>
                             @endif
                         @endforeach

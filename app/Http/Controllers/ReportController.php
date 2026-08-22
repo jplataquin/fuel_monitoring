@@ -258,7 +258,7 @@ class ReportController extends Controller
                 $account = $entry->chargeableAccount;
                 $accountName = $account->name ?? 'Unassigned';
                 $subAccount = $entry->subAccount;
-                $subAccountName = $subAccount->name ?? 'No Sub-Account';
+                $subAccountName = $subAccount ? $subAccount->display_name : 'No Sub-Account';
 
                 if (! isset($accountSummaries[$accountName])) {
                     // Fetch the sum of all approved budgets for all sub-accounts of this chargeable account

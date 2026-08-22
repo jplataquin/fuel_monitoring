@@ -45,6 +45,7 @@ class SubAccountController extends Controller
                     ->whereNull('deleted_at'),
             ],
             'accomplishment' => 'sometimes|numeric|min:0|max:100',
+            'type' => 'nullable|in:Controlled,Uncontrolled',
         ]);
 
         $subAccount->update($validated);

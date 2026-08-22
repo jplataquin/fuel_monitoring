@@ -111,7 +111,7 @@ class CreateFuelOrder extends Component
         $this->has_negative_balance = false;
         if (! $this->asset_id && ! $this->unbudgeted && $this->sub_account_id && $this->say_quantity > 0) {
             $subAccount = SubAccount::find($this->sub_account_id);
-            if ($subAccount) {
+            if ($subAccount && $subAccount->type !== 'Uncontrolled') {
                 $remaining = $subAccount->remainingBudget();
                 if ((float) $this->say_quantity > $remaining) {
                     $this->has_negative_balance = true;
@@ -166,6 +166,7 @@ class CreateFuelOrder extends Component
 
         $this->unprocessed_entries_count = $entries->count();
         $this->unprocessed_entries = [];
+        $subAccountsMap = [];
 
         foreach ($entries as $entry) {
             $calcType = strtolower($entry->calculation_type ?? '');
@@ -175,6 +176,7 @@ class CreateFuelOrder extends Component
             $accountName = $entry->chargeableAccount->name ?? 'Unassigned';
             if ($entry->subAccount) {
                 $accountName .= ' - '.$entry->subAccount->name;
+                $subAccountsMap[$accountName] = $entry->subAccount;
             }
 
             if (! isset($this->grouped_totals[$accountName])) {
@@ -253,7 +255,10 @@ class CreateFuelOrder extends Component
         foreach ($this->grouped_totals as $name => &$total) {
             $total['balance'] = $total['remaining'] - $total['quantity'];
             if ($total['balance'] < 0) {
-                $this->has_negative_balance = true;
+                $subAccount = $subAccountsMap[$name] ?? null;
+                if (!$subAccount || $subAccount->type !== 'Uncontrolled') {
+                    $this->has_negative_balance = true;
+                }
             }
         }
     }
@@ -332,7 +337,7 @@ class CreateFuelOrder extends Component
 
             foreach ($subAccountQuantities as $subAccountId => $requestedQty) {
                 $subAccount = SubAccount::find($subAccountId);
-                if ($subAccount) {
+                if ($subAccount && $subAccount->type !== 'Uncontrolled') {
                     $remaining = $subAccount->remainingBudget();
                     if ($requestedQty > $remaining) {
                         $isWaiverPending = true;
@@ -346,7 +351,7 @@ class CreateFuelOrder extends Component
                 $isWaiverPending = true;
             } elseif ($this->sub_account_id) {
                 $subAccount = SubAccount::find($this->sub_account_id);
-                if ($subAccount) {
+                if ($subAccount && $subAccount->type !== 'Uncontrolled') {
                     $remaining = $subAccount->remainingBudget();
                     if ((float) $this->say_quantity > $remaining) {
                         $isWaiverPending = true;

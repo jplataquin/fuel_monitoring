@@ -91,7 +91,7 @@
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <div class="d-flex align-items-center">
                                                         <div class="bg-primary bg-opacity-25 rounded-pill me-3 print-hidden" style="width: 4px; height: 24px;"></div>
-                                                        <span class="small fw-bold text-primary text-uppercase tracking-widest print-text-black">└ {{ $budget->subAccount?->name ?? 'Unknown Sub' }}</span>
+                                                        <span class="small fw-bold text-primary text-uppercase tracking-widest print-text-black">└ {{ $budget->subAccount?->display_name ?? 'Unknown Sub' }}</span>
                                                     </div>
                                                     <div class="text-end">
                                                         <span class="small fw-bold text-secondary text-uppercase me-2 print-text-black">Sub Total:</span>

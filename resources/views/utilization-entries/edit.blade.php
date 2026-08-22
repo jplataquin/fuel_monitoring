@@ -217,7 +217,7 @@
                 subAccounts.forEach(sub => {
                     const option = document.createElement('option');
                     option.value = sub.id;
-                    option.textContent = sub.name;
+                    option.textContent = sub.display_name;
                     if (selectedId && sub.id == selectedId) {
                         option.selected = true;
                     }

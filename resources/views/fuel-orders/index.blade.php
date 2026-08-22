@@ -20,7 +20,7 @@
                         @foreach($subAccounts as $sub)
                             @if(!request('chargeable_account_id') || $sub->chargeable_account_id == request('chargeable_account_id'))
                                 <option value="{{ $sub->id }}" {{ request('sub_account_id') == $sub->id ? 'selected' : '' }}>
-                                    {{ $sub->name }}
+                                    {{ $sub->display_name }}
                                 </option>
                             @endif
                         @endforeach
@@ -104,7 +104,7 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="fw-bold text-light small tracking-tight">
-                                            {{ $order->subAccount->name ?? '—' }}
+                                            {{ $order->subAccount->display_name ?? '—' }}
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">

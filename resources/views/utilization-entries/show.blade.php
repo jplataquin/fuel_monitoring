@@ -127,7 +127,7 @@
                                     <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
                                         <i class="bi bi-building text-primary"></i>
                                     </div>
-                                    <p class="h6 fw-bold text-white mb-0">{{ $utilizationEntry->subAccount->name ?? '—' }}</p>
+                                    <p class="h6 fw-bold text-white mb-0">{{ $utilizationEntry->subAccount->display_name ?? '—' }}</p>
                                 </div>
                             </div>
 

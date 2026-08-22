@@ -202,7 +202,7 @@
                                         <tr>
                                             <td class="px-4 py-3 small border-secondary">{{ $entry->date->format('M d, Y') }}</td>
                                             <td class="px-4 py-3 small border-secondary text-truncate" style="max-width: 200px;" title="{{ $entry->particulars }}">{{ $entry->particulars ?? '—' }}</td>
-                                            <td class="px-4 py-3 small border-secondary fw-bold text-primary">{{ $entry->chargeableAccount->name ?? 'Unassigned' }} - {{ $entry->subAccount->name ?? '—' }}</td>
+                                            <td class="px-4 py-3 small border-secondary fw-bold text-primary">{{ $entry->chargeableAccount->name ?? 'Unassigned' }} - {{ $entry->subAccount->display_name ?? '—' }}</td>
                                             <td class="px-4 py-3 border-secondary">
                                                 <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill text-uppercase tracking-widest" style="font-size: 0.6rem;">{{ $entry->calculation_type ?? 'N/A' }}</span>
                                             </td>

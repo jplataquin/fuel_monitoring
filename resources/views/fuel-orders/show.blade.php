@@ -108,7 +108,7 @@
                                     <p class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }} mb-0">{{ $fuelOrder->chargeableAccount->name ?? 'Unassigned' }}</p>
                                     <p class="small {{ $isPrint ? 'text-dark' : 'text-secondary' }} mb-0">
                                         @if($fuelOrder->subAccount)
-                                            Sub-Account: {{ $fuelOrder->subAccount->name }}
+                                            Sub-Account: {{ $fuelOrder->subAccount->display_name }}
                                         @else
                                             No Sub-Account
                                         @endif
@@ -178,7 +178,7 @@
                             $groupedTotals = [];
                             foreach ($fuelOrder->utilizationEntries as $entry) {
                                 $subAccount = $entry->subAccount;
-                                $subAccountName = $subAccount->name ?? ($entry->unbudgeted ? 'UNBUDGETED' : 'Unassigned');
+                                $subAccountName = $subAccount ? $subAccount->display_name : ($entry->unbudgeted ? 'UNBUDGETED' : 'Unassigned');
                                 if (!isset($groupedTotals[$subAccountName])) {
                                     $groupedTotals[$subAccountName] = [
                                         'km' => 0, 

@@ -51,7 +51,7 @@
                                             <label for="sub_account_id" class="form-label text-secondary fw-bold small text-uppercase tracking-wider mb-2">Sub-Account <span class="text-danger">*</span></label>
                                             <select name="sub_account_id" id="sub_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required>
                                                 @foreach($fuelOrder->chargeableAccount->subAccounts as $sub)
-                                                    <option value="{{ $sub->id }}" {{ old('sub_account_id', $fuelOrder->sub_account_id) == $sub->id ? 'selected' : '' }}>{{ $sub->name }}</option>
+                                                    <option value="{{ $sub->id }}" {{ old('sub_account_id', $fuelOrder->sub_account_id) == $sub->id ? 'selected' : '' }}>{{ $sub->display_name }}</option>
                                                 @endforeach
                                             </select>
                                             @error('sub_account_id')
