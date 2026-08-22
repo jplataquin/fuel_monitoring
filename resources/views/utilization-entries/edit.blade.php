@@ -15,7 +15,7 @@
                             @method('PATCH')
 
                             <div class="row g-4 mb-4">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <label for="calculation_type" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Calculation Type</label>
                                     <select id="calculation_type" name="calculation_type" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required>
                                         <option value="">-- Select Calculation Type --</option>
@@ -25,14 +25,6 @@
                                         <option value="Actual Hours" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Actual Hours' ? 'selected' : '' }}>Actual Hours</option>
                                     </select>
                                     @error('calculation_type') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="unbudgeted" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Unbudgeted</label>
-                                    <select id="unbudgeted" name="unbudgeted" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required onchange="toggleSubAccount()">
-                                        <option value="0" {{ old('unbudgeted', $utilizationEntry->unbudgeted) == '0' ? 'selected' : '' }}>No</option>
-                                        <option value="1" {{ old('unbudgeted', $utilizationEntry->unbudgeted) == '1' ? 'selected' : '' }}>Yes</option>
-                                    </select>
-                                    @error('unbudgeted') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
                                 </div>
                             </div>
 
@@ -154,6 +146,13 @@
                                     <label for="sub_account_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Sub Account</label>
                                     <select id="sub_account_id" name="sub_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required>
                                         <option value="">-- Select Sub Account --</option>
+                                        @if($utilizationEntry->chargeableAccount)
+                                            @foreach($utilizationEntry->chargeableAccount->subAccounts as $sub)
+                                                <option value="{{ $sub->id }}" {{ old('sub_account_id', $utilizationEntry->sub_account_id) == $sub->id ? 'selected' : '' }}>
+                                                    {{ $sub->display_name }}
+                                                </option>
+                                            @endforeach
+                                        @endif
                                     </select>
                                     @error('sub_account_id') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
                                 </div>
@@ -190,7 +189,7 @@
     </div>
 
     <script>
-        function toggleSubAccount() {
+        function toggleSubAccount(isInit = false) {
             const unbudgetedSelect = document.getElementById('unbudgeted');
             const subAccountSelect = document.getElementById('sub_account_id');
             
@@ -202,6 +201,9 @@
                 const accountId = document.getElementById('chargeable_account_id').value;
                 if (accountId) {
                     subAccountSelect.disabled = false;
+                    if (!isInit) {
+                        fetchSubAccounts(accountId);
+                    }
                 }
                 subAccountSelect.required = true;
             }
@@ -384,7 +386,7 @@
             const accountId = document.getElementById('chargeable_account_id').value;
             const selectedSubId = "{{ old('sub_account_id', $utilizationEntry->sub_account_id) }}";
             
-            toggleSubAccount();
+            toggleSubAccount(true);
             
             if (accountId) {
                 fetchSubAccounts(accountId, selectedSubId);
