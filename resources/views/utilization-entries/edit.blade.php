@@ -307,8 +307,6 @@
             return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
-        let isInitialLoad = true;
-
         function updateFieldStates() {
             const calculationType = document.getElementById('calculation_type').value;
             const startOdo = document.getElementById('start_kilometer_reading');
@@ -319,80 +317,58 @@
             const startTime = document.getElementById('start_time');
             const endTime = document.getElementById('end_time');
 
-            const assetLastTime = "{{ $utilizationEntry->asset->last_time ? \Carbon\Carbon::parse($utilizationEntry->asset->last_time)->format('H:i') : '' }}";
-            const originalStartTime = "{{ old('start_time', $utilizationEntry->start_time ? $utilizationEntry->start_time->format('H:i') : '') }}";
-            const originalEndTime = "{{ old('end_time', $utilizationEntry->end_time ? $utilizationEntry->end_time->format('H:i') : '') }}";
-
-            const enable = (el) => {
+            const setRequired = (el, isRequired) => {
                 if (el) {
-                    el.disabled = false;
-                    if (el.id === 'start_time' || el.id === 'end_time') {
-                        el.required = true;
+                    el.required = isRequired;
+                    const label = document.querySelector(`label[for="${el.id}"]`);
+                    if (label) {
+                        let ast = label.querySelector('.req-ast');
+                        if (isRequired) {
+                            if (!ast) {
+                                label.insertAdjacentHTML('beforeend', ' <span class="text-danger req-ast">*</span>');
+                            }
+                        } else {
+                            if (ast) {
+                                ast.remove();
+                            }
+                        }
                     }
                 }
             };
 
-            const disableAndSet = (el, val) => {
-                if (el) {
-                    el.disabled = true;
-                    el.value = val;
-                    el.required = false;
-                }
-            };
+            // Reset all to not required first
+            setRequired(startOdo, false);
+            setRequired(endOdo, false);
+            setRequired(startEngine, false);
+            setRequired(endEngine, false);
+            setRequired(actualHours, false);
+            setRequired(startTime, false);
+            setRequired(endTime, false);
 
             if (calculationType === 'Kilometer Reading') {
-                enable(startOdo);
-                enable(endOdo);
-                enable(startTime);
-                enable(endTime);
-
-                disableAndSet(startEngine, '0');
-                disableAndSet(endEngine, '0');
-                disableAndSet(actualHours, '0');
+                setRequired(startOdo, true);
+                setRequired(endOdo, true);
+                setRequired(startTime, true);
+                setRequired(endTime, true);
             } else if (calculationType === 'Hour Reading') {
-                enable(startEngine);
-                enable(endEngine);
-                enable(startTime);
-                enable(endTime);
-
-                disableAndSet(startOdo, '0');
-                disableAndSet(endOdo, '0');
-                disableAndSet(actualHours, '0');
+                setRequired(startEngine, true);
+                setRequired(endEngine, true);
+                setRequired(startTime, true);
+                setRequired(endTime, true);
             } else if (calculationType === 'Timeframe') {
-                enable(startTime);
-                enable(endTime);
-
-                disableAndSet(startOdo, '0');
-                disableAndSet(endOdo, '0');
-                disableAndSet(startEngine, '0');
-                disableAndSet(endEngine, '0');
-                disableAndSet(actualHours, '0');
+                setRequired(startTime, true);
+                setRequired(endTime, true);
             } else if (calculationType === 'Actual Hours') {
-                enable(actualHours);
-
-                disableAndSet(startOdo, '0');
-                disableAndSet(endOdo, '0');
-                disableAndSet(startEngine, '0');
-                disableAndSet(endEngine, '0');
-
-                if (isInitialLoad) {
-                    disableAndSet(startTime, originalStartTime);
-                    disableAndSet(endTime, originalEndTime);
-                } else {
-                    disableAndSet(startTime, assetLastTime);
-                    disableAndSet(endTime, assetLastTime);
-                }
+                setRequired(actualHours, true);
             } else {
-                enable(startOdo);
-                enable(endOdo);
-                enable(startEngine);
-                enable(endEngine);
-                enable(actualHours);
-                enable(startTime);
-                enable(endTime);
+                setRequired(startOdo, true);
+                setRequired(endOdo, true);
+                setRequired(startEngine, true);
+                setRequired(endEngine, true);
+                setRequired(actualHours, true);
+                setRequired(startTime, true);
+                setRequired(endTime, true);
             }
-            
-            isInitialLoad = false;
         }
 
         // Initialize sub-accounts on load
