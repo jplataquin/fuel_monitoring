@@ -128,10 +128,16 @@
                                         <option value="">-- Select Account --</option>
                                         @foreach($chargeableAccounts as $account)
                                             <option value="{{ $account->id }}" 
+
                                                     data-classification="{{ $account->classification }}"
                                                     data-start-date="{{ $account->start_date ? $account->start_date->format('Y-m-d') : '' }}"
                                                     data-end-date="{{ $account->end_date ? $account->end_date->format('Y-m-d') : '' }}"
-                                                    {{ old('chargeable_account_id', $utilizationEntry->chargeable_account_id) == $account->id ? 'selected' : '' }}>
+                                                    
+                                                    @if(old('chargeable_account_id', $utilizationEntry->chargeable_account_id) == $account->id) 
+                                                        selected 
+                                                    @endif
+                                                    
+                                            >
                                                 {{ $account->name }}
                                                 @if($account->classification === 'Scoped')
                                                     ({{ $account->start_date ? $account->start_date->format('M d, Y') : 'N/A' }} - {{ $account->end_date ? $account->end_date->format('M d, Y') : 'N/A' }})
