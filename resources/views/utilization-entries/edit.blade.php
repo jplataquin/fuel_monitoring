@@ -125,7 +125,7 @@
                                 <div class="col-md-6">
                                     <label for="chargeable_account_id" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Charged To</label>
                                 
-                                        {{$utilizationEntry->chargeable_account->status}}
+                                        {{$utilizationEntry->chargeableAccount->status}}
 
                                     <select id="chargeable_account_id" name="chargeable_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required onchange="fetchSubAccounts(this.value)">
                                         <option value="">-- Select Account --</option>
