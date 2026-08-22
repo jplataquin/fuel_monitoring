@@ -270,8 +270,20 @@
                                                     <td class="px-4 py-2 small {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-end font-monospace">{{ number_format($totals['km'], 2) }}</td>
                                                     <td class="px-4 py-2 small {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-end font-monospace">{{ number_format($totals['hr'], 2) }}</td>
                                                     <td class="px-4 py-2 small text-primary fw-bold text-end font-monospace">{{ number_format($totals['qty'], 2) }}</td>
-                                                    <td class="px-4 py-2 small {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-end font-monospace fw-bold">{{ isset($totals['remaining']) ? number_format($totals['remaining'], 2) : '—' }}</td>
-                                                    <td class="pe-4 py-2 small {{ isset($totals['balance']) && $totals['balance'] < 0 ? 'text-danger' : ($isPrint ? 'text-dark' : 'text-info') }} text-end font-monospace fw-bold">{{ isset($totals['balance']) ? number_format($totals['balance'], 2) : '—' }}</td>
+                                                    <td class="px-4 py-2 small {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-end font-monospace fw-bold">
+                                                        @if($totals['subAccount'] && $totals['subAccount']->type === 'Uncontrolled')
+                                                            —
+                                                        @else
+                                                            {{ isset($totals['remaining']) ? number_format($totals['remaining'], 2) : '—' }}
+                                                        @endif
+                                                    </td>
+                                                    <td class="pe-4 py-2 small {{ isset($totals['balance']) && $totals['balance'] < 0 && (!$totals['subAccount'] || $totals['subAccount']->type !== 'Uncontrolled') ? 'text-danger' : ($isPrint ? 'text-dark' : 'text-info') }} text-end font-monospace fw-bold">
+                                                        @if($totals['subAccount'] && $totals['subAccount']->type === 'Uncontrolled')
+                                                            —
+                                                        @else
+                                                            {{ isset($totals['balance']) ? number_format($totals['balance'], 2) : '—' }}
+                                                        @endif
+                                                    </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>

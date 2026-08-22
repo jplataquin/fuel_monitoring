@@ -1064,4 +1064,55 @@ class FuelOrderFeatureTest extends TestCase
         $uncontrolledOrder = FuelOrder::latest('id')->first();
         $this->assertFalse((bool)$uncontrolledOrder->is_waiver_pending);
     }
+
+    public function test_fuel_orders_show_displays_em_dash_for_uncontrolled_sub_accounts_remaining_and_balance()
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $type = AssetType::create(['name' => 'Vehicle']);
+        $account = ChargeableAccount::create(['name' => 'General Overhead', 'status' => 'Active']);
+        
+        // 1. Create an Uncontrolled sub-account
+        $uncontrolledSub = $account->subAccounts()->create(['name' => 'Uncontrolled Sub', 'type' => 'Uncontrolled']);
+        
+        $asset = Asset::create([
+            'fleet_no' => 'V-101',
+            'asset_type_id' => $type->id,
+            'fuel_factor_km' => 2.5,
+            'fuel_factor_hr' => 1.5,
+            'tank_capacity' => 100,
+        ]);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $uncontrolledSub->id,
+            'say_quantity' => 100,
+            'status' => 'PEND',
+            'is_waiver_pending' => false,
+            'created_by' => $user->id,
+        ]);
+
+        // Add a utilization entry so it has breakdown rows
+        UtilizationEntry::create([
+            'asset_id' => $asset->id,
+            'date' => '2026-03-01',
+            'start_time' => '08:00',
+            'end_time' => '17:00',
+            'reference' => 'REF-001',
+            'particulars' => 'Daily Operation',
+            'start_kilometer_reading' => 1000,
+            'end_kilometer_reading' => 1100, // 100 km diff
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $uncontrolledSub->id,
+            'calculation_type' => 'Kilometer Reading',
+            'fuel_order_id' => $fuelOrder->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('fuel-orders.show', $fuelOrder));
+        $response->assertStatus(200);
+
+        // Assert that the page contains '—' (em-dash) for Remaining and Balance
+        $response->assertSee('—');
+    }
 }
