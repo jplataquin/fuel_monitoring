@@ -242,7 +242,10 @@
                                                 <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Hours</th>
                                                 <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Fuel (L)</th>
                                                 <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Remaining (L)</th>
-                                                <th class="pe-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Balance (L)</th>
+                                                <th class="{{ $isPrint ? 'pe-4' : 'px-4' }} py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Balance (L)</th>
+                                                @if(!$isPrint)
+                                                    <th class="pe-4 py-2 small fw-bold text-secondary text-uppercase text-end">Actions</th>
+                                                @endif
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -277,13 +280,29 @@
                                                             {{ isset($totals['remaining']) ? number_format($totals['remaining'], 2) : '—' }}
                                                         @endif
                                                     </td>
-                                                    <td class="pe-4 py-2 small {{ isset($totals['balance']) && $totals['balance'] < 0 && (!$totals['subAccount'] || $totals['subAccount']->type !== 'Uncontrolled') ? 'text-danger' : ($isPrint ? 'text-dark' : 'text-info') }} text-end font-monospace fw-bold">
+                                                    <td class="{{ $isPrint ? 'pe-4' : 'px-4' }} py-2 small {{ isset($totals['balance']) && $totals['balance'] < 0 && (!$totals['subAccount'] || $totals['subAccount']->type !== 'Uncontrolled') ? 'text-danger' : ($isPrint ? 'text-dark' : 'text-info') }} text-end font-monospace fw-bold">
                                                         @if($totals['subAccount'] && $totals['subAccount']->type === 'Uncontrolled')
                                                             —
                                                         @else
                                                             {{ isset($totals['balance']) ? number_format($totals['balance'], 2) : '—' }}
                                                         @endif
                                                     </td>
+                                                    @if(!$isPrint)
+                                                        <td class="pe-4 py-2 text-end">
+                                                            @if(in_array(Auth::user()->role, ['administrator', 'moderator']) && $fuelOrder->status === 'PEND')
+                                                                <form action="{{ route('fuel-orders.unlink-sub-account', $fuelOrder) }}" method="POST" class="d-inline-block m-0" onclick="event.stopPropagation();">
+                                                                    @csrf
+                                                                    <input type="hidden" name="sub_account_id" value="{{ $totals['subAccount'] ? $totals['subAccount']->id : 'null' }}">
+                                                                    <input type="hidden" name="unbudgeted" value="{{ $account === 'UNBUDGETED' ? 1 : 0 }}">
+                                                                    <button type="submit" class="btn btn-link text-danger p-1 rounded-circle hover-bg-light hover-bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; margin-left: auto;" title="Unlink Row" onclick="return confirm('Are you sure you want to unlink this row and all its related utilization entries from this fuel order?');">
+                                                                        <i class="bi bi-x-circle fs-6"></i>
+                                                                    </button>
+                                                                </form>
+                                                            @else
+                                                                <span class="text-secondary">—</span>
+                                                            @endif
+                                                        </td>
+                                                    @endif
                                                 </tr>
                                             @endforeach
                                         </tbody>

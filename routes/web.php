@@ -71,6 +71,7 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::middleware('role:administrator,moderator')->group(function () {
         Route::patch('account-budgets/{account_budget}/approve', [SubAccountBudgetController::class, 'approve'])->name('account-budgets.approve');
         Route::patch('account-budgets/{account_budget}/reject', [SubAccountBudgetController::class, 'reject'])->name('account-budgets.reject');
+        Route::post('fuel-orders/{fuel_order}/unlink-sub-account', [FuelOrderController::class, 'unlinkSubAccount'])->name('fuel-orders.unlink-sub-account');
     });
 
     // Admin, Moderator and Budgeteer routes

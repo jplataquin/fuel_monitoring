@@ -274,4 +274,126 @@ class FuelOrderController extends Controller
 
         return redirect()->back()->with('message', 'Fuel order #'.str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT).' budget waiver approved successfully.');
     }
+
+    /**
+     * Unlink a sub-account row and its associated utilization entries from a pending fuel order.
+     */
+    public function unlinkSubAccount(Request $request, FuelOrder $fuelOrder)
+    {
+        if (! in_array(Auth::user()->role, ['administrator', 'moderator'])) {
+            abort(403, 'Unauthorized action. Only Administrators and Moderators can unlink sub-accounts.');
+        }
+
+        if ($fuelOrder->status !== 'PEND') {
+            return redirect()->back()->with('error', 'Only pending fuel orders can have rows unlinked.');
+        }
+
+        $subAccountId = $request->input('sub_account_id');
+        $unbudgeted = $request->boolean('unbudgeted');
+
+        $query = $fuelOrder->utilizationEntries();
+
+        if ($subAccountId === 'null' || !$subAccountId) {
+            $query->whereNull('sub_account_id');
+        } else {
+            $query->where('sub_account_id', $subAccountId);
+        }
+
+        if ($unbudgeted) {
+            $query->where('unbudgeted', true);
+        } else {
+            $query->where('unbudgeted', false);
+        }
+
+        $entriesToUnlink = $query->get();
+
+        if ($entriesToUnlink->isEmpty()) {
+            return redirect()->back()->with('error', 'No matching utilization entries found to unlink.');
+        }
+
+        DB::transaction(function () use ($fuelOrder, $entriesToUnlink) {
+            foreach ($entriesToUnlink as $entry) {
+                $entry->update([
+                    'fuel_order_id' => null,
+                ]);
+            }
+
+            $remainingEntries = $fuelOrder->utilizationEntries()->get();
+
+            if ($remainingEntries->isEmpty()) {
+                $fuelOrder->update([
+                    'calculated_quantity' => 0,
+                    'calculated_hours' => 0,
+                    'calculated_kilometers' => 0,
+                    'is_waiver_pending' => false,
+                ]);
+            } else {
+                $calcQty = 0;
+                $calcHours = 0;
+                $calcKm = 0;
+                $isWaiverPending = false;
+                $subAccountQuantities = [];
+
+                foreach ($remainingEntries as $entry) {
+                    $calcType = strtolower($entry->calculation_type ?? '');
+                    $qty = 0;
+
+                    if (str_contains($calcType, 'kilometer')) {
+                        $diff = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
+                        $calcKm += $diff;
+                        $qty = $fuelOrder->fuel_factor_km > 0 ? $diff / $fuelOrder->fuel_factor_km : 0;
+                    } elseif (str_contains($calcType, 'timeframe')) {
+                        if ($entry->end_time && $entry->start_time) {
+                            $start = \Illuminate\Support\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
+                            $end = \Illuminate\Support\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
+                            $hours = max(0, $start->diffInMinutes($end) / 60);
+                            $calcHours += $hours;
+                            $qty = $hours * $fuelOrder->fuel_factor_hr;
+                        }
+                    } elseif (str_contains($calcType, 'actual')) {
+                        $hours = $entry->actual_hours ?? 0;
+                        $calcHours += $hours;
+                        $qty = $hours * $fuelOrder->fuel_factor_hr;
+                    } elseif (str_contains($calcType, 'hour')) {
+                        $diff = max(0, $entry->end_hour_reading - $entry->start_hour_reading);
+                        $calcHours += $diff;
+                        $qty = $diff * $fuelOrder->fuel_factor_hr;
+                    }
+
+                    $calcQty += $qty;
+
+                    if ($entry->unbudgeted) {
+                        $isWaiverPending = true;
+                    } elseif ($entry->sub_account_id) {
+                        if (! isset($subAccountQuantities[$entry->sub_account_id])) {
+                            $subAccountQuantities[$entry->sub_account_id] = 0;
+                        }
+                        $subAccountQuantities[$entry->sub_account_id] += $qty;
+                    }
+                }
+
+                if (! $isWaiverPending) {
+                    foreach ($subAccountQuantities as $subAccId => $requestedQty) {
+                        $subAcc = SubAccount::find($subAccId);
+                        if ($subAcc && $subAcc->type !== 'Uncontrolled') {
+                            $remaining = $subAcc->remainingBudget();
+                            if ($requestedQty > $remaining) {
+                                $isWaiverPending = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                $fuelOrder->update([
+                    'calculated_quantity' => $calcQty,
+                    'calculated_hours' => $calcHours,
+                    'calculated_kilometers' => $calcKm,
+                    'is_waiver_pending' => $isWaiverPending,
+                ]);
+            }
+        });
+
+        return redirect()->route('fuel-orders.show', $fuelOrder)->with('message', 'Sub-account row has been successfully unlinked.');
+    }
 }

@@ -1115,4 +1115,110 @@ class FuelOrderFeatureTest extends TestCase
         // Assert that the page contains '—' (em-dash) for Remaining and Balance
         $response->assertSee('—');
     }
+
+    public function test_administrator_and_moderator_can_unlink_sub_account_row()
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $moderator = User::factory()->create(['role' => 'moderator']);
+        $standardUser = User::factory()->create(['role' => 'data_logger']);
+
+        $type = AssetType::create(['name' => 'Vehicle']);
+        $account = ChargeableAccount::create(['name' => 'General Overhead', 'status' => 'Active']);
+        $sub = $account->subAccounts()->create(['name' => 'Sub One']);
+        $asset = Asset::create([
+            'fleet_no' => 'V-101',
+            'asset_type_id' => $type->id,
+            'fuel_factor_km' => 2.5,
+            'fuel_factor_hr' => 1.5,
+            'tank_capacity' => 100,
+        ]);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'say_quantity' => 100,
+            'status' => 'PEND',
+            'is_waiver_pending' => false,
+            'fuel_factor_km' => 2.5,
+            'fuel_factor_hr' => 1.5,
+            'created_by' => $admin->id,
+        ]);
+
+        // Add 2 utilization entries so we can unlink one and keep one
+        $entry1 = UtilizationEntry::create([
+            'asset_id' => $asset->id,
+            'date' => '2026-03-01',
+            'start_time' => '08:00',
+            'end_time' => '17:00',
+            'reference' => 'REF-001',
+            'particulars' => 'Daily Operation',
+            'start_kilometer_reading' => 1000,
+            'end_kilometer_reading' => 1100, // 100 km diff -> 100 / 2.5 = 40 L
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'calculation_type' => 'Kilometer Reading',
+            'fuel_order_id' => $fuelOrder->id,
+        ]);
+
+        $sub2 = $account->subAccounts()->create(['name' => 'Sub Two']);
+        $entry2 = UtilizationEntry::create([
+            'asset_id' => $asset->id,
+            'date' => '2026-03-01',
+            'start_time' => '08:00',
+            'end_time' => '17:00',
+            'reference' => 'REF-002',
+            'particulars' => 'Secondary Operation',
+            'start_kilometer_reading' => 1100,
+            'end_kilometer_reading' => 1150, // 50 km diff -> 50 / 2.5 = 20 L
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub2->id,
+            'calculation_type' => 'Kilometer Reading',
+            'fuel_order_id' => $fuelOrder->id,
+        ]);
+
+        // Total calculated_quantity originally is 40 + 20 = 60 L
+        $fuelOrder->update([
+            'calculated_quantity' => 60,
+            'calculated_kilometers' => 150,
+        ]);
+
+        // 1. A standard user should be blocked
+        $response = $this->actingAs($standardUser)->post(route('fuel-orders.unlink-sub-account', $fuelOrder), [
+            'sub_account_id' => $sub->id,
+            'unbudgeted' => false,
+        ]);
+        $response->assertStatus(403);
+
+        // 2. An administrator should be able to unlink Sub One row
+        $response = $this->actingAs($admin)->post(route('fuel-orders.unlink-sub-account', $fuelOrder), [
+            'sub_account_id' => $sub->id,
+            'unbudgeted' => false,
+        ]);
+        $response->assertRedirect(route('fuel-orders.show', $fuelOrder));
+        $response->assertSessionHas('message', 'Sub-account row has been successfully unlinked.');
+
+        // 3. Verify entry1 is unlinked, entry2 is still linked
+        $this->assertNull($entry1->fresh()->fuel_order_id);
+        $this->assertEquals($fuelOrder->id, $entry2->fresh()->fuel_order_id);
+
+        // 4. Verify fuel order calculations are updated (calculated_quantity should now be 20 L, and km = 50)
+        $this->assertEquals(20.0, (float)$fuelOrder->fresh()->calculated_quantity);
+        $this->assertEquals(50.0, (float)$fuelOrder->fresh()->calculated_kilometers);
+
+        // 5. A moderator should be able to unlink Sub Two row as well
+        $response = $this->actingAs($moderator)->post(route('fuel-orders.unlink-sub-account', $fuelOrder), [
+            'sub_account_id' => $sub2->id,
+            'unbudgeted' => false,
+        ]);
+        $response->assertRedirect(route('fuel-orders.show', $fuelOrder));
+        
+        // 6. Verify entry2 is also unlinked and order has 0 totals
+        $this->assertNull($entry2->fresh()->fuel_order_id);
+        $this->assertEquals(0.0, (float)$fuelOrder->fresh()->calculated_quantity);
+        $this->assertEquals(0.0, (float)$fuelOrder->fresh()->calculated_kilometers);
+    }
 }
