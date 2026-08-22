@@ -25,11 +25,23 @@ class UtilizationEntryController extends Controller
         }
 
         if ($request->filled('sub_account_id')) {
-            $query->where('sub_account_id', $request->sub_account_id);
+            if ($request->sub_account_id === 'null') {
+                $query->whereNull('sub_account_id');
+            } else {
+                $query->where('sub_account_id', $request->sub_account_id);
+            }
         }
 
         if ($request->filled('asset_id')) {
             $query->where('asset_id', $request->asset_id);
+        }
+
+        if ($request->filled('fuel_order_id')) {
+            $query->where('fuel_order_id', $request->fuel_order_id);
+        }
+
+        if ($request->filled('unbudgeted')) {
+            $query->where('unbudgeted', $request->boolean('unbudgeted'));
         }
 
         // Get total calculated fuel across all matched entries (before pagination)
@@ -53,11 +65,23 @@ class UtilizationEntryController extends Controller
         }
 
         if ($request->filled('sub_account_id')) {
-            $query->where('sub_account_id', $request->sub_account_id);
+            if ($request->sub_account_id === 'null') {
+                $query->whereNull('sub_account_id');
+            } else {
+                $query->where('sub_account_id', $request->sub_account_id);
+            }
         }
 
         if ($request->filled('asset_id')) {
             $query->where('asset_id', $request->asset_id);
+        }
+
+        if ($request->filled('fuel_order_id')) {
+            $query->where('fuel_order_id', $request->fuel_order_id);
+        }
+
+        if ($request->filled('unbudgeted')) {
+            $query->where('unbudgeted', $request->boolean('unbudgeted'));
         }
 
         $utilizationEntries = $query->latest('date')->latest('start_time')->get();

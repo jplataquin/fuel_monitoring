@@ -247,7 +247,25 @@
                                         </thead>
                                         <tbody>
                                             @foreach($groupedTotals as $account => $totals)
-                                                <tr>
+                                                @php
+                                                    $url = '#';
+                                                    $onClickAttr = '';
+                                                    $rowStyle = '';
+                                                    if (!$isPrint) {
+                                                        $queryParams = ['fuel_order_id' => $fuelOrder->id];
+                                                        if ($totals['subAccount']) {
+                                                            $queryParams['sub_account_id'] = $totals['subAccount']->id;
+                                                        } elseif ($account === 'UNBUDGETED') {
+                                                            $queryParams['unbudgeted'] = 1;
+                                                        } else {
+                                                            $queryParams['sub_account_id'] = 'null';
+                                                        }
+                                                        $url = route('utilization-entries.index', $queryParams);
+                                                        $onClickAttr = 'onclick="window.open(\'' . $url . '\', \'_blank\')"';
+                                                        $rowStyle = 'style="cursor: pointer;"';
+                                                    }
+                                                @endphp
+                                                <tr {!! $onClickAttr !!} {!! $rowStyle !!}>
                                                     <td class="ps-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }}">{{ $account }}</td>
                                                     <td class="px-4 py-2 small {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-end font-monospace">{{ number_format($totals['km'], 2) }}</td>
                                                     <td class="px-4 py-2 small {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-end font-monospace">{{ number_format($totals['hr'], 2) }}</td>
