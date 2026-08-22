@@ -15,7 +15,7 @@
                             @method('PATCH')
 
                             <div class="row g-4 mb-4">
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <label for="calculation_type" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Calculation Type</label>
                                     <select id="calculation_type" name="calculation_type" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required>
                                         <option value="">-- Select Calculation Type --</option>
@@ -25,6 +25,14 @@
                                         <option value="Actual Hours" {{ old('calculation_type', $utilizationEntry->calculation_type) == 'Actual Hours' ? 'selected' : '' }}>Actual Hours</option>
                                     </select>
                                     @error('calculation_type') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="unbudgeted" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Unbudgeted</label>
+                                    <select id="unbudgeted" name="unbudgeted" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required onchange="toggleSubAccount()">
+                                        <option value="0" {{ old('unbudgeted', $utilizationEntry->unbudgeted) == '0' ? 'selected' : '' }}>No</option>
+                                        <option value="1" {{ old('unbudgeted', $utilizationEntry->unbudgeted) == '1' ? 'selected' : '' }}>Yes</option>
+                                    </select>
+                                    @error('unbudgeted') <div class="text-danger small fw-bold mt-1">{{ $message }}</div> @enderror
                                 </div>
                             </div>
 
