@@ -26,6 +26,14 @@
                         @endforeach
                     </select>
 
+                    <select name="status" class="form-select bg-dark text-light border-secondary border-opacity-50 rounded-pill px-3 py-2 text-sm" style="width: 150px;" onchange="this.form.submit()">
+                        <option value="">All Statuses</option>
+                        <option value="PEND" {{ request('status') === 'PEND' ? 'selected' : '' }}>Pending</option>
+                        <option value="PENDING_WAIVER" {{ request('status') === 'PENDING_WAIVER' ? 'selected' : '' }}>Pending Waiver</option>
+                        <option value="DONE" {{ request('status') === 'DONE' ? 'selected' : '' }}>Done</option>
+                        <option value="VOID" {{ request('status') === 'VOID' ? 'selected' : '' }}>Void</option>
+                    </select>
+
                     <div class="input-group">
                         <input type="text" name="fleet_no" value="{{ request('fleet_no') }}" placeholder="Search Fleet No / Order ID..." class="form-control bg-dark text-light border-secondary border-opacity-50 rounded-start-pill px-4 py-2 text-sm" style="width: 200px;">
                         <button type="submit" class="btn btn-secondary border-secondary border-opacity-50 rounded-end-pill px-4 py-2">

@@ -862,4 +862,95 @@ class FuelOrderFeatureTest extends TestCase
 
         $this->assertEquals($sub2->id, $fuelOrder->fresh()->sub_account_id);
     }
+
+    public function test_fuel_orders_index_filters_by_status_properly()
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'General Overhead', 'status' => 'Active']);
+        $sub = $account->subAccounts()->create(['name' => 'Sub One']);
+
+        // 1. Create a PEND order without pending waiver
+        $pendOrder = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'say_quantity' => 100,
+            'status' => 'PEND',
+            'is_waiver_pending' => false,
+            'created_by' => $user->id,
+        ]);
+
+        // 2. Create a PEND order with pending waiver (PENDING_WAIVER)
+        $waiverOrder = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'say_quantity' => 150,
+            'status' => 'PEND',
+            'is_waiver_pending' => true,
+            'created_by' => $user->id,
+        ]);
+
+        // 3. Create a DONE order
+        $doneOrder = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'say_quantity' => 200,
+            'status' => 'DONE',
+            'is_waiver_pending' => false,
+            'created_by' => $user->id,
+        ]);
+
+        // 4. Create a VOID order
+        $voidOrder = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'say_quantity' => 250,
+            'status' => 'VOID',
+            'is_waiver_pending' => false,
+            'created_by' => $user->id,
+        ]);
+
+        // Filter by All (no status query) should show all orders
+        $response = $this->actingAs($user)->get(route('fuel-orders.index'));
+        $response->assertStatus(200);
+        $response->assertSee('#' . str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#' . str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#' . str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#' . str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
+
+        // Filter by PEND (excluding pending waiver)
+        $response = $this->actingAs($user)->get(route('fuel-orders.index', ['status' => 'PEND']));
+        $response->assertStatus(200);
+        $response->assertSee('#' . str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#' . str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#' . str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#' . str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
+
+        // Filter by PENDING_WAIVER
+        $response = $this->actingAs($user)->get(route('fuel-orders.index', ['status' => 'PENDING_WAIVER']));
+        $response->assertStatus(200);
+        $response->assertDontSee('#' . str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#' . str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#' . str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#' . str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
+
+        // Filter by DONE
+        $response = $this->actingAs($user)->get(route('fuel-orders.index', ['status' => 'DONE']));
+        $response->assertStatus(200);
+        $response->assertDontSee('#' . str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#' . str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#' . str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#' . str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
+
+        // Filter by VOID
+        $response = $this->actingAs($user)->get(route('fuel-orders.index', ['status' => 'VOID']));
+        $response->assertStatus(200);
+        $response->assertDontSee('#' . str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#' . str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#' . str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#' . str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
+    }
 }

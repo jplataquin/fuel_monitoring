@@ -40,7 +40,14 @@ class FuelOrderController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            if ($request->status === 'PENDING_WAIVER') {
+                $query->where('is_waiver_pending', true);
+            } elseif ($request->status === 'PEND') {
+                $query->where('status', 'PEND')
+                    ->where('is_waiver_pending', false);
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
         if ($request->filled('chargeable_account_id')) {
