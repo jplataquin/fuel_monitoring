@@ -132,7 +132,7 @@
                                         
                                     
                                         @if($utilizationEntry->chargeableAccount->status != 'ACTIVE' || $utilizationEntry->chargeableAccount->deleted_at != null)
-
+                                        <!--
                                              <option value="{{ $utilizationEntry->chargeableAccount->id }}" 
 
                                                     data-classification="{{ $utilizationEntry->chargeableAccount->classification }}"
@@ -146,7 +146,7 @@
                                                     ({{ $utilizationEntry->chargeableAccount->start_date ? $utilizationEntry->chargeableAccount->start_date->format('M d, Y') : 'N/A' }} - {{ $utilizationEntry->chargeableAccount->end_date ? $utilizationEntry->chargeableAccount->end_date->format('M d, Y') : 'N/A' }})
                                                 @endif
                                             </option>
-
+                                        -->
                                          @endif
 
                                         @foreach($chargeableAccounts as $account)
