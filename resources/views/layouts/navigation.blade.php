@@ -20,7 +20,19 @@
                     <a class="nav-link {{ request()->routeIs('assets.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('assets.index') }}">{{ __('Fleet') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('fuel-orders.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('fuel-orders.index') }}">{{ __('Fuel Orders') }}</a>
+                    <a class="nav-link {{ request()->routeIs('fuel-orders.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('fuel-orders.index') }}">
+                        {{ __('Fuel Orders') }}
+                        @php
+                            $pendingCount = \App\Models\FuelOrder::where(function($q) {
+                                $q->where('status', 'PEND')->orWhere('is_waiver_pending', true);
+                            })->count();
+                        @endphp
+                        @if($pendingCount > 0)
+                            <span class="badge rounded-pill bg-danger ms-1 align-middle font-monospace" style="font-size: 0.7rem; padding: 0.25em 0.55em;">
+                                {{ $pendingCount > 99 ? '99+' : $pendingCount }}
+                            </span>
+                        @endif
+                    </a>
                 </li>
 
                 <!-- Reports Dropdown -->
