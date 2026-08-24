@@ -263,6 +263,11 @@
                         indexAxis: 'y', // Makes the bar chart horizontal!
                         responsive: true,
                         maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                            axis: 'y'
+                        },
                         plugins: {
                             legend: {
                                 display: true,
@@ -273,6 +278,7 @@
                             tooltip: {
                                 mode: 'index',
                                 intersect: false,
+                                axis: 'y',
                                 callbacks: {
                                     label: function(context) {
                                         const idx = context.dataIndex;
