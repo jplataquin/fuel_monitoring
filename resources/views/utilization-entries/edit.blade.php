@@ -130,6 +130,25 @@
                                     <select id="chargeable_account_id" name="chargeable_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 py-2 px-3 rounded-3" required onchange="fetchSubAccounts(this.value)">
                                         <option value="">-- Select Account --</option>
                                         
+                                    
+                                        @if($utilizationEntry->chargeableAccount->status != 'ACTIVE' || $utilizationEntry->chargeableAccount->deleted_at != null)
+
+                                             <option value="{{ $utilizationEntry->chargeableAccount->id }}" 
+
+                                                    data-classification="{{ $utilizationEntry->chargeableAccount->classification }}"
+                                                    data-start-date="{{ $utilizationEntry->chargeableAccount->start_date ? $utilizationEntry->chargeableAccount->start_date->format('Y-m-d') : '' }}"
+                                                    data-end-date="{{ $utilizationEntry->chargeableAccount->end_date ? $utilizationEntry->chargeableAccount->end_date->format('Y-m-d') : '' }}"
+                                                    {{ old('chargeable_account_id', $utilizationEntry->chargeable_account_id) == $utilizationEntry->chargeableAccount->id ? 'selected' : '' }}
+                                                    
+                                                >
+                                                {{ $utilizationEntry->chargeableAccount->name }}
+                                                @if($utilizationEntry->chargeableAccount->classification === 'Scoped')
+                                                    ({{ $utilizationEntry->chargeableAccount->start_date ? $utilizationEntry->chargeableAccount->start_date->format('M d, Y') : 'N/A' }} - {{ $utilizationEntry->chargeableAccount->end_date ? $utilizationEntry->chargeableAccount->end_date->format('M d, Y') : 'N/A' }})
+                                                @endif
+                                            </option>
+
+                                         @endif
+
                                         @foreach($chargeableAccounts as $account)
                                             <option value="{{ $account->id }}" 
 
