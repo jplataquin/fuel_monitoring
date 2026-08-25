@@ -48,8 +48,8 @@ class UtilizationEntryController extends Controller
             $query->withTrashed();
         }
 
-        // Get total calculated fuel across all matched entries (before pagination)
-        $totalCalculatedFuel = $query->get()->sum('calculated_quantity');
+        // Get total calculated fuel across all matched entries (excluding soft-deleted ones)
+        $totalCalculatedFuel = $query->get()->filter(fn($entry) => !$entry->trashed())->sum('calculated_quantity');
 
         $utilizationEntries = $query->latest('date')->latest('start_time')->paginate(10)->withQueryString();
 
@@ -94,7 +94,7 @@ class UtilizationEntryController extends Controller
 
         $utilizationEntries = $query->latest('date')->latest('start_time')->get();
 
-        $totalCalculatedFuel = $utilizationEntries->sum('calculated_quantity');
+        $totalCalculatedFuel = $utilizationEntries->filter(fn($entry) => !$entry->trashed())->sum('calculated_quantity');
 
         $chargeableAccount = $request->filled('chargeable_account_id') ? ChargeableAccount::find($request->chargeable_account_id) : null;
         $subAccount = $request->filled('sub_account_id') ? SubAccount::find($request->sub_account_id) : null;

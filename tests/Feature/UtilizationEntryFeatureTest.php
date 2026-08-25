@@ -906,4 +906,63 @@ class UtilizationEntryFeatureTest extends TestCase
         $responseShow->assertSee('Deleted Operator');
         $responseShow->assertSee('Deleted'); // Header badge
     }
+
+    public function test_total_calculated_fuel_excludes_soft_deleted_utilization_entries(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+
+        $account = ChargeableAccount::create([
+            'name' => 'Active Account',
+            'status' => 'Active',
+        ]);
+
+        $sub = $account->subAccounts()->create([
+            'name' => 'Sub Active',
+        ]);
+
+        // Create active entry with 10.0 L calculated fuel
+        $activeEntry = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-11',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'Active Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'reference' => 'REF-ACTIVE',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Active run',
+            'fuel_factor_hr' => 5.0, // 2 hours * 5.0 = 10.0 L
+        ]);
+
+        // Create a soft-deleted entry with 15.0 L calculated fuel
+        $deletedEntry = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-12',
+            'start_time' => '08:00',
+            'end_time' => '11:00',
+            'driver_operator_name' => 'Deleted Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'reference' => 'REF-DELETED',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Deleted run',
+            'fuel_factor_hr' => 5.0, // 3 hours * 5.0 = 15.0 L
+        ]);
+        $deletedEntry->delete(); // Soft delete it
+
+        // Get index page with include_deleted=1
+        $response = $this->actingAs($this->admin)->get(route('utilization-entries.index', ['include_deleted' => '1']));
+        $response->assertStatus(200);
+
+        // Grand total should only sum active entry (10.00 L) and NOT deleted entry (10 + 15 = 25.00 L)
+        $response->assertSee('10.00 L');
+        $response->assertDontSee('25.00 L');
+
+        // Print page with include_deleted=1 should also only show 10.00 L
+        $responsePrint = $this->actingAs($this->admin)->get(route('utilization-entries.print', ['include_deleted' => '1']));
+        $responsePrint->assertStatus(200);
+        $responsePrint->assertSee('10.00 L');
+        $responsePrint->assertDontSee('25.00 L');
+    }
 }
