@@ -6,6 +6,11 @@
             </h2>
             <div class="d-flex align-items-center gap-3">
                 <form action="{{ route('utilization-entries.index') }}" method="GET" class="d-flex align-items-center gap-2">
+                    @foreach(request()->query() as $key => $value)
+                        @if(!in_array($key, ['chargeable_account_id', 'sub_account_id', 'asset_id', 'include_deleted', 'page']) && !is_array($value))
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endif
+                    @endforeach
                     <select name="chargeable_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 rounded-pill px-3 py-2 text-sm" style="width: 200px;" onchange="this.form.submit()">
                         <option value="">All Accounts</option>
                         @foreach($chargeableAccounts as $acc)
@@ -41,7 +46,7 @@
                     </div>
 
                     @if(request('chargeable_account_id') || request('sub_account_id') || request('asset_id') || request('include_deleted'))
-                        <a href="{{ route('utilization-entries.index') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 text-sm text-decoration-none">
+                        <a href="{{ route('utilization-entries.index', request()->except(['chargeable_account_id', 'sub_account_id', 'asset_id', 'include_deleted', 'page'])) }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 text-sm text-decoration-none">
                             Clear
                         </a>
                     @endif
