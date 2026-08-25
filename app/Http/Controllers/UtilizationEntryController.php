@@ -18,7 +18,8 @@ class UtilizationEntryController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = UtilizationEntry::with(['asset', 'chargeableAccount', 'subAccount', 'fuelOrder', 'creator']);
+        $query = UtilizationEntry::with(['asset', 'chargeableAccount', 'subAccount', 'fuelOrder', 'creator'])
+            ->whereNotNull('fuel_order_id');
 
         if ($request->filled('chargeable_account_id')) {
             $query->where('chargeable_account_id', $request->chargeable_account_id);
@@ -62,7 +63,8 @@ class UtilizationEntryController extends Controller
 
     public function print(Request $request): View
     {
-        $query = UtilizationEntry::with(['asset', 'chargeableAccount', 'subAccount', 'fuelOrder', 'creator']);
+        $query = UtilizationEntry::with(['asset', 'chargeableAccount', 'subAccount', 'fuelOrder', 'creator'])
+            ->whereNotNull('fuel_order_id');
 
         if ($request->filled('chargeable_account_id')) {
             $query->where('chargeable_account_id', $request->chargeable_account_id);

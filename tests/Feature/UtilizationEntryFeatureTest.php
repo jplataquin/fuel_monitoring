@@ -509,6 +509,22 @@ class UtilizationEntryFeatureTest extends TestCase
             'name' => 'Sub B',
         ]);
 
+        $fuelOrder1 = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account1->id,
+            'sub_account_id' => $subAccount1->id,
+            'calculated_quantity' => 10.0,
+            'status' => 'PEND',
+        ]);
+
+        $fuelOrder2 = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account2->id,
+            'sub_account_id' => $subAccount2->id,
+            'calculated_quantity' => 10.0,
+            'status' => 'PEND',
+        ]);
+
         // Entry for account 1 / sub 1
         $entry1 = UtilizationEntry::create([
             'asset_id' => $this->asset->id,
@@ -521,6 +537,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'reference' => 'REF-A',
             'calculation_type' => 'Timeframe',
             'particulars' => 'First run',
+            'fuel_order_id' => $fuelOrder1->id,
         ]);
 
         // Entry for account 2 / sub 2
@@ -535,6 +552,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'reference' => 'REF-B',
             'calculation_type' => 'Timeframe',
             'particulars' => 'Second run',
+            'fuel_order_id' => $fuelOrder2->id,
         ]);
 
         // Filter by account 1 and sub 1
@@ -568,6 +586,22 @@ class UtilizationEntryFeatureTest extends TestCase
             'tank_capacity' => 150,
         ]);
 
+        $fuelOrder1 = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'calculated_quantity' => 10.0,
+            'status' => 'PEND',
+        ]);
+
+        $fuelOrder2 = FuelOrder::create([
+            'asset_id' => $asset2->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'calculated_quantity' => 6.0,
+            'status' => 'PEND',
+        ]);
+
         // Entry 1 for this->asset
         $entry1 = UtilizationEntry::create([
             'asset_id' => $this->asset->id,
@@ -582,6 +616,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'particulars' => 'First run',
             'fuel_factor_hr' => $this->asset->fuel_factor_hr,
             'fuel_factor_km' => $this->asset->fuel_factor_km,
+            'fuel_order_id' => $fuelOrder1->id,
         ]);
 
         // Entry 2 for asset2
@@ -598,6 +633,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'particulars' => 'Second run',
             'fuel_factor_hr' => $asset2->fuel_factor_hr,
             'fuel_factor_km' => $asset2->fuel_factor_km,
+            'fuel_order_id' => $fuelOrder2->id,
         ]);
 
         // Filter by asset 2
@@ -625,6 +661,14 @@ class UtilizationEntryFeatureTest extends TestCase
             'name' => 'Print Sub',
         ]);
 
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'calculated_quantity' => 3.0,
+            'status' => 'PEND',
+        ]);
+
         // Entry for this->asset
         $entry = UtilizationEntry::create([
             'asset_id' => $this->asset->id,
@@ -639,6 +683,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'particulars' => 'Print run',
             'fuel_factor_hr' => $this->asset->fuel_factor_hr,
             'fuel_factor_km' => $this->asset->fuel_factor_km,
+            'fuel_order_id' => $fuelOrder->id,
         ]);
 
         $response = $this->actingAs($this->admin)->get(route('utilization-entries.print', [
@@ -751,8 +796,8 @@ class UtilizationEntryFeatureTest extends TestCase
         $response->assertSee(route('fuel-orders.show', $fuelOrder->id));
         $response->assertSee($expectedOrderNum);
 
-        // Assert that the entry without order displays an em dash / dash
-        $response->assertSee('—');
+        // Assert that the entry without order is not included in the list
+        $response->assertDontSee('Jane Operator');
     }
 
     public function test_utilization_entry_can_be_deleted_if_not_assigned_to_fuel_order(): void
@@ -851,6 +896,22 @@ class UtilizationEntryFeatureTest extends TestCase
             'name' => 'Sub Active',
         ]);
 
+        $fuelOrder1 = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'calculated_quantity' => 10.0,
+            'status' => 'PEND',
+        ]);
+
+        $fuelOrder2 = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'calculated_quantity' => 10.0,
+            'status' => 'PEND',
+        ]);
+
         // Create an active entry
         $activeEntry = UtilizationEntry::create([
             'asset_id' => $this->asset->id,
@@ -863,6 +924,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'reference' => 'REF-ACTIVE',
             'calculation_type' => 'Timeframe',
             'particulars' => 'Active run',
+            'fuel_order_id' => $fuelOrder1->id,
         ]);
 
         // Create a deleted entry
@@ -877,6 +939,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'reference' => 'REF-DELETED',
             'calculation_type' => 'Timeframe',
             'particulars' => 'Deleted run',
+            'fuel_order_id' => $fuelOrder2->id,
         ]);
         $deletedEntry->delete(); // Soft delete it
 
@@ -920,6 +983,22 @@ class UtilizationEntryFeatureTest extends TestCase
             'name' => 'Sub Active',
         ]);
 
+        $fuelOrder1 = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'calculated_quantity' => 10.0,
+            'status' => 'PEND',
+        ]);
+
+        $fuelOrder2 = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'calculated_quantity' => 15.0,
+            'status' => 'PEND',
+        ]);
+
         // Create active entry with 10.0 L calculated fuel
         $activeEntry = UtilizationEntry::create([
             'asset_id' => $this->asset->id,
@@ -933,6 +1012,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'calculation_type' => 'Timeframe',
             'particulars' => 'Active run',
             'fuel_factor_hr' => 5.0, // 2 hours * 5.0 = 10.0 L
+            'fuel_order_id' => $fuelOrder1->id,
         ]);
 
         // Create a soft-deleted entry with 15.0 L calculated fuel
@@ -948,6 +1028,7 @@ class UtilizationEntryFeatureTest extends TestCase
             'calculation_type' => 'Timeframe',
             'particulars' => 'Deleted run',
             'fuel_factor_hr' => 5.0, // 3 hours * 5.0 = 15.0 L
+            'fuel_order_id' => $fuelOrder2->id,
         ]);
         $deletedEntry->delete(); // Soft delete it
 
