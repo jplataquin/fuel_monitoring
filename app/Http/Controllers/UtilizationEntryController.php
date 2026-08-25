@@ -44,6 +44,10 @@ class UtilizationEntryController extends Controller
             $query->where('unbudgeted', $request->boolean('unbudgeted'));
         }
 
+        if ($request->boolean('include_deleted')) {
+            $query->withTrashed();
+        }
+
         // Get total calculated fuel across all matched entries (before pagination)
         $totalCalculatedFuel = $query->get()->sum('calculated_quantity');
 
@@ -82,6 +86,10 @@ class UtilizationEntryController extends Controller
 
         if ($request->filled('unbudgeted')) {
             $query->where('unbudgeted', $request->boolean('unbudgeted'));
+        }
+
+        if ($request->boolean('include_deleted')) {
+            $query->withTrashed();
         }
 
         $utilizationEntries = $query->latest('date')->latest('start_time')->get();
@@ -481,6 +489,11 @@ class UtilizationEntryController extends Controller
         if (! in_array(Auth::user()->role, ['administrator', 'moderator'])) {
             abort(403);
         }
+
+        if ($utilizationEntry->fuel_order_id !== null) {
+            return redirect()->back()->with('error', 'Cannot delete utilization entry because it is already assigned to a fuel order.');
+        }
+
         $utilizationEntry->update(['deleted_by' => Auth::id()]);
         $utilizationEntry->delete();
 

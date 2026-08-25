@@ -49,7 +49,7 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
 
     // Utilization Entries
     Route::get('utilization-entries/print', [UtilizationEntryController::class, 'print'])->name('utilization-entries.print');
-    Route::resource('utilization-entries', UtilizationEntryController::class)->except(['create']);
+    Route::resource('utilization-entries', UtilizationEntryController::class)->except(['create'])->withTrashed();
 
     // Fuel Orders
     Route::resource('fuel-orders', FuelOrderController::class)->except(['destroy']);

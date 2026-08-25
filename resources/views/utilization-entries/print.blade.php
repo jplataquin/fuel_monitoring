@@ -66,9 +66,12 @@
                     </thead>
                     <tbody>
                         @forelse($utilizationEntries as $entry)
-                            <tr>
+                            <tr class="@if($entry->trashed()) table-danger opacity-75 @endif">
                                 <td class="align-middle">
                                     {{ $entry->date->format('M d, Y') }}
+                                    @if($entry->trashed())
+                                        <span class="badge bg-danger text-white rounded-pill ms-1" style="font-size: 7px; padding: 1px 4px;">DELETED</span>
+                                    @endif
                                     @if($entry->start_time && $entry->end_time)
                                         <span class="d-block text-secondary" style="font-size: 7px;">{{ $entry->start_time->format('H:i') }} - {{ $entry->end_time->format('H:i') }}</span>
                                     @endif

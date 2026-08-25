@@ -754,4 +754,156 @@ class UtilizationEntryFeatureTest extends TestCase
         // Assert that the entry without order displays an em dash / dash
         $response->assertSee('—');
     }
+
+    public function test_utilization_entry_can_be_deleted_if_not_assigned_to_fuel_order(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+
+        $account = ChargeableAccount::create([
+            'name' => 'Active Account',
+            'status' => 'Active',
+        ]);
+
+        $sub = $account->subAccounts()->create([
+            'name' => 'Sub Active',
+        ]);
+
+        $entry = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-11',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'Jane Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'reference' => 'REF-456',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Night run',
+        ]);
+
+        $response = $this->actingAs($this->admin)->delete(route('utilization-entries.destroy', $entry));
+        $response->assertRedirect(route('assets.show', $entry->asset_id));
+        $response->assertSessionHas('status', 'Utilization entry deleted successfully.');
+
+        $this->assertSoftDeleted('utilization_entries', ['id' => $entry->id]);
+    }
+
+    public function test_utilization_entry_cannot_be_deleted_if_assigned_to_fuel_order(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+
+        $account = ChargeableAccount::create([
+            'name' => 'Active Account',
+            'status' => 'Active',
+        ]);
+
+        $sub = $account->subAccounts()->create([
+            'name' => 'Sub Active',
+        ]);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'calculated_quantity' => 10.0,
+            'status' => 'PEND',
+        ]);
+
+        $entry = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-10',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'reference' => 'REF-123',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Daily run',
+            'fuel_order_id' => $fuelOrder->id,
+        ]);
+
+        // Mock being on the utilization entry show page so redirect()->back() works
+        $response = $this->actingAs($this->admin)
+            ->from(route('utilization-entries.show', $entry))
+            ->delete(route('utilization-entries.destroy', $entry));
+
+        $response->assertRedirect(route('utilization-entries.show', $entry));
+        $response->assertSessionHas('error', 'Cannot delete utilization entry because it is already assigned to a fuel order.');
+
+        // Assert it is still in the database (not deleted)
+        $this->assertDatabaseHas('utilization_entries', [
+            'id' => $entry->id,
+            'deleted_at' => null,
+        ]);
+    }
+
+    public function test_utilization_entries_index_can_toggle_soft_deleted_entries(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+
+        $account = ChargeableAccount::create([
+            'name' => 'Active Account',
+            'status' => 'Active',
+        ]);
+
+        $sub = $account->subAccounts()->create([
+            'name' => 'Sub Active',
+        ]);
+
+        // Create an active entry
+        $activeEntry = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-11',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'Active Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'reference' => 'REF-ACTIVE',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Active run',
+        ]);
+
+        // Create a deleted entry
+        $deletedEntry = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-12',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'Deleted Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'reference' => 'REF-DELETED',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Deleted run',
+        ]);
+        $deletedEntry->delete(); // Soft delete it
+
+        // 1. By default, deleted entry should NOT be shown
+        $response = $this->actingAs($this->admin)->get(route('utilization-entries.index'));
+        $response->assertStatus(200);
+        $response->assertSee('Active Operator');
+        $response->assertDontSee('Deleted Operator');
+
+        // 2. With include_deleted=1, both active and deleted should be shown
+        $responseWithDeleted = $this->actingAs($this->admin)->get(route('utilization-entries.index', ['include_deleted' => '1']));
+        $responseWithDeleted->assertStatus(200);
+        $responseWithDeleted->assertSee('Active Operator');
+        $responseWithDeleted->assertSee('Deleted Operator');
+        $responseWithDeleted->assertSee('Deleted'); // Soft deleted badge is visible
+
+        // 3. Print list with include_deleted=1
+        $responsePrint = $this->actingAs($this->admin)->get(route('utilization-entries.print', ['include_deleted' => '1']));
+        $responsePrint->assertStatus(200);
+        $responsePrint->assertSee('Active Operator');
+        $responsePrint->assertSee('Deleted Operator');
+        $responsePrint->assertSee('DELETED');
+
+        // 4. View soft deleted entry directly
+        $responseShow = $this->actingAs($this->admin)->get(route('utilization-entries.show', $deletedEntry));
+        $responseShow->assertStatus(200);
+        $responseShow->assertSee('Deleted Operator');
+        $responseShow->assertSee('Deleted'); // Header badge
+    }
 }

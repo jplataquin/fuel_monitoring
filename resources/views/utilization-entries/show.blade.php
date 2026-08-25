@@ -1,11 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center">
-            <h2 class="h2 fw-bold text-light mb-0">
+            <h2 class="h2 fw-bold text-light mb-0 d-flex align-items-center gap-2">
                 {{ __('Entry Summary') }}
+                @if($utilizationEntry->trashed())
+                    <span class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-20 rounded-pill" style="font-size: 11px; padding: 4px 10px;">Deleted</span>
+                @endif
             </h2>
             <div class="d-flex align-items-center gap-2">
-                @if(in_array(Auth::user()->role, ['administrator', 'moderator']))
+                @if(in_array(Auth::user()->role, ['administrator', 'moderator']) && !$utilizationEntry->trashed())
                     <form action="{{ route('utilization-entries.destroy', $utilizationEntry) }}" method="POST" class="d-inline">
                         @csrf
                         @method('DELETE')
@@ -16,8 +19,8 @@
                 @endif
                 
                 @php
-                    $canEdit = in_array(Auth::user()->role, ['administrator', 'moderator']) || 
-                               (Auth::user()->role === 'data_logger' && $utilizationEntry->created_at->diffInMinutes(now()) <= 5);
+                    $canEdit = (in_array(Auth::user()->role, ['administrator', 'moderator']) || 
+                               (Auth::user()->role === 'data_logger' && $utilizationEntry->created_at->diffInMinutes(now()) <= 5)) && !$utilizationEntry->trashed();
                 @endphp
 
                 @if($canEdit)
@@ -35,6 +38,24 @@
 
     <div class="py-5">
         <div class="container-xl">
+            @if (session('status'))
+                <div class="alert alert-success bg-success bg-opacity-10 border-success border-opacity-20 text-success d-flex align-items-center mb-4 rounded-3" role="alert">
+                    <svg class="me-2" width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <div class="fw-bold small">{{ session('status') }}</div>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-20 text-danger d-flex align-items-center mb-4 rounded-3" role="alert">
+                    <svg class="me-2" width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                    <div class="fw-bold small">{{ session('error') }}</div>
+                </div>
+            @endif
+
             <div class="card bg-dark border-secondary border-opacity-25 rounded-4 shadow-lg overflow-hidden">
                 <div class="card-body p-4 p-md-5">
                     <div class="row g-5">

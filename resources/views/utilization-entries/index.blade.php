@@ -35,7 +35,12 @@
                         @endforeach
                     </select>
 
-                    @if(request('chargeable_account_id') || request('sub_account_id') || request('asset_id'))
+                    <div class="form-check form-switch text-secondary d-flex align-items-center gap-2 mb-0 px-3 py-2 rounded-pill bg-dark border border-secondary border-opacity-50" style="height: 38px;">
+                        <input class="form-check-input ms-0" type="checkbox" name="include_deleted" id="include_deleted" value="1" {{ request('include_deleted') ? 'checked' : '' }} onchange="this.form.submit()" style="cursor: pointer;">
+                        <label class="form-check-label text-light text-sm mb-0" for="include_deleted" style="font-size: 12px; cursor: pointer; white-space: nowrap;">Include Deleted</label>
+                    </div>
+
+                    @if(request('chargeable_account_id') || request('sub_account_id') || request('asset_id') || request('include_deleted'))
                         <a href="{{ route('utilization-entries.index') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 text-sm text-decoration-none">
                             Clear
                         </a>
@@ -98,9 +103,14 @@
                         </thead>
                         <tbody>
                             @forelse($utilizationEntries as $entry)
-                                <tr onclick="window.location='{{ route('utilization-entries.show', $entry) }}'" style="cursor: pointer;">
+                                <tr onclick="window.location='{{ route('utilization-entries.show', $entry) }}'" style="cursor: pointer;" class="{{ $entry->trashed() ? 'opacity-50' : '' }}">
                                     <td class="ps-4 py-3">
-                                        <div class="fw-bold text-light small">{{ $entry->date->format('M d, Y') }}</div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="fw-bold text-light small">{{ $entry->date->format('M d, Y') }}</div>
+                                            @if($entry->trashed())
+                                                <span class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-20 rounded-pill" style="font-size: 9px; padding: 2px 6px;">Deleted</span>
+                                            @endif
+                                        </div>
                                         <div class="text-secondary small" style="font-size: 11px;">
                                             @if($entry->start_time && $entry->end_time)
                                                 {{ $entry->start_time->format('H:i') }} - {{ $entry->end_time->format('H:i') }}
