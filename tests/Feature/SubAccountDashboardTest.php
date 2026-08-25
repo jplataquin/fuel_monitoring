@@ -409,6 +409,114 @@ class SubAccountDashboardTest extends TestCase
             'sub_account_id' => $subAccount->id,
         ]);
 
-        $response->assertSee("window.open('" . e($expectedUrl) . "', '_blank')", false);
+        $response->assertSee("window.open('".e($expectedUrl)."', '_blank')", false);
+    }
+
+    public function test_dashboard_calculations_exclude_soft_deleted_and_unassigned_utilization_entries(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Calc Test Account',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Calc Sub',
+        ]);
+
+        // Allocate budget of 100 L
+        SubAccountBudget::create([
+            'sub_account_id' => $subAccount->id,
+            'budget_quantity' => 100.0,
+            'status' => 'Approved',
+            'created_by' => $this->admin->id,
+        ]);
+
+        // Create Fuel Order
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'calculated_quantity' => 20.0,
+            'actual_quantity' => 20.0,
+            'status' => 'DONE',
+            'created_by' => $this->admin->id,
+        ]);
+
+        // 1. Create a valid (not-deleted, assigned to fuel order) utilization entry: 10.0 L
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-11',
+            'start_time' => '08:00',
+            'end_time' => '13:00', // 5 hours * 2 = 10.0 L
+            'driver_operator_name' => 'Valid Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-VALID',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Valid run',
+            'fuel_order_id' => $fuelOrder->id,
+            'fuel_factor_hr' => 2.0,
+        ]);
+
+        // 2. Create a soft-deleted entry assigned to the fuel order: 30.0 L
+        $deletedEntry = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-12',
+            'start_time' => '08:00',
+            'end_time' => '23:00', // 15 hours * 2 = 30.0 L
+            'driver_operator_name' => 'Deleted Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-DELETED',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Deleted run',
+            'fuel_order_id' => $fuelOrder->id,
+            'fuel_factor_hr' => 2.0,
+        ]);
+        $deletedEntry->delete(); // Soft delete it
+
+        // 3. Create an unassigned entry (not deleted, but fuel_order_id is null): 50.0 L
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-13',
+            'start_time' => '08:00',
+            'end_time' => '23:00', // 25 hours * 2 = 50.0 L
+            'driver_operator_name' => 'Unassigned Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-UNASSIGNED',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Unassigned run',
+            'fuel_order_id' => null, // No fuel order
+            'fuel_factor_hr' => 2.0,
+        ]);
+
+        // Access main budget dashboard
+        $response = $this->actingAs($this->admin)->get(route('dashboard'));
+        $response->assertStatus(200);
+
+        // The calculated/consumed fuel should ONLY count the valid entry (10.0 L).
+        // Since there is only 1 valid entry with calculated quantity of 10.0 L on the DONE order,
+        // total calculated fuel must be 10.0 L, and budgeted fuel must be 10.0 L.
+        // It must NOT include the soft-deleted 30.0 L or unassigned 50.0 L.
+        $chartData = $response->viewData('chartData');
+        $this->assertNotEmpty($chartData);
+        $summary = collect($chartData)->firstWhere('name', 'Calc Test Account');
+        $this->assertNotNull($summary);
+        $this->assertEquals(10.0, $summary['total_calculated_fuel']);
+        $this->assertEquals(10.0, $summary['budgeted_fuel']);
+
+        // Access sub-account dashboard
+        $subResponse = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account));
+        $subResponse->assertStatus(200);
+
+        // Sub-account dashboard consumed should be 10.0 L, remaining should be 90.0 L (100 - 10)
+        $subAccountData = $subResponse->viewData('subAccountData');
+        $subSummary = collect($subAccountData)->firstWhere('name', 'Calc Sub');
+        $this->assertNotNull($subSummary);
+        $this->assertEquals(10.0, $subSummary['consumed']);
+        $this->assertEquals(90.0, $subSummary['remaining']);
     }
 }

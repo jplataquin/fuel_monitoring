@@ -37,6 +37,10 @@ trait DashboardDataTrait
             $orderActualQty = $order->actual_quantity;
 
             foreach ($order->utilizationEntries as $entry) {
+                if ($entry->trashed() || $entry->fuel_order_id === null) {
+                    continue;
+                }
+
                 $calcType = strtolower($entry->calculation_type ?? '');
                 $qty = 0;
 
@@ -62,6 +66,10 @@ trait DashboardDataTrait
             }
 
             foreach ($order->utilizationEntries as $entry) {
+                if ($entry->trashed() || $entry->fuel_order_id === null) {
+                    continue;
+                }
+
                 if ($accountId && $entry->chargeable_account_id != $accountId) {
                     continue;
                 }
@@ -258,6 +266,10 @@ trait DashboardDataTrait
 
             // Calculate total calculated qty for the entire order
             foreach ($order->utilizationEntries as $entry) {
+                if ($entry->trashed() || $entry->fuel_order_id === null) {
+                    continue;
+                }
+
                 $calcType = strtolower($entry->calculation_type ?? '');
                 $qty = 0;
 
@@ -284,6 +296,10 @@ trait DashboardDataTrait
 
             // Accumulate calculated qty per sub-account
             foreach ($order->utilizationEntries as $entry) {
+                if ($entry->trashed() || $entry->fuel_order_id === null) {
+                    continue;
+                }
+
                 if ($entry->chargeable_account_id != $chargeableAccount->id || ! $entry->sub_account_id) {
                     continue;
                 }

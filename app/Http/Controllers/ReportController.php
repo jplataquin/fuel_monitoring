@@ -225,6 +225,10 @@ class ReportController extends Controller
             $orderActualQty = $order->actual_quantity;
 
             foreach ($order->utilizationEntries as $entry) {
+                if ($entry->trashed() || $entry->fuel_order_id === null) {
+                    continue;
+                }
+
                 // ... existing calc logic ...
                 $calcType = strtolower($entry->calculation_type ?? '');
                 $qty = 0;
@@ -251,6 +255,10 @@ class ReportController extends Controller
             }
 
             foreach ($order->utilizationEntries as $entry) {
+                if ($entry->trashed() || $entry->fuel_order_id === null) {
+                    continue;
+                }
+
                 if ($accountId && $entry->chargeable_account_id != $accountId) {
                     continue;
                 }
