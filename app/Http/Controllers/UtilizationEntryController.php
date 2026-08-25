@@ -276,6 +276,10 @@ class UtilizationEntryController extends Controller
             abort(403, 'You are not authorized to edit this record or the 5-minute window has expired.');
         }
 
+        if ($utilizationEntry->fuelOrder && $utilizationEntry->fuelOrder->status === 'DONE') {
+            abort(403, 'Cannot edit utilization entry because its assigned fuel order has been completed.');
+        }
+
         $chargeableAccounts = ChargeableAccount::where('status', 'Active')->orderBy('name', 'asc')->get();
 
         return view('utilization-entries.edit', compact('utilizationEntry', 'chargeableAccounts'));
@@ -289,6 +293,10 @@ class UtilizationEntryController extends Controller
 
         if (! $isAuthorized) {
             abort(403, 'You are not authorized to edit this record or the 5-minute window has expired.');
+        }
+
+        if ($utilizationEntry->fuelOrder && $utilizationEntry->fuelOrder->status === 'DONE') {
+            abort(403, 'Cannot edit utilization entry because its assigned fuel order has been completed.');
         }
 
         $asset = $utilizationEntry->asset;

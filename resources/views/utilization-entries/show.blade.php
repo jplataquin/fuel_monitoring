@@ -20,7 +20,9 @@
                 
                 @php
                     $canEdit = (in_array(Auth::user()->role, ['administrator', 'moderator']) || 
-                               (Auth::user()->role === 'data_logger' && $utilizationEntry->created_at->diffInMinutes(now()) <= 5)) && !$utilizationEntry->trashed();
+                               (Auth::user()->role === 'data_logger' && $utilizationEntry->created_at->diffInMinutes(now()) <= 5)) 
+                               && !$utilizationEntry->trashed()
+                               && !($utilizationEntry->fuelOrder && $utilizationEntry->fuelOrder->status === 'DONE');
                 @endphp
 
                 @if($canEdit)

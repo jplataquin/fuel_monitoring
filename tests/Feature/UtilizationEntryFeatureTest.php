@@ -1089,4 +1089,55 @@ class UtilizationEntryFeatureTest extends TestCase
         // Assert status badge 'PEND' is visible
         $response->assertSee('PEND');
     }
+
+    public function test_utilization_entry_cannot_be_edited_if_assigned_fuel_order_is_done(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+
+        $account = ChargeableAccount::create([
+            'name' => 'Active Account',
+            'status' => 'Active',
+        ]);
+
+        $sub = $account->subAccounts()->create([
+            'name' => 'Sub Active',
+        ]);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'calculated_quantity' => 10.0,
+            'status' => 'DONE',
+        ]);
+
+        $entry = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-10',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'reference' => 'REF-123',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Daily run',
+            'fuel_order_id' => $fuelOrder->id,
+        ]);
+
+        // 1. Try to open the edit page (GET request) -> Should be 403
+        $responseEdit = $this->actingAs($this->admin)->get(route('utilization-entries.edit', $entry));
+        $responseEdit->assertStatus(403);
+
+        // 2. Try to send an update (PATCH request) -> Should be 403
+        $responseUpdate = $this->actingAs($this->admin)->patch(route('utilization-entries.update', $entry), [
+            'driver_operator_name' => 'Attempted Edit Operator',
+        ]);
+        $responseUpdate->assertStatus(403);
+
+        // 3. View detail summary -> Edit icon should NOT be visible
+        $responseShow = $this->actingAs($this->admin)->get(route('utilization-entries.show', $entry));
+        $responseShow->assertStatus(200);
+        $responseShow->assertDontSee('bi-pencil-square');
+    }
 }
