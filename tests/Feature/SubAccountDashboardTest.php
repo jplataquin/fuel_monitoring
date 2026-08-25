@@ -407,6 +407,7 @@ class SubAccountDashboardTest extends TestCase
         $expectedUrl = route('utilization-entries.index', [
             'chargeable_account_id' => $account->id,
             'sub_account_id' => $subAccount->id,
+            'fuel_order_status' => 'DONE',
         ]);
 
         $response->assertSee("window.open('".e($expectedUrl)."', '_blank')", false);

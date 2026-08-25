@@ -41,6 +41,12 @@ class UtilizationEntryController extends Controller
             $query->where('fuel_order_id', $request->fuel_order_id);
         }
 
+        if ($request->filled('fuel_order_status')) {
+            $query->whereHas('fuelOrder', function ($q) use ($request) {
+                $q->where('status', $request->fuel_order_status);
+            });
+        }
+
         if ($request->filled('unbudgeted')) {
             $query->where('unbudgeted', $request->boolean('unbudgeted'));
         }
@@ -84,6 +90,12 @@ class UtilizationEntryController extends Controller
 
         if ($request->filled('fuel_order_id')) {
             $query->where('fuel_order_id', $request->fuel_order_id);
+        }
+
+        if ($request->filled('fuel_order_status')) {
+            $query->whereHas('fuelOrder', function ($q) use ($request) {
+                $q->where('status', $request->fuel_order_status);
+            });
         }
 
         if ($request->filled('unbudgeted')) {
