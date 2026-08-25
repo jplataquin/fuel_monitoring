@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Asset;
 use App\Models\AssetType;
 use App\Models\ChargeableAccount;
+use App\Models\FuelOrder;
 use App\Models\SubAccount;
 use App\Models\User;
 use App\Models\UtilizationEntry;
@@ -683,10 +684,74 @@ class UtilizationEntryFeatureTest extends TestCase
         $response->assertStatus(200);
 
         // Assert that Charged To is selected on Active Account
-        $response->assertSee('value="' . $account->id . '"', false);
+        $response->assertSee('value="'.$account->id.'"', false);
         $response->assertSee('selected', false);
 
         // Assert that Sub Account is rendered with Sub Active selected
-        $response->assertSee('value="' . $sub->id . '"', false);
+        $response->assertSee('value="'.$sub->id.'"', false);
+    }
+
+    public function test_utilization_entries_index_shows_order_number_column(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Active Account',
+            'status' => 'Active',
+        ]);
+
+        $sub = $account->subAccounts()->create([
+            'name' => 'Sub Active',
+        ]);
+
+        // 1. Create a fuel order
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'calculated_quantity' => 10.0,
+            'status' => 'PEND',
+        ]);
+
+        // 2. Create utilization entry with fuel order
+        $entryWithOrder = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-10',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'reference' => 'REF-123',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Daily run',
+            'fuel_order_id' => $fuelOrder->id,
+        ]);
+
+        // 3. Create utilization entry without fuel order
+        $entryWithoutOrder = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-11',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'Jane Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'reference' => 'REF-456',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Night run',
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('utilization-entries.index'));
+        $response->assertStatus(200);
+
+        // Assert the column header exists
+        $response->assertSee('Order #');
+
+        // Assert the link to fuel order is present with correct padded format
+        $expectedOrderNum = '#'.str_pad($fuelOrder->id, 5, '0', STR_PAD_LEFT);
+        $response->assertSee(route('fuel-orders.show', $fuelOrder->id));
+        $response->assertSee($expectedOrderNum);
+
+        // Assert that the entry without order displays an em dash / dash
+        $response->assertSee('—');
     }
 }

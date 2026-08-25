@@ -92,6 +92,7 @@
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Calculation Type</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest text-end">Readings / Hours</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest text-end">Calculated Fuel</th>
+                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Order #</th>
                                 <th class="pe-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest text-end">Actions</th>
                             </tr>
                         </thead>
@@ -136,6 +137,15 @@
                                     <td class="px-4 py-3 text-end font-monospace small fw-bold text-info">
                                         {{ number_format($entry->calculated_quantity, 2) }} L
                                     </td>
+                                    <td class="px-4 py-3 small" onclick="event.stopPropagation()">
+                                        @if($entry->fuel_order_id)
+                                            <a href="{{ route('fuel-orders.show', $entry->fuel_order_id) }}" class="text-info fw-bold text-decoration-none hover-underline">
+                                                #{{ str_pad($entry->fuel_order_id, 5, '0', STR_PAD_LEFT) }}
+                                            </a>
+                                        @else
+                                            <span class="text-secondary">—</span>
+                                        @endif
+                                    </td>
                                     <td class="pe-4 py-3 text-end">
                                         <div class="d-flex justify-content-end gap-1" onclick="event.stopPropagation()">
                                             <a href="{{ route('utilization-entries.show', $entry) }}" class="btn btn-link text-primary p-2 rounded-circle hover-bg-light hover-bg-opacity-10" title="View Entry">
@@ -146,7 +156,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="px-4 py-5 text-center border-0">
+                                    <td colspan="8" class="px-4 py-5 text-center border-0">
                                         <div class="d-flex flex-column align-items-center justify-content-center py-5">
                                             <div class="bg-secondary bg-opacity-20 rounded-4 d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
                                                 <svg width="32" height="32" class="text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
