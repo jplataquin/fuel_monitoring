@@ -874,7 +874,7 @@ class UtilizationEntryFeatureTest extends TestCase
             ->delete(route('utilization-entries.destroy', $entry));
 
         $response->assertRedirect(route('utilization-entries.show', $entry));
-        $response->assertSessionHas('error', 'Cannot delete utilization entry because it is already assigned to a fuel order.');
+        $response->assertSessionHas('error', 'Cannot delete utilization entry because it is already assigned to an active or completed fuel order.');
 
         // Assert it is still in the database (not deleted)
         $this->assertDatabaseHas('utilization_entries', [
@@ -1045,5 +1045,48 @@ class UtilizationEntryFeatureTest extends TestCase
         $responsePrint->assertStatus(200);
         $responsePrint->assertSee('10.00 L');
         $responsePrint->assertDontSee('25.00 L');
+    }
+
+    public function test_utilization_entry_show_page_displays_fuel_order_status_badge(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Active Account',
+            'status' => 'Active',
+        ]);
+
+        $sub = $account->subAccounts()->create([
+            'name' => 'Sub Active',
+        ]);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'calculated_quantity' => 10.0,
+            'status' => 'PEND',
+        ]);
+
+        $entry = UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-10',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'driver_operator_name' => 'John Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'reference' => 'REF-123',
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Daily run',
+            'fuel_order_id' => $fuelOrder->id,
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('utilization-entries.show', $entry));
+        $response->assertStatus(200);
+
+        // Assert fuel order number link is visible
+        $response->assertSee(route('fuel-orders.show', $fuelOrder->id));
+
+        // Assert status badge 'PEND' is visible
+        $response->assertSee('PEND');
     }
 }

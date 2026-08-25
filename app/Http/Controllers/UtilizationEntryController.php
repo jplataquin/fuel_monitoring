@@ -56,7 +56,7 @@ class UtilizationEntryController extends Controller
         }
 
         // Get total calculated fuel across all matched entries (excluding soft-deleted ones)
-        $totalCalculatedFuel = $query->get()->filter(fn($entry) => !$entry->trashed())->sum('calculated_quantity');
+        $totalCalculatedFuel = $query->get()->filter(fn ($entry) => ! $entry->trashed())->sum('calculated_quantity');
 
         $utilizationEntries = $query->latest('date')->latest('start_time')->paginate(10)->withQueryString();
 
@@ -108,7 +108,7 @@ class UtilizationEntryController extends Controller
 
         $utilizationEntries = $query->latest('date')->latest('start_time')->get();
 
-        $totalCalculatedFuel = $utilizationEntries->filter(fn($entry) => !$entry->trashed())->sum('calculated_quantity');
+        $totalCalculatedFuel = $utilizationEntries->filter(fn ($entry) => ! $entry->trashed())->sum('calculated_quantity');
 
         $chargeableAccount = $request->filled('chargeable_account_id') ? ChargeableAccount::find($request->chargeable_account_id) : null;
         $subAccount = $request->filled('sub_account_id') ? SubAccount::find($request->sub_account_id) : null;
@@ -505,7 +505,7 @@ class UtilizationEntryController extends Controller
         }
 
         if ($utilizationEntry->fuel_order_id !== null) {
-            return redirect()->back()->with('error', 'Cannot delete utilization entry because it is already assigned to a fuel order.');
+            return redirect()->back()->with('error', 'Cannot delete utilization entry because it is already assigned to an active or completed fuel order.');
         }
 
         $utilizationEntry->update(['deleted_by' => Auth::id()]);

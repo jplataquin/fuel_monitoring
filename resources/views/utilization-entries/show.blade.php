@@ -212,10 +212,30 @@
 
                                 <div class="mb-4 pt-3 border-top border-secondary border-opacity-25">
                                     <p class="small fw-bold text-secondary text-uppercase tracking-widest mb-2">Fuel Order Reference</p>
-                                    @if($utilizationEntry->fuel_order_id)
-                                        <a href="{{ route('fuel-orders.show', $utilizationEntry->fuel_order_id) }}" class="btn btn-outline-primary btn-sm fw-bold tracking-widest">
-                                            #{{ $utilizationEntry->fuel_order_id }}
-                                        </a>
+                                    @if($utilizationEntry->fuel_order_id && $utilizationEntry->fuelOrder)
+                                        <div class="d-flex align-items-center gap-2">
+                                            <a href="{{ route('fuel-orders.show', $utilizationEntry->fuel_order_id) }}" class="btn btn-outline-primary btn-sm fw-bold tracking-widest">
+                                                #{{ $utilizationEntry->fuel_order_id }}
+                                            </a>
+                                            @php
+                                                $order = $utilizationEntry->fuelOrder;
+                                                if ($order->is_waiver_pending) {
+                                                    $statusClass = 'bg-danger text-danger bg-opacity-10 border border-danger border-opacity-20';
+                                                    $statusLabel = 'PENDING WAIVER';
+                                                } else {
+                                                    $statusClass = match($order->status) {
+                                                        'PEND' => 'bg-warning text-warning bg-opacity-10 border border-warning border-opacity-20',
+                                                        'DONE' => 'bg-success text-success bg-opacity-10 border border-success border-opacity-20',
+                                                        'VOID' => 'bg-danger text-danger bg-opacity-10 border border-danger border-opacity-20',
+                                                        default => 'bg-secondary text-secondary bg-opacity-10 border border-secondary border-opacity-20',
+                                                    };
+                                                    $statusLabel = $order->status;
+                                                }
+                                            @endphp
+                                            <span class="badge {{ $statusClass }} rounded-pill text-uppercase tracking-widest fw-bold px-3 py-1" style="font-size: 10px;">
+                                                {{ $statusLabel }}
+                                            </span>
+                                        </div>
                                     @else
                                         <span class="small text-secondary fw-bold text-uppercase tracking-widest fst-italic">No reference provided</span>
                                     @endif
