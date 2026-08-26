@@ -6,13 +6,16 @@ use App\Models\Asset;
 use App\Models\ChargeableAccount;
 use App\Models\SubAccount;
 use App\Models\UtilizationEntry;
+use App\Imports\UtilizationEntryImport;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UtilizationEntryController extends Controller
 {
@@ -576,5 +579,418 @@ class UtilizationEntryController extends Controller
         $entries = $query->get();
 
         return view('assets.print-logs', compact('asset', 'entries', 'request'));
+    }
+
+    public function bulkUpload(Asset $asset): View
+    {
+        return view('utilization-entries.bulk-upload', compact('asset'));
+    }
+
+    public function bulkPreview(Request $request, Asset $asset): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ]);
+
+        try {
+            $array = Excel::toArray(new UtilizationEntryImport, $request->file('file'));
+            $sheet = $array[0] ?? [];
+
+            if (empty($sheet)) {
+                return response()->json(['error' => 'The uploaded file is empty or invalid.'], 422);
+            }
+
+            if (count($sheet) > 50) {
+                return response()->json(['error' => 'Maximum allowable entries is 50 rows per bulk upload. The uploaded file has ' . count($sheet) . ' rows.'], 422);
+            }
+
+            $mappedRows = [];
+            foreach ($sheet as $rawRow) {
+                // Check if the row is entirely empty
+                $nonEmpty = array_filter($rawRow, fn($val) => $val !== null && $val !== '');
+                if (empty($nonEmpty)) {
+                    continue;
+                }
+                $mappedRows[] = $this->mapExcelRow($rawRow);
+            }
+
+            if (empty($mappedRows)) {
+                return response()->json(['error' => 'The uploaded file has no data rows.'], 422);
+            }
+
+            $validationResult = $this->validateBatchRows($asset, $mappedRows);
+
+            return response()->json([
+                'rows' => $validationResult['rows'],
+                'has_errors' => $validationResult['has_errors'],
+                'total_rows' => count($validationResult['rows']),
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to parse Excel file: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function bulkStore(Request $request, Asset $asset): JsonResponse
+    {
+        $request->validate([
+            'rows' => 'required|array',
+        ]);
+
+        $rows = $request->input('rows');
+
+        if (count($rows) > 50) {
+            return response()->json(['error' => 'Maximum allowable entries is 50 rows per bulk upload.'], 422);
+        }
+
+        // Run server-side validation again to guarantee security
+        $validationResult = $this->validateBatchRows($asset, $rows);
+
+        if ($validationResult['has_errors']) {
+            return response()->json([
+                'message' => 'Validation failed on some rows.',
+                'errors' => $validationResult['rows'],
+            ], 422);
+        }
+
+        try {
+            DB::transaction(function () use ($asset, $validationResult) {
+                foreach ($validationResult['rows'] as $row) {
+                    $entryData = [
+                        'asset_id' => $asset->id,
+                        'date' => $row['date'],
+                        'start_time' => $row['start_time'],
+                        'end_time' => $row['end_time'],
+                        'driver_operator_name' => $row['driver_operator_name'],
+                        'chargeable_account_id' => $row['chargeable_account_id'],
+                        'sub_account_id' => $row['sub_account_id'],
+                        'reference' => $row['reference'],
+                        'calculation_type' => $row['calculation_type'],
+                        'unbudgeted' => $row['unbudgeted'],
+                        'particulars' => $row['particulars'],
+                        'start_kilometer_reading' => $row['start_kilometer_reading'],
+                        'end_kilometer_reading' => $row['end_kilometer_reading'],
+                        'start_hour_reading' => $row['start_hour_reading'],
+                        'end_hour_reading' => $row['end_hour_reading'],
+                        'actual_hours' => $row['actual_hours'],
+                        'remarks' => $row['remarks'],
+                        'created_by' => Auth::id(),
+                        'fuel_factor_km' => $asset->fuel_factor_km,
+                        'fuel_factor_hr' => $asset->fuel_factor_hr,
+                        'last_kilometer_reading' => $asset->last_kilometer_reading,
+                        'last_engine_hours' => $asset->last_engine_hours,
+                        'last_date' => $asset->last_date,
+                        'last_time' => $asset->last_time,
+                    ];
+
+                    UtilizationEntry::create($entryData);
+
+                    // Progressively update the asset state
+                    if ($row['calculation_type'] === 'Kilometer Reading') {
+                        $asset->last_kilometer_reading = $row['end_kilometer_reading'];
+                        $asset->last_date = $row['date'];
+                        $asset->last_time = $row['end_time'];
+                    } elseif ($row['calculation_type'] === 'Hour Reading') {
+                        $asset->last_engine_hours = $row['end_hour_reading'];
+                        $asset->last_date = $row['date'];
+                        $asset->last_time = $row['end_time'];
+                    } else {
+                        $asset->last_date = $row['date'];
+                        $asset->last_time = $row['end_time'];
+                    }
+                    $asset->save();
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => count($rows) . ' utilization entries created successfully.',
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Database transaction failed: ' . $e->getMessage()], 500);
+        }
+    }
+
+    private function mapExcelRow(array $rawRow): array
+    {
+        $mapped = [];
+        $keys = array_keys($rawRow);
+
+        $findValue = function ($aliases) use ($rawRow, $keys) {
+            foreach ($aliases as $alias) {
+                if (in_array($alias, $keys)) {
+                    return $rawRow[$alias];
+                }
+                $normalizedAlias = str_replace(['_', ' '], '', strtolower($alias));
+                foreach ($keys as $key) {
+                    $normalizedKey = str_replace(['_', ' '], '', strtolower($key));
+                    if ($normalizedKey === $normalizedAlias) {
+                        return $rawRow[$key];
+                    }
+                }
+            }
+            return null;
+        };
+
+        $mapped['date'] = $this->parseExcelDate($findValue(['date']));
+        $mapped['start_time'] = $this->parseExcelTime($findValue(['start_time']));
+        $mapped['end_time'] = $this->parseExcelTime($findValue(['end_time']));
+        $mapped['driver_operator_name'] = $findValue(['driver_operator_name', 'driver_operator', 'personnel_in_charge', 'driver', 'operator']);
+        $mapped['chargeable_account'] = $findValue(['chargeable_account', 'charged_to', 'account']);
+        $mapped['sub_account'] = $findValue(['sub_account', 'sub_account_name']);
+        $mapped['reference'] = $findValue(['reference', 'ref']);
+        $mapped['calculation_type'] = $findValue(['calculation_type', 'calc_type', 'type']);
+        $mapped['unbudgeted'] = $findValue(['unbudgeted', 'unbudgeted_log']);
+        $mapped['particulars'] = $findValue(['particulars', 'particulars_mission', 'particulars_or_mission', 'mission']);
+        $mapped['start_reading'] = $findValue(['start_reading', 'start_odo', 'start_engine']);
+        $mapped['end_reading'] = $findValue(['end_reading', 'end_odo', 'end_engine']);
+        $mapped['actual_hours'] = $findValue(['actual_hours', 'hours']);
+        $mapped['remarks'] = $findValue(['remarks', 'notes', 'remark']);
+
+        return $mapped;
+    }
+
+    private function parseExcelDate($value)
+    {
+        if ($value === null || $value === '') return null;
+        if (is_numeric($value)) {
+            try {
+                return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value))->format('Y-m-d');
+            } catch (\Exception $e) {}
+        }
+        try {
+            return Carbon::parse($value)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return $value;
+        }
+    }
+
+    private function parseExcelTime($value)
+    {
+        if ($value === null || $value === '') return null;
+        if (is_numeric($value)) {
+            try {
+                return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value))->format('H:i');
+            } catch (\Exception $e) {}
+        }
+        try {
+            // If it's a string of HH:MM:SS or HH:MM
+            return Carbon::parse($value)->format('H:i');
+        } catch (\Exception $e) {
+            return $value;
+        }
+    }
+
+    private function validateBatchRows(Asset $asset, array $mappedRows): array
+    {
+        $simulatedOdometer = $asset->last_kilometer_reading;
+        $simulatedEngineHours = $asset->last_engine_hours;
+        $simulatedDate = $asset->last_date;
+        $simulatedTime = $asset->last_time;
+
+        $validatedRows = [];
+        $hasErrorsTotal = false;
+
+        foreach ($mappedRows as $index => $row) {
+            $rowErrors = [];
+
+            // 1. Resolve Account
+            $accountName = trim($row['chargeable_account'] ?? '');
+            $account = null;
+            if (empty($accountName)) {
+                $rowErrors[] = "Chargeable account is required.";
+            } else {
+                $account = ChargeableAccount::where('name', $accountName)->first();
+                if (!$account) {
+                    $rowErrors[] = "Chargeable account '{$accountName}' not found.";
+                } elseif ($account->status !== 'Active') {
+                    $rowErrors[] = "Chargeable account '{$accountName}' is inactive.";
+                }
+            }
+
+            // 2. Resolve Unbudgeted
+            $unbudgetedVal = trim($row['unbudgeted'] ?? '');
+            $unbudgeted = in_array(strtolower($unbudgetedVal), ['yes', '1', 'true', 'y']);
+
+            // 3. Resolve Sub Account
+            $subAccountName = trim($row['sub_account'] ?? '');
+            $subAccount = null;
+            if (!$unbudgeted && $account) {
+                if (empty($subAccountName)) {
+                    $rowErrors[] = "Sub-account is required when not unbudgeted.";
+                } else {
+                    $subAccount = SubAccount::where('chargeable_account_id', $account->id)
+                        ->where('name', $subAccountName)
+                        ->first();
+                    if (!$subAccount) {
+                        $rowErrors[] = "Sub-account '{$subAccountName}' not found under account '{$accountName}'.";
+                    }
+                }
+            }
+
+            // 4. Validate Date Scope
+            $entryDateStr = $row['date'];
+            if (empty($entryDateStr)) {
+                $rowErrors[] = "Date is required.";
+            } else {
+                try {
+                    $entryDate = Carbon::parse($entryDateStr);
+                    if ($account && $account->classification === 'Scoped') {
+                        $startDate = $account->start_date ? $account->start_date->startOfDay() : null;
+                        $endDate = $account->end_date ? $account->end_date->startOfDay() : null;
+                        $compDate = $entryDate->startOfDay();
+
+                        if ($startDate && $compDate->lt($startDate)) {
+                            $rowErrors[] = "Date (" . Carbon::parse($entryDateStr)->format('M d, Y') . ") must be after or on Chargeable Account's start date (" . $startDate->format('M d, Y') . ").";
+                        }
+                        if ($endDate && $compDate->gt($endDate)) {
+                            $rowErrors[] = "Date (" . Carbon::parse($entryDateStr)->format('M d, Y') . ") must be before or on Chargeable Account's end date (" . $endDate->format('M d, Y') . ").";
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $rowErrors[] = "Invalid date format.";
+                }
+            }
+
+            // 5. Check calculation type
+            $calcType = trim($row['calculation_type'] ?? '');
+            $allowedTypes = ['Kilometer Reading', 'Hour Reading', 'Timeframe', 'Actual Hours'];
+            if (empty($calcType)) {
+                $rowErrors[] = "Calculation type is required.";
+            } elseif (!in_array($calcType, $allowedTypes)) {
+                $rowErrors[] = "Invalid calculation type '{$calcType}'. Must be one of: " . implode(', ', $allowedTypes);
+            }
+
+            // 6. Validate basic fields
+            if (empty($row['driver_operator_name'])) {
+                $rowErrors[] = "Personnel In-Charge is required.";
+            }
+            if (empty($row['particulars'])) {
+                $rowErrors[] = "Particulars / Mission is required.";
+            }
+
+            // 7. Validate Times and readings sequentiality
+            $startTimeStr = $row['start_time'];
+            $endTimeStr = $row['end_time'];
+
+            if (empty($startTimeStr)) {
+                $rowErrors[] = "Start Time is required.";
+            }
+            if (empty($endTimeStr)) {
+                $rowErrors[] = "End Time is required.";
+            }
+
+            if (!empty($entryDateStr) && !empty($startTimeStr)) {
+                try {
+                    $reqDateTime = Carbon::parse($entryDateStr . ' ' . $startTimeStr);
+
+                    // Compare with running asset last date/time
+                    if ($simulatedDate !== null && $simulatedTime !== null) {
+                        $assetDateTime = Carbon::parse($simulatedDate . ' ' . $simulatedTime);
+                        if ($reqDateTime->lessThan($assetDateTime)) {
+                            $rowErrors[] = "Date and Start Time cannot be earlier than previous log's end time (" . $assetDateTime->format('M d, Y H:i') . ").";
+                        }
+                    }
+
+                    // End time check
+                    if (!empty($endTimeStr)) {
+                        $reqEndDateTime = Carbon::parse($entryDateStr . ' ' . $endTimeStr);
+                        if ($reqEndDateTime->lessThanOrEqualTo($reqDateTime)) {
+                            $rowErrors[] = "End Time must be after Start Time.";
+                        }
+
+                        if (empty($rowErrors)) {
+                            $simulatedDate = $entryDateStr;
+                            $simulatedTime = $endTimeStr;
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $rowErrors[] = "Invalid date/time values.";
+                }
+            }
+
+            // Readings and calculation validation
+            $startReading = floatval($row['start_reading'] ?? $row['start_kilometer_reading'] ?? $row['start_hour_reading'] ?? 0);
+            $endReading = floatval($row['end_reading'] ?? $row['end_kilometer_reading'] ?? $row['end_hour_reading'] ?? 0);
+            $actualHours = floatval($row['actual_hours'] ?? 0);
+
+            if ($calcType === 'Kilometer Reading') {
+                $startVal = $row['start_reading'] ?? $row['start_kilometer_reading'] ?? null;
+                if ($startVal === null || $startVal === '') {
+                    $rowErrors[] = "Start Reading (Odometer) is required.";
+                } else {
+                    if ($simulatedOdometer !== null && $startReading < $simulatedOdometer) {
+                        $rowErrors[] = "Start Odometer ({$startReading}) cannot be less than previous log's End Odometer ({$simulatedOdometer}).";
+                    }
+                }
+                $endVal = $row['end_reading'] ?? $row['end_kilometer_reading'] ?? null;
+                if ($endVal === null || $endVal === '') {
+                    $rowErrors[] = "End Reading (Odometer) is required.";
+                } elseif ($endReading <= $startReading) {
+                    $rowErrors[] = "End Odometer ({$endReading}) must be greater than Start Odometer ({$startReading}).";
+                }
+                if (empty($rowErrors)) {
+                    $simulatedOdometer = $endReading;
+                }
+            } elseif ($calcType === 'Hour Reading') {
+                $startVal = $row['start_reading'] ?? $row['start_hour_reading'] ?? null;
+                if ($startVal === null || $startVal === '') {
+                    $rowErrors[] = "Start Reading (Engine Hours) is required.";
+                } else {
+                    if ($simulatedEngineHours !== null && $startReading < $simulatedEngineHours) {
+                        $rowErrors[] = "Start Engine Hours ({$startReading}) cannot be less than previous log's End Engine Hours ({$simulatedEngineHours}).";
+                    }
+                }
+                $endVal = $row['end_reading'] ?? $row['end_hour_reading'] ?? null;
+                if ($endVal === null || $endVal === '') {
+                    $rowErrors[] = "End Reading (Engine Hours) is required.";
+                } elseif ($endReading <= $startReading) {
+                    $rowErrors[] = "End Engine Hours ({$endReading}) must be greater than Start Engine Hours ({$startReading}).";
+                }
+                if (empty($rowErrors)) {
+                    $simulatedEngineHours = $endReading;
+                }
+            } elseif ($calcType === 'Actual Hours') {
+                if ($row['actual_hours'] === null || $row['actual_hours'] === '') {
+                    $rowErrors[] = "Actual Hours is required.";
+                } elseif ($actualHours <= 0) {
+                    $rowErrors[] = "Actual Hours ({$actualHours}) must be greater than 0.";
+                }
+            }
+
+            $validatedRows[] = [
+                'index' => $index + 1,
+                'date' => $row['date'],
+                'start_time' => $row['start_time'],
+                'end_time' => $row['end_time'],
+                'driver_operator_name' => $row['driver_operator_name'],
+                'chargeable_account_id' => $account ? $account->id : null,
+                'chargeable_account' => $accountName,
+                'sub_account_id' => $subAccount ? $subAccount->id : null,
+                'sub_account' => $subAccountName,
+                'reference' => $row['reference'] ?? '',
+                'calculation_type' => $calcType,
+                'unbudgeted' => $unbudgeted,
+                'particulars' => $row['particulars'] ?? '',
+                'start_kilometer_reading' => $calcType === 'Kilometer Reading' ? $startReading : 0,
+                'end_kilometer_reading' => $calcType === 'Kilometer Reading' ? $endReading : 0,
+                'start_hour_reading' => $calcType === 'Hour Reading' ? $startReading : 0,
+                'end_hour_reading' => $calcType === 'Hour Reading' ? $endReading : 0,
+                'actual_hours' => $calcType === 'Actual Hours' ? $actualHours : 0,
+                'remarks' => $row['remarks'] ?? '',
+                'has_errors' => !empty($rowErrors),
+                'errors' => $rowErrors,
+            ];
+
+            if (!empty($rowErrors)) {
+                $hasErrorsTotal = true;
+            }
+        }
+
+        return [
+            'rows' => $validatedRows,
+            'has_errors' => $hasErrorsTotal,
+        ];
     }
 }

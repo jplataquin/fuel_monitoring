@@ -311,12 +311,16 @@
         <div class="card bg-dark border-secondary border-opacity-25 shadow-sm overflow-hidden">
             <div class="card-header bg-secondary bg-opacity-10 py-4 px-4 border-bottom border-secondary border-opacity-25">
                 <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4">
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-2">
                         <h3 class="h5 fw-bold text-light mb-0 tracking-tight">{{ __('Utilization Logs') }}</h3>
                         <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest" data-bs-toggle="modal" data-bs-target="#utilizationModal" style="font-size: 0.7rem;">
                             <svg width="12" height="12" class="me-1 d-inline-block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                             Register
                         </button>
+                        <a href="{{ route('assets.utilization-entries.bulk-upload', $asset) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest d-inline-flex align-items-center" style="font-size: 0.7rem;">
+                            <svg width="12" height="12" class="me-1 d-inline-block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            Bulk Upload
+                        </a>
                     </div>
                     
                     <div class="d-flex flex-wrap align-items-center gap-3">
