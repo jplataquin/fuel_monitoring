@@ -13,9 +13,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 
 class UtilizationEntryController extends Controller
 {
@@ -992,5 +996,184 @@ class UtilizationEntryController extends Controller
             'rows' => $validatedRows,
             'has_errors' => $hasErrorsTotal,
         ];
+    }
+
+    public function bulkTemplate(Asset $asset)
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Template');
+
+        $headers = [
+            'Date (YYYY-MM-DD)',
+            'Start Time (HH:MM)',
+            'End Time (HH:MM)',
+            'Personnel In-Charge',
+            'Charged To',
+            'Sub Account',
+            'Calculation Type',
+            'Start Reading',
+            'End Reading',
+            'Actual Hours',
+            'Unbudgeted',
+            'Particulars / Mission',
+            'Reference',
+            'Remarks'
+        ];
+
+        // Format Header
+        foreach ($headers as $colIndex => $header) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
+            $sheet->setCellValue($colLetter . '1', $header);
+            $sheet->getColumnDimension($colLetter)->setAutoSize(true);
+        }
+
+        // Set up 50 blank rows with data validations
+        for ($row = 2; $row <= 51; $row++) {
+            // Dropdown validation for Calculation Type (Column G = Column 7)
+            $validationCalc = $sheet->getCell('G' . $row)->getDataValidation();
+            $validationCalc->setType(DataValidation::TYPE_LIST);
+            $validationCalc->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validationCalc->setAllowBlank(false);
+            $validationCalc->setShowInputMessage(true);
+            $validationCalc->setShowErrorMessage(true);
+            $validationCalc->setShowDropDown(true);
+            $validationCalc->setErrorTitle('Input error');
+            $validationCalc->setError('Value is not in list');
+            $validationCalc->setPromptTitle('Pick from list');
+            $validationCalc->setPrompt('Please choose a calculation type');
+            $validationCalc->setFormula1('"Kilometer Reading,Hour Reading,Timeframe,Actual Hours"');
+
+            // Dropdown validation for Unbudgeted (Column K = Column 11)
+            $validationUnbudgeted = $sheet->getCell('K' . $row)->getDataValidation();
+            $validationUnbudgeted->setType(DataValidation::TYPE_LIST);
+            $validationUnbudgeted->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validationUnbudgeted->setAllowBlank(false);
+            $validationUnbudgeted->setShowInputMessage(true);
+            $validationUnbudgeted->setShowErrorMessage(true);
+            $validationUnbudgeted->setShowDropDown(true);
+            $validationUnbudgeted->setErrorTitle('Input error');
+            $validationUnbudgeted->setError('Value is not in list');
+            $validationUnbudgeted->setPromptTitle('Pick from list');
+            $validationUnbudgeted->setPrompt('Is this unbudgeted?');
+            $validationUnbudgeted->setFormula1('"Yes,No"');
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'utilization_bulk_template_' . strtolower($asset->fleet_no) . '.xlsx';
+
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
+
+    public function bulkUploadChunk(Request $request, Asset $asset): JsonResponse
+    {
+        $request->validate([
+            'file_chunk' => 'required|file',
+            'chunk_index' => 'required|integer',
+            'total_chunks' => 'required|integer',
+            'file_name' => 'required|string',
+            'file_id' => 'required|string',
+        ]);
+
+        $chunk = $request->file('file_chunk');
+        $chunkIndex = (int) $request->input('chunk_index');
+        $totalChunks = (int) $request->input('total_chunks');
+        $fileId = $request->input('file_id');
+        $originalFileName = $request->input('file_name');
+
+        $chunkDir = "chunks/{$fileId}";
+        $chunkPath = "{$chunkDir}/{$chunkIndex}";
+
+        // Save chunk
+        Storage::put($chunkPath, fopen($chunk->getRealPath(), 'r'));
+
+        // If it's the final chunk, assemble and process it
+        if ($chunkIndex === $totalChunks - 1) {
+            $assembledDir = "temp_uploads";
+            $assembledFileName = "{$fileId}_{$originalFileName}";
+            $assembledPath = "{$assembledDir}/{$assembledFileName}";
+
+            // Ensure directory exists
+            if (!Storage::exists($assembledDir)) {
+                Storage::makeDirectory($assembledDir);
+            }
+
+            // Create write stream to assembled file
+            $assembledFullPath = Storage::path($assembledPath);
+            $out = fopen($assembledFullPath, 'wb');
+
+            // Merge chunks sequentially
+            for ($i = 0; $i < $totalChunks; $i++) {
+                $segmentPath = Storage::path("{$chunkDir}/{$i}");
+                if (!Storage::exists("{$chunkDir}/{$i}")) {
+                    fclose($out);
+                    Storage::deleteDirectory($chunkDir);
+                    return response()->json(['error' => "Chunk fragment {$i} is missing. Please retry upload."], 422);
+                }
+                $in = fopen($segmentPath, 'rb');
+                stream_copy_to_stream($in, $out);
+                fclose($in);
+            }
+            fclose($out);
+
+            // Delete raw chunks
+            Storage::deleteDirectory($chunkDir);
+
+            // Now parse the assembled file!
+            try {
+                $array = Excel::toArray(new UtilizationEntryImport, $assembledFullPath);
+                $sheet = $array[0] ?? [];
+
+                // Clean up the assembled file
+                Storage::delete($assembledPath);
+
+                if (empty($sheet)) {
+                    return response()->json(['error' => 'The uploaded file is empty or invalid.'], 422);
+                }
+
+                if (count($sheet) > 50) {
+                    return response()->json(['error' => 'Maximum allowable entries is 50 rows per bulk upload. The uploaded file has ' . count($sheet) . ' rows.'], 422);
+                }
+
+                $mappedRows = [];
+                foreach ($sheet as $rawRow) {
+                    $nonEmpty = array_filter($rawRow, fn($val) => $val !== null && $val !== '');
+                    if (empty($nonEmpty)) {
+                        continue;
+                    }
+                    $mappedRows[] = $this->mapExcelRow($rawRow);
+                }
+
+                if (empty($mappedRows)) {
+                    return response()->json(['error' => 'The uploaded file has no data rows.'], 422);
+                }
+
+                $validationResult = $this->validateBatchRows($asset, $mappedRows);
+
+                return response()->json([
+                    'rows' => $validationResult['rows'],
+                    'has_errors' => $validationResult['has_errors'],
+                    'total_rows' => count($validationResult['rows']),
+                    'success' => true,
+                ]);
+
+            } catch (\Exception $e) {
+                if (Storage::exists($assembledPath)) {
+                    Storage::delete($assembledPath);
+                }
+                return response()->json(['error' => 'Failed to parse Excel file chunks: ' . $e->getMessage()], 500);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'progress' => round((($chunkIndex + 1) / $totalChunks) * 100, 2),
+            'chunk_index' => $chunkIndex,
+        ]);
     }
 }

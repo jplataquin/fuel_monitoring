@@ -35,9 +35,16 @@
                             <span class="bg-primary p-1 rounded-circle me-2" style="width: 8px; height: 8px;"></span>
                             Instructions
                         </h4>
-                        <p class="text-secondary small mb-4">
+                        <p class="text-secondary small mb-3">
                             Please prepare your Excel file (`.xlsx`, `.xls`) or `.csv` according to the columns listed below. You can upload up to <strong>50 entries</strong> per file.
                         </p>
+
+                        <div class="mb-4">
+                            <a href="{{ route('assets.utilization-entries.bulk-template', $asset) }}" class="btn btn-outline-primary btn-sm rounded-pill w-100 fw-bold text-uppercase tracking-wider py-2 d-flex align-items-center justify-content-center" style="font-size: 0.75rem;">
+                                <svg class="me-2" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                Download Excel Template
+                            </a>
+                        </div>
 
                         <h5 class="small fw-bold text-secondary text-uppercase tracking-wider mb-2" style="font-size: 0.7rem;">Expected Columns (Headers)</h5>
                         <ul class="list-group list-group-flush bg-transparent border-0 ps-0 mb-4" style="font-size: 0.8rem;">
@@ -235,7 +242,7 @@
                 showAlert('success', 'File cleared. You can upload another file.');
             });
 
-            // Bulk preview submission
+            // Bulk preview submission via sequential chunk uploads
             previewForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
@@ -244,38 +251,78 @@
                     return;
                 }
 
-                const formData = new FormData();
-                formData.append('file', fileInput.files[0]);
-                formData.append('_token', '{{ csrf_token() }}');
+                const file = fileInput.files[0];
+                const chunkSize = 256 * 1024; // 256KB chunks
+                const totalChunks = Math.ceil(file.size / chunkSize);
+                const fileId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
                 previewBtn.disabled = true;
                 previewSpinner.classList.remove('d-none');
                 alertContainer.innerHTML = '';
 
-                fetch("{{ route('assets.utilization-entries.bulk-preview', $asset) }}", {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => response.json().then(data => ({ status: response.status, body: data })))
-                .then(result => {
-                    previewBtn.disabled = false;
-                    previewSpinner.classList.add('d-none');
+                let chunkIndex = 0;
 
-                    if (result.status !== 200) {
-                        showAlert('danger', result.body.error || result.body.message || 'An error occurred while parsing the file.');
-                        return;
-                    }
+                function uploadNextChunk() {
+                    const start = chunkIndex * chunkSize;
+                    const end = Math.min(start + chunkSize, file.size);
+                    const chunk = file.slice(start, end);
 
-                    renderPreview(result.body.rows, result.body.has_errors, result.body.total_rows);
-                })
-                .catch(error => {
-                    previewBtn.disabled = false;
-                    previewSpinner.classList.add('d-none');
-                    showAlert('danger', 'System error occurred: ' + error.message);
-                });
+                    const formData = new FormData();
+                    formData.append('file_chunk', chunk);
+                    formData.append('chunk_index', chunkIndex);
+                    formData.append('total_chunks', totalChunks);
+                    formData.append('file_name', file.name);
+                    formData.append('file_id', fileId);
+                    formData.append('_token', '{{ csrf_token() }}');
+
+                    // Progress indicator
+                    const progressPercent = Math.round(((chunkIndex) / totalChunks) * 100);
+                    previewBtn.querySelector('span').innerText = `Uploading chunk ${chunkIndex + 1}/${totalChunks} (${progressPercent}%)`;
+
+                    fetch("{{ route('assets.utilization-entries.bulk-upload-chunk', $asset) }}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+                    .then(result => {
+                        if (result.status !== 200) {
+                            previewBtn.disabled = false;
+                            previewBtn.querySelector('span').innerText = 'Preview Entries';
+                            previewSpinner.classList.add('d-none');
+                            showAlert('danger', result.body.error || result.body.message || 'Chunk upload failed.');
+                            return;
+                        }
+
+                        if (chunkIndex < totalChunks - 1) {
+                            // Upload next chunk
+                            chunkIndex++;
+                            uploadNextChunk();
+                        } else {
+                            // Final chunk completed! Handle response
+                            previewBtn.disabled = false;
+                            previewBtn.querySelector('span').innerText = 'Preview Entries';
+                            previewSpinner.classList.add('d-none');
+                            
+                            if (result.body.error) {
+                                showAlert('danger', result.body.error);
+                            } else {
+                                renderPreview(result.body.rows, result.body.has_errors, result.body.total_rows);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        previewBtn.disabled = false;
+                        previewBtn.querySelector('span').innerText = 'Preview Entries';
+                        previewSpinner.classList.add('d-none');
+                        showAlert('danger', 'System error occurred during chunk upload: ' + error.message);
+                    });
+                }
+
+                // Start chunked upload
+                uploadNextChunk();
             });
 
             // Submit Final batch upload

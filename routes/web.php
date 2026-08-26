@@ -46,6 +46,8 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::get('assets/{asset}/utilization-entries/bulk-upload', [UtilizationEntryController::class, 'bulkUpload'])->name('assets.utilization-entries.bulk-upload');
     Route::post('assets/{asset}/utilization-entries/bulk-preview', [UtilizationEntryController::class, 'bulkPreview'])->name('assets.utilization-entries.bulk-preview');
     Route::post('assets/{asset}/utilization-entries/bulk-store', [UtilizationEntryController::class, 'bulkStore'])->name('assets.utilization-entries.bulk-store');
+    Route::get('assets/{asset}/utilization-entries/bulk-template', [UtilizationEntryController::class, 'bulkTemplate'])->name('assets.utilization-entries.bulk-template');
+    Route::post('assets/{asset}/utilization-entries/bulk-upload-chunk', [UtilizationEntryController::class, 'bulkUploadChunk'])->name('assets.utilization-entries.bulk-upload-chunk');
 
     // Sub Accounts JSON (needed by utilization form for all roles)
     Route::get('chargeable-accounts/{chargeable_account}/sub-accounts/json', [SubAccountController::class, 'byAccount'])->name('chargeable-accounts.sub-accounts.json');

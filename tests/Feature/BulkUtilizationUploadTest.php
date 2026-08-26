@@ -307,4 +307,69 @@ class BulkUtilizationUploadTest extends TestCase
         $this->assertEquals('2026-08-25', $this->asset->last_date);
         $this->assertEquals('12:00', $this->asset->last_time);
     }
+
+    public function test_bulk_template_downloads_successfully(): void
+    {
+        $response = $this->actingAs($this->admin)
+            ->get(route('assets.utilization-entries.bulk-template', $this->asset));
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->assertHeader('Content-Disposition', 'attachment; filename=utilization_bulk_template_t-500.xlsx');
+    }
+
+    public function test_bulk_upload_chunk_uploads_sequentially_and_parses(): void
+    {
+        $rows = [
+            ['2026-08-26', '08:00', '10:00', 'John Doe', 'Project Alpha', 'Civil Works', 'Kilometer Reading', '1000', '1050', '0', 'No', 'First run', 'REF-01', '']
+        ];
+        $file = $this->createCsvFile($rows);
+
+        // Upload in 2 chunks
+        $fileSize = $file->getSize();
+        $chunkSize = (int) ceil($fileSize / 2);
+
+        // Chunk 1
+        $tempFile1 = tempnam(sys_get_temp_dir(), 'chunk_');
+        $in = fopen($file->getRealPath(), 'rb');
+        $out = fopen($tempFile1, 'wb');
+        stream_copy_to_stream($in, $out, $chunkSize);
+        fclose($out);
+        $chunk1 = new UploadedFile($tempFile1, 'import.csv', 'text/csv', null, true);
+
+        $response1 = $this->actingAs($this->admin)
+            ->post(route('assets.utilization-entries.bulk-upload-chunk', $this->asset), [
+                'file_chunk' => $chunk1,
+                'chunk_index' => 0,
+                'total_chunks' => 2,
+                'file_name' => 'import.csv',
+                'file_id' => 'test_file_chunking_123',
+            ]);
+
+        $response1->assertStatus(200);
+        $response1->assertJsonPath('success', true);
+        $response1->assertJsonPath('progress', 50);
+
+        // Chunk 2
+        $tempFile2 = tempnam(sys_get_temp_dir(), 'chunk_');
+        $out = fopen($tempFile2, 'wb');
+        stream_copy_to_stream($in, $out);
+        fclose($out);
+        fclose($in);
+        $chunk2 = new UploadedFile($tempFile2, 'import.csv', 'text/csv', null, true);
+
+        $response2 = $this->actingAs($this->admin)
+            ->post(route('assets.utilization-entries.bulk-upload-chunk', $this->asset), [
+                'file_chunk' => $chunk2,
+                'chunk_index' => 1,
+                'total_chunks' => 2,
+                'file_name' => 'import.csv',
+                'file_id' => 'test_file_chunking_123',
+            ]);
+
+        $response2->assertStatus(200);
+        $response2->assertJsonPath('success', true);
+        $response2->assertJsonCount(1, 'rows');
+        $this->assertFalse($response2->json('rows.0.has_errors'));
+    }
 }
