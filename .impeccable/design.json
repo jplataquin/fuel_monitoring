@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-27T00:00:00Z",
+  "title": "Design System: Fuel Monitoring Management System",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Command Blue", "canonical": "#0d6efd" },
+      "neutral-bg": { "role": "neutral", "displayName": "Deep Void Background", "canonical": "#212529" },
+      "neutral-fg": { "role": "neutral", "displayName": "High-Contrast White", "canonical": "#f8f9fa" },
+      "surface": { "role": "neutral", "displayName": "Industrial Track", "canonical": "#1c1b1f" },
+      "surface-card": { "role": "neutral", "displayName": "Surface Card", "canonical": "#2c3034" },
+      "scrollbar-track": { "role": "neutral", "displayName": "Scrollbar Track", "canonical": "#1C1B1F" },
+      "scrollbar-thumb": { "role": "neutral", "displayName": "Scrollbar Thumb", "canonical": "#49454F" },
+      "scrollbar-thumb-hover": { "role": "neutral", "displayName": "Scrollbar Thumb Hover", "canonical": "#CAC4D0" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Title", "purpose": "Hero metrics, primary dashboard totals, main headings." },
+      "body": { "displayName": "Body Copy", "purpose": "Data rows, forms, and core user documentation." }
+    },
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Material transitions for state hover/active states." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main action button for submitting forms, logging utilization, and approving orders.",
+      "html": "<button class=\"ds-btn-primary\">SUBMIT LOG</button>",
+      "css": ".ds-btn-primary { background-color: #0d6efd; color: #f8f9fa; border: none; padding: 8px 16px; border-radius: 4px; font-family: 'Figtree', sans-serif; font-weight: 500; font-size: 1rem; cursor: pointer; transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background-color: #0b5ed7; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Secondary actions like canceling or resetting form inputs.",
+      "html": "<button class=\"ds-btn-secondary\">CANCEL</button>",
+      "css": ".ds-btn-secondary { background-color: #49454F; color: #f8f9fa; border: none; padding: 8px 16px; border-radius: 4px; font-family: 'Figtree', sans-serif; font-weight: 500; font-size: 1rem; cursor: pointer; transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-secondary:hover { background-color: #CAC4D0; color: #1c1b1f; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Precise Depot Console",
+    "overview": "The Fuel Monitoring Management System's visual identity is inspired by highly functional, high-contrast physical hardware terminals and industrial dashboards. It features a dark-by-default environment optimized to minimize eye strain during long-shift operational use.",
+    "keyCharacteristics": [
+      "Task-Focused Clarity: Layouts prioritize tables, rapid input form controls, and prominent status badges.",
+      "High-Contrast Dark Aesthetic: Built on top of Bootstrap 5.3's dark theme using deeply dark, high-contrast surface elements.",
+      "Micro-tactile feedback: Clickable UI elements utilize standard transitions to feel modern, responsive, and tactile."
+    ],
+    "rules": [
+      { "name": "The Strict Dark Theme Rule", "body": "The interface is built exclusively around the Bootstrap 5.3 dark theme (data-bs-theme=\"dark\"). Light backgrounds are forbidden except in print views.", "section": "colors" },
+      { "name": "The Interactive Highlight Rule", "body": "Accent colors (Command Blue) must occupy less than 15% of any screen surface.", "section": "colors" },
+      { "name": "The Condensed Heading Rule", "body": "All headings (h1 through h6) must carry a condensed letter spacing (-0.02em).", "section": "typography" },
+      { "name": "The Flat Canvas Rule", "body": "Drop shadows are only permitted for floating components that exist outside the flat flow (modals, tooltips).", "section": "elevation" }
+    ],
+    "dos": [
+      "Do ensure all clickable anchor tags, select boxes, buttons, and custom button roles have cursor: pointer on hover.",
+      "Do clear the Laravel configuration cache (php artisan config:clear) before running automated tests.",
+      "Do use native Bootstrap spacing classes to preserve the 8px grid alignment."
+    ],
+    "donts": [
+      "Don't use arbitrary inline hex color values for texts or backgrounds.",
+      "Don't add complex drop shadows to standard widgets or dashboard cards.",
+      "Don't disable smooth transition animations on interactive states."
+    ]
+  }
+}

@@ -17,29 +17,28 @@
         <div class="container-xl">
             <div class="vstack gap-5">
                 <!-- Welcome Section -->
-                <div class="position-relative overflow-hidden rounded-4 p-4 p-md-5 shadow-lg" style="background-color: #D0BCFF;">
+                <div class="position-relative overflow-hidden rounded-4 p-4 p-md-5 border border-secondary border-opacity-25 bg-dark" style="background-color: #1c1b1f !important;">
                     <div class="position-relative z-1">
-                        <h3 class="display-5 fw-bold text-dark mb-2 tracking-tight">
+                        <h3 class="display-5 fw-bold text-light mb-2 tracking-tight">
                             Good day, {{ Auth::user()->name }}
                         </h3>
-                        <p class="text-dark text-opacity-75 fs-5 fw-medium mb-4 mb-md-5" style="max-width: 600px;">
+                        <p class="text-light text-opacity-75 fs-5 fw-medium mb-4 mb-md-5" style="max-width: 600px;">
                             Monitor and manage your fleet utilization with precision and ease.
                         </p>
                         <div class="d-flex flex-wrap gap-2">
-                            <span class="badge rounded-pill px-3 py-2 fw-bold text-uppercase tracking-widest shadow-sm" style="font-size: 0.65rem; color: #D0BCFF; background-color: #381E72;">
+                            <span class="badge rounded-pill px-3 py-2 fw-bold text-uppercase tracking-widest border border-primary border-opacity-50" style="font-size: 0.75rem; color: #f8f9fa; background-color: rgba(13, 110, 253, 0.15);">
                                 {{ Auth::user()->role }}
                             </span>
                         </div>
                     </div>
-                    <div class="position-absolute top-0 end-0 mt-n5 me-n5 bg-white bg-opacity-25 rounded-circle" style="width: 320px; height: 320px; filter: blur(80px);"></div>
-                    <div class="position-absolute bottom-0 end-0 mb-4 me-5 d-none d-lg-block opacity-25">
-                        <x-application-logo class="fill-current text-dark" style="width: 200px; height: 200px;" />
+                    <div class="position-absolute bottom-0 end-0 mb-4 me-5 d-none d-lg-block opacity-10">
+                        <x-application-logo class="fill-current text-light" style="width: 200px; height: 200px;" />
                     </div>
                 </div>
 
                 <!-- Budget Dashboard Section -->
                 <div class="vstack gap-4">
-                    <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
+                    <div class="card bg-dark border-secondary border-opacity-25 rounded-4 overflow-hidden">
                         <div class="card-body p-4">
                             <form action="{{ route('dashboard') }}" method="GET" class="row g-3 align-items-end">
                                 <div class="col-md-9">
@@ -71,13 +70,13 @@
                         <h3 class="h5 fw-bold text-light mb-0 text-uppercase tracking-widest">Asset Performance</h3>
                         <div class="flex-grow-1 border-top border-secondary border-opacity-25 d-none d-md-block"></div>
                         <div class="d-flex flex-wrap gap-2">
-                            <button type="button" onclick="toggleAssetFilter('red', this)" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold text-uppercase tracking-widest asset-filter-btn" style="font-size: 0.6rem;">
+                            <button type="button" onclick="toggleAssetFilter('red', this)" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2 fw-bold text-uppercase tracking-widest asset-filter-btn" style="font-size: 0.75rem;">
                                 Critical (≥10%)
                             </button>
-                            <button type="button" onclick="toggleAssetFilter('blue', this)" class="btn btn-sm btn-outline-info rounded-pill px-3 fw-bold text-uppercase tracking-widest asset-filter-btn" style="font-size: 0.6rem;">
+                            <button type="button" onclick="toggleAssetFilter('blue', this)" class="btn btn-sm btn-outline-info rounded-pill px-3 py-2 fw-bold text-uppercase tracking-widest asset-filter-btn" style="font-size: 0.75rem;">
                                 Under (<0%)
                             </button>
-                            <button type="button" onclick="toggleAssetFilter('all', this)" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold text-uppercase tracking-widest asset-filter-btn active" style="font-size: 0.6rem;">
+                            <button type="button" onclick="toggleAssetFilter('all', this)" class="btn btn-sm btn-primary rounded-pill px-3 py-2 fw-bold text-uppercase tracking-widest asset-filter-btn active" style="font-size: 0.75rem;">
                                 Show All
                             </button>
                         </div>
@@ -229,6 +228,9 @@
 
         async function updateDashboard() {
             try {
+                if (typeof window.showLoadingIndicator === 'function') {
+                    window.showLoadingIndicator();
+                }
                 const url = new URL(window.location.href);
                 const response = await fetch(url, {
                     headers: {
@@ -246,6 +248,10 @@
                 }
             } catch (error) {
                 console.error('Dashboard update failed:', error);
+            } finally {
+                if (typeof window.hideLoadingIndicator === 'function') {
+                    window.hideLoadingIndicator();
+                }
             }
         }
 
