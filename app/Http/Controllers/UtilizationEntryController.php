@@ -737,15 +737,49 @@ class UtilizationEntryController extends Controller
             return null;
         };
 
+        // Parse combined account and sub-account
+        $combinedValue = trim($findValue(['account_sub_account', 'account_-_sub_account', 'account__sub_account', 'charged_to', 'account']) ?? '');
+
+        $accountName = '';
+        $subAccountName = '';
+        $unbudgeted = false;
+
+        if (!empty($combinedValue) && str_contains($combinedValue, ' - ')) {
+            $parts = explode(' - ', $combinedValue);
+            if (count($parts) >= 2) {
+                $subName = trim(array_pop($parts));
+                $accName = trim(implode(' - ', $parts));
+
+                $accountName = $accName;
+                if (strtolower($subName) === 'unbudgeted') {
+                    $unbudgeted = true;
+                    $subAccountName = '';
+                } else {
+                    $unbudgeted = false;
+                    $subAccountName = $subName;
+                }
+            } else {
+                $accountName = $combinedValue;
+                $unbudgeted = false;
+                $subAccountName = '';
+            }
+        } else {
+            // Fallbacks if columns are separate (helps with our feature test suites!)
+            $accountName = trim($findValue(['chargeable_account', 'charged_to', 'account']) ?? '');
+            $subAccountName = trim($findValue(['sub_account', 'sub_account_name']) ?? '');
+            $unbudgetedVal = trim($findValue(['unbudgeted', 'unbudgeted_log']) ?? '');
+            $unbudgeted = in_array(strtolower($unbudgetedVal), ['yes', '1', 'true', 'y']);
+        }
+
         $mapped['date'] = $this->parseExcelDate($findValue(['date']));
         $mapped['start_time'] = $this->parseExcelTime($findValue(['start_time']));
         $mapped['end_time'] = $this->parseExcelTime($findValue(['end_time']));
         $mapped['driver_operator_name'] = $findValue(['driver_operator_name', 'driver_operator', 'personnel_in_charge', 'driver', 'operator']);
-        $mapped['chargeable_account'] = $findValue(['chargeable_account', 'charged_to', 'account']);
-        $mapped['sub_account'] = $findValue(['sub_account', 'sub_account_name']);
+        $mapped['chargeable_account'] = $accountName;
+        $mapped['sub_account'] = $subAccountName;
         $mapped['reference'] = $findValue(['reference', 'ref']);
         $mapped['calculation_type'] = $findValue(['calculation_type', 'calc_type', 'type']);
-        $mapped['unbudgeted'] = $findValue(['unbudgeted', 'unbudgeted_log']);
+        $mapped['unbudgeted'] = $unbudgeted;
         $mapped['particulars'] = $findValue(['particulars', 'particulars_mission', 'particulars_or_mission', 'mission']);
         $mapped['start_reading'] = $findValue(['start_reading', 'start_odo', 'start_engine']);
         $mapped['end_reading'] = $findValue(['end_reading', 'end_odo', 'end_engine']);

@@ -87,6 +87,37 @@ class BulkUtilizationUploadTest extends TestCase
         return new UploadedFile($tempFile, 'import.csv', 'text/csv', null, true);
     }
 
+    private function createCombinedCsvFile(array $rows): UploadedFile
+    {
+        $tempFile = tempnam(sys_get_temp_dir(), 'test_bulk_');
+        $handle = fopen($tempFile, 'w');
+
+        // Headers
+        fputcsv($handle, [
+            'Date',
+            'Start Time',
+            'End Time',
+            'Personnel In-Charge',
+            'Account - Sub Account',
+            'Calculation Type',
+            'Start Reading',
+            'End Reading',
+            'Actual Hours',
+            'Particulars',
+            'Reference',
+            'Remarks'
+        ]);
+
+        // Rows
+        foreach ($rows as $row) {
+            fputcsv($handle, $row);
+        }
+
+        fclose($handle);
+
+        return new UploadedFile($tempFile, 'import.csv', 'text/csv', null, true);
+    }
+
     public function test_bulk_upload_view_renders_correctly(): void
     {
         $response = $this->actingAs($this->admin)
@@ -163,6 +194,39 @@ class BulkUtilizationUploadTest extends TestCase
         // Row 3 has Invalid Account error
         $this->assertTrue($previewRows[2]['has_errors']);
         $this->assertContains("Chargeable account 'Non-existent Project' not found.", $previewRows[2]['errors']);
+    }
+
+    public function test_bulk_preview_handles_combined_account_sub_account_format(): void
+    {
+        $rows = [
+            // Row 1: Active account & sub-account combination
+            ['2026-08-26', '08:00', '10:00', 'John Doe', 'Project Alpha - Civil Works', 'Kilometer Reading', '1000', '1050', '0', 'First run', 'REF-01', ''],
+            // Row 2: Account & Unbudgeted combination
+            ['2026-08-26', '10:30', '12:00', 'John Doe', 'Project Alpha - Unbudgeted', 'Kilometer Reading', '1050', '1100', '0', 'Unbudgeted run', 'REF-02', '']
+        ];
+
+        $file = $this->createCombinedCsvFile($rows);
+
+        $response = $this->actingAs($this->admin)
+            ->post(route('assets.utilization-entries.bulk-preview', $this->asset), [
+                'file' => $file,
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('has_errors', false);
+        $response->assertJsonCount(2, 'rows');
+
+        $previewRows = $response->json('rows');
+
+        // Verify Row 1 parsed correct IDs and unbudgeted is false
+        $this->assertEquals($this->account->id, $previewRows[0]['chargeable_account_id']);
+        $this->assertEquals($this->subAccount->id, $previewRows[0]['sub_account_id']);
+        $this->assertFalse($previewRows[0]['unbudgeted']);
+
+        // Verify Row 2 parsed unbudgeted is true, sub_account_id is null
+        $this->assertEquals($this->account->id, $previewRows[1]['chargeable_account_id']);
+        $this->assertNull($previewRows[1]['sub_account_id']);
+        $this->assertTrue($previewRows[1]['unbudgeted']);
     }
 
     public function test_bulk_store_saves_entries_inside_transaction_and_updates_asset_technical_specifications(): void
