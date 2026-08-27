@@ -22,11 +22,11 @@
             <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
                 
                 <!-- Report Filter Form -->
-                <div class="card-header bg-dark border-secondary p-4 d-print-none">
+                <div class="card-header bg-secondary bg-opacity-10 py-3 px-4 border-bottom border-secondary border-opacity-25 d-print-none">
                     <form action="{{ route('reports.chargeable-accounts') }}" method="GET" class="row g-3 align-items-end">
-                        <div class="col-md-3">
-                            <label for="account_search" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Chargeable Account</label>
-                            <input type="text" id="account_search" class="form-control bg-dark text-light border-secondary" placeholder="Search account..." list="account_suggestions" autocomplete="off" value="{{ $accountId && $accounts->firstWhere('id', $accountId) ? ($accounts->firstWhere('id', $accountId)->name . ($accounts->firstWhere('id', $accountId)->status === 'Inactive' ? ' ⛔️' : '')) : '' }}" required>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <label for="account_search" class="form-label text-secondary text-uppercase fw-bold tracking-widest mb-2" style="font-size: 0.75rem;">Chargeable Account</label>
+                            <input type="text" id="account_search" class="form-control bg-dark border-secondary border-opacity-50 text-light py-2 rounded-3" placeholder="Search account..." list="account_suggestions" autocomplete="off" value="{{ $accountId && $accounts->firstWhere('id', $accountId) ? ($accounts->firstWhere('id', $accountId)->name . ($accounts->firstWhere('id', $accountId)->status === 'Inactive' ? ' ⛔️' : '')) : '' }}" required>
                             <input type="hidden" name="account_id" id="account_id" value="{{ $accountId }}">
                             <datalist id="account_suggestions">
                                 @foreach($accounts as $acc)
@@ -37,23 +37,23 @@
                                     </option>
                                 @endforeach
                             </datalist>
-                            <div class="form-check mt-2">
-                                <input class="form-check-input bg-dark border-secondary" type="checkbox" name="include_inactive" id="include_inactive" value="1" {{ ($includeInactive ?? false) ? 'checked' : '' }} onchange="this.form.submit()">
-                                <label class="form-check-label text-secondary small" for="include_inactive">
-                                    Include Inactive Accounts
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3" id="date_from_col">
+                            <label for="date_from" class="form-label text-secondary text-uppercase fw-bold tracking-widest mb-2" style="font-size: 0.75rem;">Date From</label>
+                            <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}" class="form-control bg-dark border-secondary border-opacity-50 text-light py-2 rounded-3" required>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3" id="date_to_col">
+                            <label for="date_to" class="form-label text-secondary text-uppercase fw-bold tracking-widest mb-2" style="font-size: 0.75rem;">Date To</label>
+                            <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}" class="form-control bg-dark border-secondary border-opacity-50 text-light py-2 rounded-3" required>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3 d-flex flex-column justify-content-end gap-2">
+                            <div class="form-check ms-1 mb-1">
+                                <input class="form-check-input bg-dark border-secondary border-opacity-50" type="checkbox" name="include_inactive" id="include_inactive" value="1" {{ ($includeInactive ?? false) ? 'checked' : '' }} onchange="this.form.submit()">
+                                <label class="form-check-label text-secondary text-uppercase fw-bold tracking-widest mt-1" for="include_inactive" style="font-size: 0.75rem;">
+                                    Include Inactive
                                 </label>
                             </div>
-                        </div>
-                        <div class="col-md-3" id="date_from_col">
-                            <label for="date_from" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date From</label>
-                            <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}" class="form-control bg-dark text-light border-secondary" required>
-                        </div>
-                        <div class="col-md-3" id="date_to_col">
-                            <label for="date_to" class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Date To</label>
-                            <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}" class="form-control bg-dark text-light border-secondary" required>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold text-uppercase small shadow-sm py-2">
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold text-uppercase tracking-widest" style="font-size: 0.75rem;">
                                 Generate
                             </button>
                         </div>
