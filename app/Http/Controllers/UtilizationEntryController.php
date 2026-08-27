@@ -1043,16 +1043,14 @@ class UtilizationEntryController extends Controller
             'Start Time (HH:MM)',
             'End Time (HH:MM)',
             'Personnel In-Charge',
-            'Charged To',
-            'Sub Account',
-            'Calculation Type',
-            'Start Reading',
-            'End Reading',
-            'Actual Hours',
-            'Unbudgeted',
-            'Particulars / Mission',
-            'Reference',
-            'Remarks'
+            'Account - Sub Account', // Column E
+            'Calculation Type',      // Column F
+            'Start Reading',         // Column G
+            'End Reading',           // Column H
+            'Actual Hours',          // Column I
+            'Particulars / Mission', // Column J
+            'Reference',             // Column K
+            'Remarks'                // Column L
         ];
 
         // Format Header
@@ -1062,10 +1060,56 @@ class UtilizationEntryController extends Controller
             $sheet->getColumnDimension($colLetter)->setAutoSize(true);
         }
 
+        // Fetch options
+        $accounts = ChargeableAccount::where('status', 'Active')
+            ->with(['subAccounts' => function($q) {
+                $q->orderBy('name', 'asc');
+            }])
+            ->orderBy('name', 'asc')
+            ->get();
+
+        $dropdownOptions = [];
+        foreach ($accounts as $account) {
+            $dropdownOptions[] = "{$account->name} - Unbudgeted";
+            foreach ($account->subAccounts as $sub) {
+                $dropdownOptions[] = "{$account->name} - {$sub->name}";
+            }
+        }
+        sort($dropdownOptions);
+
+        // Add Options sheet
+        $optionsSheet = $spreadsheet->createSheet();
+        $optionsSheet->setTitle('Options');
+        $optionsSheet->setSheetState(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet::SHEETSTATE_HIDDEN);
+
+        // Write options
+        foreach ($dropdownOptions as $idx => $option) {
+            $optionsSheet->setCellValue('A' . ($idx + 1), $option);
+        }
+
+        // Reset active sheet to Template
+        $spreadsheet->setActiveSheetIndex(0);
+
         // Set up 50 blank rows with data validations
         for ($row = 2; $row <= 51; $row++) {
-            // Dropdown validation for Calculation Type (Column G = Column 7)
-            $validationCalc = $sheet->getCell('G' . $row)->getDataValidation();
+            // Dropdown validation for Account - Sub Account (Column E)
+            if (count($dropdownOptions) > 0) {
+                $validationAccount = $sheet->getCell('E' . $row)->getDataValidation();
+                $validationAccount->setType(DataValidation::TYPE_LIST);
+                $validationAccount->setErrorStyle(DataValidation::STYLE_INFORMATION);
+                $validationAccount->setAllowBlank(false);
+                $validationAccount->setShowInputMessage(true);
+                $validationAccount->setShowErrorMessage(true);
+                $validationAccount->setShowDropDown(true);
+                $validationAccount->setErrorTitle('Input error');
+                $validationAccount->setError('Value is not in list');
+                $validationAccount->setPromptTitle('Pick from list');
+                $validationAccount->setPrompt('Please choose an Account - Sub Account combination');
+                $validationAccount->setFormula1('Options!$A$1:$A$' . count($dropdownOptions));
+            }
+
+            // Dropdown validation for Calculation Type (Column F)
+            $validationCalc = $sheet->getCell('F' . $row)->getDataValidation();
             $validationCalc->setType(DataValidation::TYPE_LIST);
             $validationCalc->setErrorStyle(DataValidation::STYLE_INFORMATION);
             $validationCalc->setAllowBlank(false);
@@ -1077,20 +1121,6 @@ class UtilizationEntryController extends Controller
             $validationCalc->setPromptTitle('Pick from list');
             $validationCalc->setPrompt('Please choose a calculation type');
             $validationCalc->setFormula1('"Kilometer Reading,Hour Reading,Timeframe,Actual Hours"');
-
-            // Dropdown validation for Unbudgeted (Column K = Column 11)
-            $validationUnbudgeted = $sheet->getCell('K' . $row)->getDataValidation();
-            $validationUnbudgeted->setType(DataValidation::TYPE_LIST);
-            $validationUnbudgeted->setErrorStyle(DataValidation::STYLE_INFORMATION);
-            $validationUnbudgeted->setAllowBlank(false);
-            $validationUnbudgeted->setShowInputMessage(true);
-            $validationUnbudgeted->setShowErrorMessage(true);
-            $validationUnbudgeted->setShowDropDown(true);
-            $validationUnbudgeted->setErrorTitle('Input error');
-            $validationUnbudgeted->setError('Value is not in list');
-            $validationUnbudgeted->setPromptTitle('Pick from list');
-            $validationUnbudgeted->setPrompt('Is this unbudgeted?');
-            $validationUnbudgeted->setFormula1('"Yes,No"');
         }
 
         $writer = new Xlsx($spreadsheet);
