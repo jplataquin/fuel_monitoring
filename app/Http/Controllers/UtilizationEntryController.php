@@ -1036,7 +1036,7 @@ class UtilizationEntryController extends Controller
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Template');
+        $sheet->setTitle(substr($asset->fleet_no, 0, 31));
 
         $headers = [
             'Date (YYYY-MM-DD)',
@@ -1124,7 +1124,7 @@ class UtilizationEntryController extends Controller
         }
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = 'utilization_bulk_template_' . strtolower($asset->fleet_no) . '.xlsx';
+        $fileName = $asset->fleet_no . ' - Bulk Utilization Upload.xlsx';
 
         return response()->streamDownload(function () use ($writer) {
             $writer->save('php://output');

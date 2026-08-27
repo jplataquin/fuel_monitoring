@@ -217,4 +217,32 @@ class BudgeteerAccessTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('99+');
     }
+
+    public function test_budget_index_shows_pending_counts_in_search_dropdown_options(): void
+    {
+        $user = User::factory()->create(['role' => 'budgeteer']);
+        $account = ChargeableAccount::create(['name' => 'Pending Project', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Project']);
+
+        // Assert standard account without pending shows standard name
+        $response = $this->actingAs($user)->get(route('account-budgets.index'));
+        $response->assertStatus(200);
+        $response->assertSee('Pending Project');
+        $response->assertDontSee('Pending Project(pending:');
+
+        // Add 5 pending budgets to the account
+        $subAccount->budgets()->createMany([
+            ['budget_quantity' => 100, 'status' => 'Pending', 'created_by' => $user->id],
+            ['budget_quantity' => 120, 'status' => 'Pending', 'created_by' => $user->id],
+            ['budget_quantity' => 130, 'status' => 'Pending', 'created_by' => $user->id],
+            ['budget_quantity' => 140, 'status' => 'Pending', 'created_by' => $user->id],
+            ['budget_quantity' => 150, 'status' => 'Pending', 'created_by' => $user->id],
+        ]);
+
+        // Assert pending count (pending: 5) is visible in option text
+        $response = $this->actingAs($user)->get(route('account-budgets.index'));
+        
+        $response->assertStatus(200);
+        $response->assertSee('Pending Project (pending: 5)');
+    }
 }

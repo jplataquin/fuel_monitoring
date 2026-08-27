@@ -379,7 +379,7 @@ class BulkUtilizationUploadTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        $response->assertHeader('Content-Disposition', 'attachment; filename=utilization_bulk_template_t-500.xlsx');
+        $response->assertHeader('Content-Disposition', 'attachment; filename="' . $this->asset->fleet_no . ' - Bulk Utilization Upload.xlsx"');
     }
 
     public function test_bulk_upload_chunk_uploads_sequentially_and_parses(): void

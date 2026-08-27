@@ -24,8 +24,11 @@
                             <select name="chargeable_account_id" onchange="this.form.submit()" class="form-select bg-dark border-secondary text-white rounded-3 p-2.5 focus-ring focus-ring-primary">
                                 <option value="">Select Chargeable Account</option>
                                 @foreach($accounts as $acc)
+                                    @php
+                                        $pendingCount = $acc->budgets()->where('status', 'Pending')->count();
+                                    @endphp
                                     <option value="{{ $acc->id }}" {{ request('chargeable_account_id') == $acc->id ? 'selected' : '' }}>
-                                        {{ $acc->name }}
+                                        {{ $acc->name }}@if($pendingCount > 0) (pending: {{ $pendingCount }})@endif
                                     </option>
                                 @endforeach
                             </select>
