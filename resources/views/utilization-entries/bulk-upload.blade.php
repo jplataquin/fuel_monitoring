@@ -29,7 +29,7 @@
         <div class="row g-4 mb-5">
             <!-- Instructions and Excel Spec -->
             <div class="col-lg-4">
-                <div class="card bg-dark border-secondary border-opacity-25 shadow-sm h-100">
+                <div class="card bg-dark border-secondary border-opacity-25 h-100">
                     <div class="card-body p-4">
                         <h4 class="h5 fw-bold text-light mb-3 d-flex align-items-center">
                             <span class="bg-primary p-1 rounded-circle me-2" style="width: 8px; height: 8px;"></span>
@@ -46,45 +46,54 @@
                             </a>
                         </div>
 
-                        <h5 class="small fw-bold text-secondary text-uppercase tracking-wider mb-2" style="font-size: 0.7rem;">Expected Columns (Headers)</h5>
-                        <ul class="list-group list-group-flush bg-transparent border-0 ps-0 mb-4" style="font-size: 0.8rem;">
-                            <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
-                                <strong>Date</strong>: YYYY-MM-DD or MM/DD/YYYY format
-                            </li>
-                            <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
-                                <strong>Start Time & End Time</strong>: HH:MM (24h format, e.g. 08:30)
-                            </li>
-                            <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
-                                <strong>Personnel In-Charge</strong>: Name of driver or operator
-                            </li>
-                            <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
-                                <strong>Charged To</strong>: Exact active Chargeable Account name
-                            </li>
-                            <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
-                                <strong>Sub Account</strong>: Exact Sub-account name (required if not unbudgeted)
-                            </li>
-                            <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
-                                <strong>Calculation Type</strong>: <em>Kilometer Reading</em>, <em>Hour Reading</em>, <em>Timeframe</em>, or <em>Actual Hours</em>
-                            </li>
-                            <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
-                                <strong>Start Reading & End Reading</strong>: Numeric values (required for Kilometer/Hour Reading types)
-                            </li>
-                            <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
-                                <strong>Actual Hours</strong>: Decimal hours (required for Actual Hours type)
-                            </li>
-                            <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
-                                <strong>Unbudgeted</strong>: <em>Yes</em> / <em>No</em> or <em>1</em> / <em>0</em>
-                            </li>
-                            <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
-                                <strong>Particulars / Mission</strong>: Description of the task
-                            </li>
-                            <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
-                                <strong>Reference</strong>: Optional string
-                            </li>
-                            <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
-                                <strong>Remarks</strong>: Optional additional comments
-                            </li>
-                        </ul>
+                        <h5 class="small fw-bold text-secondary text-uppercase tracking-wider mb-3" style="font-size: 0.75rem;">Expected Columns (Headers)</h5>
+                        
+                        <div class="mb-4">
+                            <small class="text-primary text-uppercase fw-semibold tracking-wider d-block mb-1" style="font-size: 0.75rem;">1. Core Metadata</small>
+                            <ul class="list-group list-group-flush bg-transparent border-0 ps-0 mb-3" style="font-size: 0.75rem;">
+                                <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
+                                    <strong>Date</strong>: YYYY-MM-DD or MM/DD/YYYY
+                                </li>
+                                <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
+                                    <strong>Start Time & End Time</strong>: HH:MM (24h format)
+                                </li>
+                                <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
+                                    <strong>Personnel In-Charge</strong>: driver or operator name
+                                </li>
+                            </ul>
+
+                            <small class="text-primary text-uppercase fw-semibold tracking-wider d-block mb-1" style="font-size: 0.75rem;">2. Allocation & Calculation</small>
+                            <ul class="list-group list-group-flush bg-transparent border-0 ps-0 mb-3" style="font-size: 0.75rem;">
+                                <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
+                                    <strong>Charged To</strong>: Active Chargeable Account name
+                                </li>
+                                <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
+                                    <strong>Sub Account</strong>: Sub-account name (required if budgeted)
+                                </li>
+                                <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
+                                    <strong>Calculation Type</strong>: <em>Kilometer Reading</em>, <em>Hour Reading</em>, <em>Timeframe</em>, or <em>Actual Hours</em>
+                                </li>
+                            </ul>
+
+                            <small class="text-primary text-uppercase fw-semibold tracking-wider d-block mb-1" style="font-size: 0.75rem;">3. Readings & Particulars</small>
+                            <ul class="list-group list-group-flush bg-transparent border-0 ps-0" style="font-size: 0.75rem;">
+                                <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
+                                    <strong>Start Reading & End Reading</strong>: Numeric values
+                                </li>
+                                <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
+                                    <strong>Actual Hours</strong>: Decimal hours (for Actual Hours type)
+                                </li>
+                                <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
+                                    <strong>Unbudgeted</strong>: <em>Yes</em> / <em>No</em> or <em>1</em> / <em>0</em>
+                                </li>
+                                <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
+                                    <strong>Particulars / Mission</strong>: Description of task
+                                </li>
+                                <li class="list-group-item bg-transparent text-light border-secondary border-opacity-25 px-0 py-2">
+                                    <strong>Reference / Remarks</strong>: Optional strings
+                                </li>
+                            </ul>
+                        </div>
 
                         <div class="bg-primary bg-opacity-10 border border-primary border-opacity-20 p-3 rounded-3 text-primary small">
                             <h6 class="fw-bold mb-1">💡 Reading Increments Notice</h6>
@@ -100,7 +109,7 @@
 
             <!-- Upload Area -->
             <div class="col-lg-8">
-                <div class="card bg-dark border-secondary border-opacity-25 shadow-sm h-100">
+                <div class="card bg-dark border-secondary border-opacity-25 h-100">
                     <div class="card-body p-4 p-md-5 d-flex flex-column justify-content-center">
                         <h4 class="h5 fw-bold text-light mb-4">Upload Spreadsheet File</h4>
                         
@@ -129,7 +138,7 @@
 
         <!-- Preview Results Container -->
         <div id="preview-container" class="d-none">
-            <div class="card bg-dark border-secondary border-opacity-25 shadow-sm mb-4">
+            <div class="card bg-dark border-secondary border-opacity-25 mb-4">
                 <div class="card-header bg-secondary bg-opacity-10 py-4 px-4 border-bottom border-secondary border-opacity-25 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
                     <div>
                         <h3 class="h5 fw-bold text-light mb-1">Tabular Preview</h3>
@@ -151,7 +160,7 @@
                     </div>
                 </div>
                 <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                    <table class="table table-dark table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                    <table class="table table-dark table-hover align-middle mb-0" style="font-size: 0.75rem;">
                         <thead class="sticky-top bg-dark text-secondary text-uppercase small tracking-wider" style="z-index: 5;">
                             <tr>
                                 <th class="py-3 px-4" style="width: 60px;">#</th>
