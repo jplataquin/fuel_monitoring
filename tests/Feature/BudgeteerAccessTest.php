@@ -175,4 +175,46 @@ class BudgeteerAccessTest extends TestCase
         $response->assertSee('Active Account');
         $response->assertDontSee('Inactive Account');
     }
+
+    public function test_navigation_displays_pending_budget_allocation_bubble_counter(): void
+    {
+        $user = User::factory()->create(['role' => 'budgeteer']);
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Account']);
+        
+        // Ensure no pending budget exists first
+        \App\Models\SubAccountBudget::query()->delete();
+
+        // Get index page and assert no bubble is shown
+        $response = $this->actingAs($user)->get(route('account-budgets.index'));
+        $response->assertStatus(200);
+        $response->assertDontSee('badge rounded-pill bg-danger');
+
+        // Create 3 pending budgets
+        $subAccount->budgets()->createMany([
+            ['budget_quantity' => 100, 'status' => 'Pending', 'created_by' => $user->id],
+            ['budget_quantity' => 150, 'status' => 'Pending', 'created_by' => $user->id],
+            ['budget_quantity' => 200, 'status' => 'Pending', 'created_by' => $user->id],
+        ]);
+
+        // Get index page and assert bubble is shown with count '3'
+        $response = $this->actingAs($user)->get(route('account-budgets.index'));
+        $response->assertStatus(200);
+        $response->assertSee('3');
+
+        // Create 100 pending budgets to verify truncation/cap of 99
+        // There are already 3, so we create 97 more to make it 100
+        for ($i = 0; $i < 97; $i++) {
+            $subAccount->budgets()->create([
+                'budget_quantity' => 50,
+                'status' => 'Pending',
+                'created_by' => $user->id,
+            ]);
+        }
+
+        // Get index page and assert bubble shows '99+'
+        $response = $this->actingAs($user)->get(route('account-budgets.index'));
+        $response->assertStatus(200);
+        $response->assertSee('99+');
+    }
 }

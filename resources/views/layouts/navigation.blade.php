@@ -28,7 +28,7 @@
                             })->count();
                         @endphp
                         @if($pendingCount > 0)
-                            <span class="badge rounded-pill bg-danger ms-1 align-middle font-monospace" style="font-size: 0.7rem; padding: 0.25em 0.55em;">
+                            <span class="badge rounded-pill bg-danger ms-1 align-middle font-monospace" style="font-size: 0.75rem; padding: 0.25em 0.55em;">
                                 {{ $pendingCount > 99 ? '99+' : $pendingCount }}
                             </span>
                         @endif
@@ -55,7 +55,17 @@
                 @endif
                 @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('account-budgets.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('account-budgets.index') }}">{{ __('Budget') }}</a>
+                    <a class="nav-link {{ request()->routeIs('account-budgets.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('account-budgets.index') }}">
+                        {{ __('Budget') }}
+                        @php
+                            $pendingBudgetCount = \App\Models\SubAccountBudget::where('status', 'Pending')->count();
+                        @endphp
+                        @if($pendingBudgetCount > 0)
+                            <span class="badge rounded-pill bg-danger ms-1 align-middle font-monospace" style="font-size: 0.75rem; padding: 0.25em 0.55em;">
+                                {{ $pendingBudgetCount > 99 ? '99+' : $pendingBudgetCount }}
+                            </span>
+                        @endif
+                    </a>
                 </li>
                 @endif
 
@@ -79,7 +89,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg border-secondary mt-2">
                         <li class="px-3 py-2 border-bottom border-secondary mb-1">
-                            <small class="text-secondary text-uppercase fw-bold tracking-widest" style="font-size: 0.65rem;">Account</small>
+                            <small class="text-secondary text-uppercase fw-bold tracking-widest" style="font-size: 0.75rem;">Account</small>
                             <p class="mb-0 fw-semibold text-truncate" style="max-width: 150px;">{{ Auth::user()->name }}</p>
                         </li>
                         <li><a class="dropdown-item" href="{{ route('profile.edit') }}">{{ __('Profile') }}</a></li>
