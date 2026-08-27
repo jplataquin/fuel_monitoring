@@ -307,46 +307,51 @@
 
         <!-- Utilization Logs -->
         <div class="card bg-dark border-secondary border-opacity-25 overflow-hidden">
-            <div class="card-header bg-secondary bg-opacity-10 py-4 px-4 border-bottom border-secondary border-opacity-25">
-                <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4">
-                    <div class="d-flex align-items-center gap-2">
-                        <h3 class="h5 fw-bold text-light mb-0 tracking-tight">{{ __('Utilization Logs') }}</h3>
-                        <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest" data-bs-toggle="modal" data-bs-target="#utilizationModal" style="font-size: 0.75rem;">
-                            <svg width="12" height="12" class="me-1 d-inline-block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                            Register
+            <div class="card-header bg-secondary bg-opacity-10 py-3 px-4 border-bottom border-secondary border-opacity-25">
+                <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+                    <h3 class="h5 fw-bold text-light mb-0 tracking-tight">{{ __('Utilization Logs') }}</h3>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-bold text-uppercase tracking-widest d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#utilizationModal" style="font-size: 0.75rem;">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                            Register Entry
                         </button>
-                        <a href="{{ route('assets.utilization-entries.bulk-upload', $asset) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest d-inline-flex align-items-center" style="font-size: 0.75rem;">
-                            <svg width="12" height="12" class="me-1 d-inline-block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <a href="{{ route('assets.utilization-entries.bulk-upload', $asset) }}" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold text-uppercase tracking-widest d-inline-flex align-items-center gap-2" style="font-size: 0.75rem;">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                             Bulk Upload
                         </a>
                     </div>
-                    
-                    <div class="d-flex flex-wrap align-items-center gap-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="text-secondary text-uppercase small fw-bold tracking-widest" style="font-size: 0.75rem;">From</span>
-                            <input id="filter_start_date" type="date" class="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-light" style="width: 130px;">
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="text-secondary text-uppercase small fw-bold tracking-widest" style="font-size: 0.75rem;">To</span>
-                            <input id="filter_end_date" type="date" class="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-light" style="width: 130px;">
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="text-secondary text-uppercase small fw-bold tracking-widest" style="font-size: 0.75rem;">Account</span>
-                            <select id="filter_chargeable_account_id" class="form-select form-select-sm bg-dark border-secondary border-opacity-50 text-light" style="width: 150px;">
-                                <option value="">All</option>
-                                @foreach($chargeableAccounts as $account)
-                                    <option value="{{ $account->id }}">{{ $account->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="text-secondary text-uppercase small fw-bold tracking-widest" style="font-size: 0.75rem;">Order ID</span>
-                            <input id="filter_fuel_order_id" type="number" class="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-light" style="width: 80px;" placeholder="ID">
-                        </div>
-                        <button onclick="applyFilter()" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest" style="font-size: 0.75rem;">
+                </div>
+            </div>
+            
+            <!-- Filter Shelf -->
+            <div class="bg-dark bg-opacity-50 py-3 px-4 border-bottom border-secondary border-opacity-10">
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label for="filter_start_date" class="form-label text-secondary text-uppercase fw-bold tracking-widest mb-2" style="font-size: 0.75rem;">From</label>
+                        <input id="filter_start_date" type="date" class="form-control bg-dark border-secondary border-opacity-50 text-light py-2 rounded-3">
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label for="filter_end_date" class="form-label text-secondary text-uppercase fw-bold tracking-widest mb-2" style="font-size: 0.75rem;">To</label>
+                        <input id="filter_end_date" type="date" class="form-control bg-dark border-secondary border-opacity-50 text-light py-2 rounded-3">
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label for="filter_chargeable_account_id" class="form-label text-secondary text-uppercase fw-bold tracking-widest mb-2" style="font-size: 0.75rem;">Charged To</label>
+                        <select id="filter_chargeable_account_id" class="form-select bg-dark border-secondary border-opacity-50 text-light py-2 rounded-3">
+                            <option value="">All Accounts</option>
+                            @foreach($chargeableAccounts as $account)
+                                <option value="{{ $account->id }}">{{ $account->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-1">
+                        <label for="filter_fuel_order_id" class="form-label text-secondary text-uppercase fw-bold tracking-widest mb-2" style="font-size: 0.75rem;">Order ID</label>
+                        <input id="filter_fuel_order_id" type="number" class="form-control bg-dark border-secondary border-opacity-50 text-light py-2 rounded-3" placeholder="ID">
+                    </div>
+                    <div class="col-12 col-md-2 d-flex gap-2">
+                        <button onclick="applyFilter()" class="btn btn-primary w-100 rounded-pill py-2 fw-bold text-uppercase tracking-widest" style="font-size: 0.75rem;">
                             Filter
                         </button>
-                        <button onclick="printFilteredLogs()" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest d-flex align-items-center gap-2" style="font-size: 0.75rem;">
+                        <button onclick="printFilteredLogs()" class="btn btn-outline-secondary w-100 rounded-pill py-2 fw-bold text-uppercase tracking-widest d-flex align-items-center justify-content-center gap-2" style="font-size: 0.75rem;">
                             <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
                             Print
                         </button>
