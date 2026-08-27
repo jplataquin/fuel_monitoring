@@ -45,7 +45,7 @@
         <div class="row g-4 mb-5">
             <!-- Asset Specs -->
             <div class="col-lg-8">
-                <div class="card h-100 bg-dark border-secondary border-opacity-25 shadow-sm">
+                <div class="card h-100 bg-dark border-secondary border-opacity-25">
                     <div class="card-body p-4 p-md-5">
                         <h3 class="text-secondary text-uppercase small fw-bold tracking-widest mb-4 d-flex align-items-center">
                             <span class="bg-primary bg-opacity-25 p-1 rounded-circle me-3" style="width: 24px; height: 4px;"></span>
@@ -57,7 +57,7 @@
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                                 </div>
                                 <div>
-                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.65rem;">Equipment Type</p>
+                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.75rem;">Equipment Type</p>
                                     <p class="h6 fw-bold text-light mb-0">{{ $asset->assetType->name }}</p>
                                 </div>
                             </div>
@@ -66,7 +66,7 @@
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" /></svg>
                                 </div>
                                 <div>
-                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.65rem;">Plate Number</p>
+                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.75rem;">Plate Number</p>
                                     <p class="h6 fw-bold text-light font-monospace mb-0">{{ $asset->plate_no ?? 'UNASSIGNED' }}</p>
                                 </div>
                             </div>
@@ -75,7 +75,7 @@
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
                                 </div>
                                 <div>
-                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.65rem;">Tank Capacity</p>
+                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.75rem;">Tank Capacity</p>
                                     <p class="h6 fw-bold text-light mb-0">{{ number_format($asset->tank_capacity, 2) }} <span class="small text-secondary fw-medium ms-1">LITERS</span></p>
                                 </div>
                             </div>
@@ -84,7 +84,7 @@
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
                                 </div>
                                 <div>
-                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.65rem;">Fuel Type</p>
+                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.75rem;">Fuel Type</p>
                                     <p class="h6 fw-bold text-light text-uppercase mb-0">{{ $asset->fuel_type ?? 'Diesel' }}</p>
                                 </div>
                             </div>
@@ -93,7 +93,7 @@
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
                                 </div>
                                 <div>
-                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.65rem;">Factor (KM)</p>
+                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.75rem;">Factor (KM)</p>
                                     <p class="h6 fw-bold text-light mb-0">{{ $asset->fuel_factor_km ?? '0.00' }} <span class="small text-secondary fw-medium ms-1">KM/L</span></p>
                                 </div>
                             </div>
@@ -102,7 +102,7 @@
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 </div>
                                 <div>
-                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.65rem;">Factor (HR)</p>
+                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.75rem;">Factor (HR)</p>
                                     <p class="h6 fw-bold text-light mb-0">{{ $asset->fuel_factor_hr ?? '0.00' }} <span class="small text-secondary fw-medium ms-1">L/HR</span></p>
                                 </div>
                             </div>
@@ -111,7 +111,7 @@
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.487V4.513a2 2 0 011.553-1.943L9 1.5l5.447 2.724A2 2 0 0116 6.164v10.973a2 2 0 01-1.553 1.943L9 21.5z" /></svg>
                                 </div>
                                 <div>
-                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.65rem;">Last Odometer</p>
+                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.75rem;">Last Odometer</p>
                                     <p class="h6 fw-bold text-light mb-0">{{ number_format($asset->last_kilometer_reading, 2) }} <span class="small text-secondary fw-medium ms-1">KM</span></p>
                                 </div>
                             </div>
@@ -120,7 +120,7 @@
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 </div>
                                 <div>
-                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.65rem;">Last Engine Hours</p>
+                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.75rem;">Last Engine Hours</p>
                                     <p class="h6 fw-bold text-light mb-0">{{ number_format($asset->last_engine_hours, 2) }} <span class="small text-secondary fw-medium ms-1">HRS</span></p>
                                 </div>
                             </div>
@@ -129,7 +129,7 @@
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 </div>
                                 <div>
-                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.65rem;">Last Time</p>
+                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.75rem;">Last Time</p>
                                     <p class="h6 fw-bold text-light mb-0">{{ $asset->last_time ? date('H:i', strtotime($asset->last_time)) : 'N/A' }}</p>
                                 </div>
                             </div>
@@ -138,7 +138,7 @@
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 </div>
                                 <div>
-                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.65rem;">Last Date</p>
+                                    <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-1" style="font-size: 0.75rem;">Last Date</p>
                                     <p class="h6 fw-bold text-light mb-0">{{ $asset->last_date ? date('M d, Y', strtotime($asset->last_date)) : 'N/A' }}</p>
                                 </div>
                             </div>
@@ -148,16 +148,14 @@
             </div>
             
             <div class="col-lg-4">
-                <div class="card h-100 bg-primary border-0 shadow-lg text-center overflow-hidden position-relative">
+                <div class="card h-100 bg-dark border-secondary border-opacity-25 text-center overflow-hidden position-relative">
                     <div class="card-body p-5 d-flex flex-column justify-content-center position-relative z-1">
-                        <p class="text-white text-opacity-75 text-uppercase small fw-bold tracking-widest mb-4">Lifecycle Stats</p>
+                        <p class="text-secondary text-uppercase small fw-bold tracking-widest mb-4">Lifecycle Stats</p>
                         <div class="mb-2">
-                            <p class="display-3 fw-bold text-white mb-0" id="total-logs">0</p>
+                            <p class="display-3 fw-bold text-primary mb-0" id="total-logs">0</p>
                         </div>
-                        <p class="small fw-bold text-white text-opacity-75 text-uppercase tracking-widest">Total Logs</p>
+                        <p class="small fw-bold text-light text-opacity-75 text-uppercase tracking-widest">Total Logs</p>
                     </div>
-                    <!-- Decorative background element -->
-                    <div class="position-absolute bottom-0 end-0 bg-white opacity-10 rounded-circle" style="width: 150px; height: 150px; transform: translate(30%, 30%); filter: blur(40px);"></div>
                 </div>
             </div>
         </div>
@@ -308,16 +306,16 @@
         </div>
 
         <!-- Utilization Logs -->
-        <div class="card bg-dark border-secondary border-opacity-25 shadow-sm overflow-hidden">
+        <div class="card bg-dark border-secondary border-opacity-25 overflow-hidden">
             <div class="card-header bg-secondary bg-opacity-10 py-4 px-4 border-bottom border-secondary border-opacity-25">
                 <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4">
                     <div class="d-flex align-items-center gap-2">
                         <h3 class="h5 fw-bold text-light mb-0 tracking-tight">{{ __('Utilization Logs') }}</h3>
-                        <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest" data-bs-toggle="modal" data-bs-target="#utilizationModal" style="font-size: 0.7rem;">
+                        <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest" data-bs-toggle="modal" data-bs-target="#utilizationModal" style="font-size: 0.75rem;">
                             <svg width="12" height="12" class="me-1 d-inline-block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                             Register
                         </button>
-                        <a href="{{ route('assets.utilization-entries.bulk-upload', $asset) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest d-inline-flex align-items-center" style="font-size: 0.7rem;">
+                        <a href="{{ route('assets.utilization-entries.bulk-upload', $asset) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest d-inline-flex align-items-center" style="font-size: 0.75rem;">
                             <svg width="12" height="12" class="me-1 d-inline-block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                             Bulk Upload
                         </a>
@@ -325,15 +323,15 @@
                     
                     <div class="d-flex flex-wrap align-items-center gap-3">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="text-secondary text-uppercase small fw-bold tracking-widest" style="font-size: 0.6rem;">From</span>
+                            <span class="text-secondary text-uppercase small fw-bold tracking-widest" style="font-size: 0.75rem;">From</span>
                             <input id="filter_start_date" type="date" class="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-light" style="width: 130px;">
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="text-secondary text-uppercase small fw-bold tracking-widest" style="font-size: 0.6rem;">To</span>
+                            <span class="text-secondary text-uppercase small fw-bold tracking-widest" style="font-size: 0.75rem;">To</span>
                             <input id="filter_end_date" type="date" class="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-light" style="width: 130px;">
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="text-secondary text-uppercase small fw-bold tracking-widest" style="font-size: 0.6rem;">Account</span>
+                            <span class="text-secondary text-uppercase small fw-bold tracking-widest" style="font-size: 0.75rem;">Account</span>
                             <select id="filter_chargeable_account_id" class="form-select form-select-sm bg-dark border-secondary border-opacity-50 text-light" style="width: 150px;">
                                 <option value="">All</option>
                                 @foreach($chargeableAccounts as $account)
@@ -342,13 +340,13 @@
                             </select>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="text-secondary text-uppercase small fw-bold tracking-widest" style="font-size: 0.6rem;">Order ID</span>
+                            <span class="text-secondary text-uppercase small fw-bold tracking-widest" style="font-size: 0.75rem;">Order ID</span>
                             <input id="filter_fuel_order_id" type="number" class="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-light" style="width: 80px;" placeholder="ID">
                         </div>
-                        <button onclick="applyFilter()" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest" style="font-size: 0.7rem;">
+                        <button onclick="applyFilter()" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest" style="font-size: 0.75rem;">
                             Filter
                         </button>
-                        <button onclick="printFilteredLogs()" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest d-flex align-items-center gap-2" style="font-size: 0.7rem;">
+                        <button onclick="printFilteredLogs()" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold text-uppercase tracking-widest d-flex align-items-center gap-2" style="font-size: 0.75rem;">
                             <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
                             Print
                         </button>
@@ -620,7 +618,7 @@
                                 end.setHours(parseInt(endParts[0], 10), parseInt(endParts[1], 10), 0, 0);
                                 if (end < start) end.setDate(end.getDate() + 1);
                                 const diffHrs = (end - start) / (1000 * 60 * 60);
-                                operationHoursHtml = `<div class="mt-1"><span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25 fw-bold text-uppercase tracking-widest" style="font-size: 0.6rem;">${diffHrs.toFixed(2)} hrs</span></div>`;
+                                operationHoursHtml = `<div class="mt-1"><span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25 fw-bold text-uppercase tracking-widest" style="font-size: 0.75rem;">${diffHrs.toFixed(2)} hrs</span></div>`;
                             }
                         }
                         
@@ -649,12 +647,12 @@
                         row.innerHTML = `
                             <td class="ps-4 py-3">
                                 <div class="fw-bold text-light small">${formattedDate}</div>
-                                <div class="text-primary small fw-bold text-uppercase tracking-widest" style="font-size: 0.65rem;">${entry.start_time || '—'} - ${entry.end_time || '—'}</div>
+                                <div class="text-primary small fw-bold text-uppercase tracking-widest" style="font-size: 0.75rem;">${entry.start_time || '—'} - ${entry.end_time || '—'}</div>
                                 ${operationHoursHtml}
                             </td>
                             <td class="py-3 text-secondary small" title="${entry.particulars || ''}">${particularsTruncated}</td>
                             <td class="py-3 text-center">
-                                ${entry.unbudgeted ? '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 text-uppercase fw-bold tracking-widest" style="font-size: 0.6rem;">Yes</span>' : '<span class="text-secondary opacity-25">—</span>'}
+                                ${entry.unbudgeted ? '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 text-uppercase fw-bold tracking-widest" style="font-size: 0.75rem;">Yes</span>' : '<span class="text-secondary opacity-25">—</span>'}
                             </td>
                             <td class="py-3" title="${accountText !== '—' ? accountText : ''}">
                                 <div class="text-secondary small">
@@ -664,7 +662,7 @@
                             <td class="py-3 text-center font-monospace small text-light">${parseFloat(entry.start_kilometer_reading).toLocaleString()} - ${parseFloat(entry.end_kilometer_reading).toLocaleString()}</td>
                             <td class="py-3 text-center font-monospace small text-light">${parseFloat(entry.start_hour_reading).toLocaleString()} - ${parseFloat(entry.end_hour_reading).toLocaleString()}</td>
                             <td class="pe-4 py-3 text-center">
-                                ${entry.fuel_order_id ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-bold" style="font-size: 0.65rem;">#${entry.fuel_order_id}</span>` : '<span class="text-secondary opacity-25">—</span>'}
+                                ${entry.fuel_order_id ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-bold" style="font-size: 0.75rem;">#${entry.fuel_order_id}</span>` : '<span class="text-secondary opacity-25">—</span>'}
                             </td>
                         `;
                         body.appendChild(row);
@@ -678,23 +676,23 @@
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
                                     <div class="fw-bold text-light small">${formattedDate}</div>
-                                    <div class="text-primary small fw-bold text-uppercase tracking-widest" style="font-size: 0.65rem;">${entry.start_time || '—'} - ${entry.end_time || '—'}</div>
+                                    <div class="text-primary small fw-bold text-uppercase tracking-widest" style="font-size: 0.75rem;">${entry.start_time || '—'} - ${entry.end_time || '—'}</div>
                                     ${operationHoursHtml}
                                 </div>
                                 ${entry.fuel_order_id ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-bold">#${entry.fuel_order_id}</span>` : ''}
                             </div>
-                            <p class="small text-secondary mb-2" title="${entry.particulars || ''}">${particularsTruncated} ${entry.unbudgeted ? '<span class="badge bg-danger bg-opacity-10 text-danger ms-2" style="font-size: 0.6rem;">UNBUDGETED</span>' : ''}</p>
-                            <p class="text-primary small fw-bold text-uppercase tracking-widest mb-3" style="font-size: 0.6rem;" title="${accountText !== '—' ? accountText : ''}">
+                            <p class="small text-secondary mb-2" title="${entry.particulars || ''}">${particularsTruncated} ${entry.unbudgeted ? '<span class="badge bg-danger bg-opacity-10 text-danger ms-2" style="font-size: 0.75rem;">UNBUDGETED</span>' : ''}</p>
+                            <p class="text-primary small fw-bold text-uppercase tracking-widest mb-3" style="font-size: 0.75rem;" title="${accountText !== '—' ? accountText : ''}">
                                 <span class="text-secondary opacity-50">ACCOUNT:</span> 
                                 ${chargedToTruncated}
                             </p>
                             <div class="row g-2 pt-3 border-top border-secondary border-opacity-10">
                                 <div class="col-6">
-                                    <p class="text-secondary text-uppercase fw-bold tracking-widest mb-1" style="font-size: 0.55rem;">Kilometers</p>
+                                    <p class="text-secondary text-uppercase fw-bold tracking-widest mb-1" style="font-size: 0.75rem;">Kilometers</p>
                                     <p class="small font-monospace text-light mb-0">${parseFloat(entry.start_kilometer_reading).toLocaleString()} - ${parseFloat(entry.end_kilometer_reading).toLocaleString()}</p>
                                 </div>
                                 <div class="col-6 text-end">
-                                    <p class="text-secondary text-uppercase fw-bold tracking-widest mb-1" style="font-size: 0.55rem;">Hours</p>
+                                    <p class="text-secondary text-uppercase fw-bold tracking-widest mb-1" style="font-size: 0.75rem;">Hours</p>
                                     <p class="small font-monospace text-light mb-0">${parseFloat(entry.start_hour_reading).toLocaleString()} - ${parseFloat(entry.end_hour_reading).toLocaleString()}</p>
                                 </div>
                             </div>
