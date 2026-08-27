@@ -45,11 +45,13 @@ class ChargeableAccountController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:chargeable_accounts',
+            'name' => ['required', 'string', 'max:255', 'unique:chargeable_accounts', 'not_regex:/[:]/'],
             'classification' => 'required|in:Running,Scoped',
             'start_date' => 'required_if:classification,Scoped|nullable|date',
             'end_date' => 'required_if:classification,Scoped|nullable|date|after_or_equal:start_date',
             'status' => 'required|in:Active,Inactive',
+        ], [
+            'name.not_regex' => 'The Account Name cannot contain colons (:).',
         ]);
 
         if ($validated['classification'] === 'Running') {
@@ -70,11 +72,13 @@ class ChargeableAccountController extends Controller
     public function update(Request $request, ChargeableAccount $chargeableAccount): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:chargeable_accounts,name,'.$chargeableAccount->id,
+            'name' => ['required', 'string', 'max:255', 'unique:chargeable_accounts,name,'.$chargeableAccount->id, 'not_regex:/[:]/'],
             'classification' => 'required|in:Running,Scoped',
             'start_date' => 'required_if:classification,Scoped|nullable|date',
             'end_date' => 'required_if:classification,Scoped|nullable|date|after_or_equal:start_date',
             'status' => 'required|in:Active,Inactive',
+        ], [
+            'name.not_regex' => 'The Account Name cannot contain colons (:).',
         ]);
 
         if ($validated['classification'] === 'Running') {

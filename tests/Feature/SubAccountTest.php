@@ -437,4 +437,26 @@ class SubAccountTest extends TestCase
 
         $response->assertSessionHasErrors('accomplishment');
     }
+
+    public function test_sub_account_name_cannot_contain_colons(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
+
+        // Create with colon - should fail validation
+        $response = $this->actingAs($user)->post(route('chargeable-accounts.sub-accounts.store', $account), [
+            'name' => 'Sub: Account',
+        ]);
+
+        $response->assertSessionHasErrors('name');
+
+        // Update with colon - should fail validation
+        $subAccount = $account->subAccounts()->create(['name' => 'Valid Sub']);
+        $response2 = $this->actingAs($user)->patch(route('sub-accounts.update', $subAccount), [
+            'name' => 'Valid: Sub',
+        ]);
+
+        $response2->assertSessionHasErrors('name');
+    }
 }

@@ -287,4 +287,29 @@ class ChargeableAccountFeatureTest extends TestCase
         $response->assertSee(now()->format('M d, Y'));
         $response->assertDontSee('Account Information');
     }
+
+    public function test_chargeable_account_name_cannot_contain_colons(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+        $user = User::factory()->create(['role' => 'administrator']);
+
+        // Create with colon - should fail validation
+        $response = $this->actingAs($user)->post(route('chargeable-accounts.store'), [
+            'name' => 'Project: Alpha',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $response->assertSessionHasErrors('name');
+
+        // Update with colon - should fail validation
+        $account = ChargeableAccount::create(['name' => 'Valid Project', 'status' => 'Active', 'classification' => 'Running']);
+        $response2 = $this->actingAs($user)->patch(route('chargeable-accounts.update', $account), [
+            'name' => 'Valid: Project',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $response2->assertSessionHasErrors('name');
+    }
 }

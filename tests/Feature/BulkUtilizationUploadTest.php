@@ -98,7 +98,7 @@ class BulkUtilizationUploadTest extends TestCase
             'Start Time',
             'End Time',
             'Personnel In-Charge',
-            'Account - Sub Account',
+            'Account :: Sub Account',
             'Calculation Type',
             'Start Reading',
             'End Reading',
@@ -200,9 +200,9 @@ class BulkUtilizationUploadTest extends TestCase
     {
         $rows = [
             // Row 1: Active account & sub-account combination
-            ['2026-08-26', '08:00', '10:00', 'John Doe', 'Project Alpha - Civil Works', 'Kilometer Reading', '1000', '1050', '0', 'First run', 'REF-01', ''],
+            ['2026-08-26', '08:00', '10:00', 'John Doe', 'Project Alpha :: Civil Works', 'Kilometer Reading', '1000', '1050', '0', 'First run', 'REF-01', ''],
             // Row 2: Account & Unbudgeted combination
-            ['2026-08-26', '10:30', '12:00', 'John Doe', 'Project Alpha - Unbudgeted', 'Kilometer Reading', '1050', '1100', '0', 'Unbudgeted run', 'REF-02', '']
+            ['2026-08-26', '10:30', '12:00', 'John Doe', 'Project Alpha :: Unbudgeted', 'Kilometer Reading', '1050', '1100', '0', 'Unbudgeted run', 'REF-02', '']
         ];
 
         $file = $this->createCombinedCsvFile($rows);

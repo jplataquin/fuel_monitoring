@@ -14,7 +14,7 @@
 
                     <div class="mb-4">
                         <label for="name" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Sub-Account Name</label>
-                        <input id="name" name="name" type="text" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-primary" value="{{ old('name', $subAccount->name) }}" required autofocus>
+                        <input id="name" name="name" type="text" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-primary" value="{{ old('name', $subAccount->name) }}" required autofocus pattern="^[^:]+$" title="Colons (:) are not allowed in the sub-account name">
                         @error('name')
                             <div class="text-danger small mt-2 fw-bold">{{ $message }}</div>
                         @enderror

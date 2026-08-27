@@ -80,7 +80,7 @@
                     <form action="{{ route('chargeable-accounts.sub-accounts.store', $chargeableAccount) }}" method="POST">
                         @csrf
                         <div class="mb-3">
-                            <input type="text" name="name" placeholder="e.g. Project Alpha" required class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-info">
+                            <input type="text" name="name" placeholder="e.g. Project Alpha" required class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-info" pattern="^[^:]+$" title="Colons (:) are not allowed in the sub-account name">
                             @if ($errors->any())
                                 <div class="text-danger small fw-bold mt-2">
                                     <ul class="list-unstyled mb-0">

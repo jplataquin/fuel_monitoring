@@ -738,17 +738,17 @@ class UtilizationEntryController extends Controller
         };
 
         // Parse combined account and sub-account
-        $combinedValue = trim($findValue(['account_sub_account', 'account_-_sub_account', 'account__sub_account', 'charged_to', 'account']) ?? '');
+        $combinedValue = trim($findValue(['account_sub_account', 'account_::_sub_account', 'account__sub_account', 'charged_to', 'account']) ?? '');
 
         $accountName = '';
         $subAccountName = '';
         $unbudgeted = false;
 
-        if (!empty($combinedValue) && str_contains($combinedValue, ' - ')) {
-            $parts = explode(' - ', $combinedValue);
+        if (!empty($combinedValue) && str_contains($combinedValue, ' :: ')) {
+            $parts = explode(' :: ', $combinedValue);
             if (count($parts) >= 2) {
                 $subName = trim(array_pop($parts));
-                $accName = trim(implode(' - ', $parts));
+                $accName = trim(implode(' :: ', $parts));
 
                 $accountName = $accName;
                 if (strtolower($subName) === 'unbudgeted') {
@@ -1043,7 +1043,7 @@ class UtilizationEntryController extends Controller
             'Start Time (HH:MM)',
             'End Time (HH:MM)',
             'Personnel In-Charge',
-            'Account - Sub Account', // Column E
+            'Account :: Sub Account', // Column E
             'Calculation Type',      // Column F
             'Start Reading',         // Column G
             'End Reading',           // Column H
@@ -1070,9 +1070,9 @@ class UtilizationEntryController extends Controller
 
         $dropdownOptions = [];
         foreach ($accounts as $account) {
-            $dropdownOptions[] = "{$account->name} - Unbudgeted";
+            $dropdownOptions[] = "{$account->name} :: Unbudgeted";
             foreach ($account->subAccounts as $sub) {
-                $dropdownOptions[] = "{$account->name} - {$sub->name}";
+                $dropdownOptions[] = "{$account->name} :: {$sub->name}";
             }
         }
         sort($dropdownOptions);
@@ -1104,7 +1104,7 @@ class UtilizationEntryController extends Controller
                 $validationAccount->setErrorTitle('Input error');
                 $validationAccount->setError('Value is not in list');
                 $validationAccount->setPromptTitle('Pick from list');
-                $validationAccount->setPrompt('Please choose an Account - Sub Account combination');
+                $validationAccount->setPrompt('Please choose an Account :: Sub Account combination');
                 $validationAccount->setFormula1('Options!$A$1:$A$' . count($dropdownOptions));
             }
 

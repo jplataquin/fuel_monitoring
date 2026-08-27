@@ -43,9 +43,12 @@ class SubAccountController extends Controller
                     ->where(fn ($query) => $query->where('chargeable_account_id', $subAccount->chargeable_account_id))
                     ->ignore($subAccount->id)
                     ->whereNull('deleted_at'),
+                'not_regex:/[:]/',
             ],
             'accomplishment' => 'sometimes|numeric|min:0|max:100',
             'type' => 'nullable|in:Controlled,Uncontrolled',
+        ], [
+            'name.not_regex' => 'The Sub-Account Name cannot contain colons (:).',
         ]);
 
         $subAccount->update($validated);
@@ -63,7 +66,10 @@ class SubAccountController extends Controller
                 Rule::unique('sub_accounts')
                     ->where(fn ($query) => $query->where('chargeable_account_id', $chargeableAccount->id))
                     ->whereNull('deleted_at'),
+                'not_regex:/[:]/',
             ],
+        ], [
+            'name.not_regex' => 'The Sub-Account Name cannot contain colons (:).',
         ]);
 
         $chargeableAccount->subAccounts()->create($validated);
