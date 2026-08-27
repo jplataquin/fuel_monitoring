@@ -49,7 +49,7 @@
             <div class="row g-4">
                 <!-- Chart Card -->
                 <div class="col-12 col-xl-8">
-                    <div class="card h-100 bg-dark border-secondary border-opacity-50 rounded-4 p-4 shadow-sm">
+                    <div class="card h-100 bg-dark border-secondary border-opacity-50 rounded-4 p-4">
                         <div class="card-header bg-transparent border-0 p-0 mb-4">
                             <h3 class="h5 fw-bold text-light mb-1">Sub-Account Remaining Balances</h3>
                             <p class="text-secondary small mb-0">Visual comparison of remaining fuel budgets in Liters (L).</p>
@@ -72,7 +72,7 @@
 
                 <!-- Metrics Summary Card -->
                 <div class="col-12 col-xl-4">
-                    <div class="card h-100 bg-dark border-secondary border-opacity-50 rounded-4 p-4 shadow-sm">
+                    <div class="card h-100 bg-dark border-secondary border-opacity-50 rounded-4 p-4">
                         <div class="card-header bg-transparent border-0 p-0 mb-4">
                             <h3 class="h5 fw-bold text-light mb-1">Summary Statistics</h3>
                             <p class="text-secondary small mb-0">Overview of account totals.</p>
@@ -86,37 +86,37 @@
                             @endphp
 
                             <div class="vstack gap-3">
-                                <div class="p-3 bg-secondary bg-opacity-10 rounded-3 text-center">
-                                    <div class="text-secondary small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.65rem;">Total Allocated Budget</div>
+                                <div class="p-3 bg-secondary bg-opacity-10 rounded-3 text-center border border-secondary border-opacity-10">
+                                    <div class="text-secondary small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.75rem;">Total Allocated Budget</div>
                                     <div class="h3 font-monospace fw-bold text-light mb-0">{{ number_format($totalBudgets, 2) }} L</div>
                                 </div>
-                                <div class="p-3 bg-success bg-opacity-10 rounded-3 text-center">
-                                    <div class="text-success small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.65rem; color: #34d399 !important;">Total Calculated Quantity</div>
-                                    <div class="h3 font-monospace fw-bold text-success mb-0" style="color: #34d399 !important;">{{ number_format($totalConsumed, 2) }} L</div>
+                                <div class="p-3 bg-secondary bg-opacity-10 rounded-3 text-center border border-secondary border-opacity-10">
+                                    <div class="text-success small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.75rem;">Total Calculated Quantity</div>
+                                    <div class="h3 font-monospace fw-bold text-success mb-0">{{ number_format($totalConsumed, 2) }} L</div>
                                 </div>
-                                <div class="p-3 bg-warning bg-opacity-10 rounded-3 text-center position-relative">
-                                    <div class="text-warning small fw-bold text-uppercase tracking-wider mb-1 d-flex align-items-center justify-content-center gap-2" style="font-size: 0.65rem; color: #fbbf24 !important;">
+                                <div class="p-3 bg-secondary bg-opacity-10 rounded-3 text-center position-relative border border-secondary border-opacity-10">
+                                    <div class="text-warning small fw-bold text-uppercase tracking-wider mb-1 d-flex align-items-center justify-content-center gap-2" style="font-size: 0.75rem;">
                                         Total Actual Quantity
                                         <a href="{{ route('fuel-orders.index', ['chargeable_account_id' => $chargeableAccount->id, 'status' => 'DONE']) }}" class="text-warning hover-opacity-75 transition-all d-print-none" title="View associated fuel orders">
                                             <i class="bi bi-box-arrow-up-right" style="font-size: 0.75rem;"></i>
                                         </a>
                                     </div>
-                                    <div class="h3 font-monospace fw-bold text-warning mb-0" style="color: #fbbf24 !important;">{{ number_format($totalActualQuantity ?? 0, 2) }} L</div>
+                                    <div class="h3 font-monospace fw-bold text-warning mb-0">{{ number_format($totalActualQuantity ?? 0, 2) }} L</div>
                                 </div>
-                                <div class="p-3 bg-info bg-opacity-10 rounded-3 text-center">
-                                    <div class="text-info small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.65rem; color: #38bdf8 !important;">Total Remaining Balance</div>
-                                    <div class="h3 font-monospace fw-bold text-info mb-0" style="color: #38bdf8 !important;">{{ number_format($totalRemaining, 2) }} L</div>
+                                <div class="p-3 bg-secondary bg-opacity-10 rounded-3 text-center border border-secondary border-opacity-10">
+                                    <div class="text-info small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.75rem;">Total Remaining Balance</div>
+                                    <div class="h3 font-monospace fw-bold text-info mb-0">{{ number_format($totalRemaining, 2) }} L</div>
                                 </div>
 
                                 <div class="mt-2 border-top border-secondary border-opacity-25 pt-3">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="text-secondary small fw-medium text-uppercase tracking-wider" style="font-size: 0.7rem;">Overall Budget Utilization</span>
+                                        <span class="text-secondary small fw-medium text-uppercase tracking-wider" style="font-size: 0.75rem;">Overall Budget Utilization</span>
                                         <span class="font-monospace fw-bold" style="color: {{ $utilizationPercent >= 90 ? '#ef4444' : ($utilizationPercent >= 75 ? '#f59e0b' : '#34d399') }};">
                                             {{ number_format($utilizationPercent, 1) }}%
                                         </span>
                                     </div>
-                                    <div class="progress bg-secondary bg-opacity-25" style="height: 10px; border-radius: 5px;">
-                                        <div class="progress-bar" role="progressbar" style="width: {{ min(100, $utilizationPercent) }}%; border-radius: 5px; background-color: {{ $utilizationPercent >= 90 ? '#ef4444' : ($utilizationPercent >= 75 ? '#f59e0b' : '#34d399') }};" aria-valuenow="{{ $utilizationPercent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <div class="progress bg-secondary bg-opacity-25 rounded-pill" style="height: 10px;">
+                                        <div class="progress-bar rounded-pill" role="progressbar" style="width: {{ min(100, $utilizationPercent) }}%; background-color: {{ $utilizationPercent >= 90 ? '#ef4444' : ($utilizationPercent >= 75 ? '#f59e0b' : '#34d399') }};" aria-valuenow="{{ $utilizationPercent }}" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                 </div>
                             </div>
@@ -126,7 +126,7 @@
 
                 <!-- Detailed Tabular List Card -->
                 <div class="col-12">
-                    <div class="card bg-dark border-secondary border-opacity-50 rounded-4 shadow-sm overflow-hidden">
+                    <div class="card bg-dark border-secondary border-opacity-50 rounded-4 overflow-hidden">
                         <div class="card-header bg-dark border-secondary border-opacity-50 p-4">
                             <h3 class="h5 fw-bold text-light mb-1">Sub-Account Breakdowns</h3>
                             <p class="text-secondary small mb-0">Detailed breakdown of budgets and consumption per sub-account.</p>
