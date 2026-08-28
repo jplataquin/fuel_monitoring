@@ -116,6 +116,7 @@
                                     <thead>
                                         <tr class="bg-secondary bg-opacity-10">
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Sub Account</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Quantity</th>
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Accomplishment</th>
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Approved Budget</th>
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Pending Budget</th>
@@ -126,12 +127,16 @@
                                         @forelse($chargeableAccount->subAccounts as $subAccount)
                                             <tr>
                                                 <td class="px-4 py-3 align-middle">
-                                                    <div class="d-flex flex-column">
+                                                    <div class="d-flex align-items-center">
                                                         <span class="text-light fw-medium">{{ $subAccount->display_name }}</span>
-                                                        @if($subAccount->quantity)
-                                                            <span class="text-secondary smaller fw-bold text-uppercase mt-1" style="font-size: 0.75rem;">Quantity: {{ number_format($subAccount->quantity, 2) }} {{ $subAccount->unit }}</span>
-                                                        @endif
                                                     </div>
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end font-monospace text-secondary fw-bold">
+                                                    @if($subAccount->quantity)
+                                                        {{ number_format($subAccount->quantity, 2) }} {{ $subAccount->unit }}
+                                                    @else
+                                                        —
+                                                    @endif
                                                 </td>
                                                 <td class="px-4 py-3 align-middle text-end font-monospace text-info fw-bold">
                                                     {{ number_format($subAccount->accomplishment, 2) }}%
