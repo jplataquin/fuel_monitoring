@@ -20,9 +20,27 @@
                         @enderror
                     </div>
 
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label for="quantity" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Target Quantity</label>
+                            <input id="quantity" name="quantity" type="number" step="0.01" min="0" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-primary" value="{{ old('quantity', $subAccount->quantity) }}" placeholder="e.g. 500.00">
+                            @error('quantity')
+                                <div class="text-danger small mt-2 fw-bold">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label for="unit" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Unit</label>
+                            <input id="unit" name="unit" type="text" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-primary" value="{{ old('unit', $subAccount->unit) }}" placeholder="e.g. meters">
+                            @error('unit')
+                                <div class="text-danger small mt-2 fw-bold">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
                     <div class="mb-4">
                         <label for="accomplishment" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Accomplishment (%)</label>
-                        <input id="accomplishment" name="accomplishment" type="number" step="0.01" min="0" max="100" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-primary" value="{{ old('accomplishment', $subAccount->accomplishment) }}" required>
+                        <input id="accomplishment" name="accomplishment" type="number" step="0.01" min="0" max="100" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-primary" value="{{ old('accomplishment', $subAccount->accomplishment) }}">
+                        <span class="text-secondary small d-block mt-1" style="font-size: 0.8rem;">Note: This manual percentage is only used if Target Quantity is blank or zero. Otherwise, accomplishment is computed automatically from logged achievements.</span>
                         @error('accomplishment')
                             <div class="text-danger small mt-2 fw-bold">{{ $message }}</div>
                         @enderror

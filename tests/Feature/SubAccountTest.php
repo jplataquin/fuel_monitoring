@@ -459,4 +459,116 @@ class SubAccountTest extends TestCase
 
         $response2->assertSessionHasErrors('name');
     }
+
+    public function test_can_create_sub_account_with_quantity_and_unit(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
+
+        $response = $this->actingAs($user)->post(route('chargeable-accounts.sub-accounts.store', $account), [
+            'name' => 'Sub Account with Quantity',
+            'quantity' => 250.50,
+            'unit' => 'meters',
+        ]);
+
+        $response->assertRedirect(route('chargeable-accounts.show', $account));
+        $this->assertDatabaseHas('sub_accounts', [
+            'name' => 'Sub Account with Quantity',
+            'quantity' => 250.50,
+            'unit' => 'meters',
+        ]);
+    }
+
+    public function test_can_update_sub_account_quantity_and_unit(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub Account A']);
+
+        $response = $this->actingAs($user)->patch(route('sub-accounts.update', $subAccount), [
+            'name' => 'Sub Account A',
+            'quantity' => 500.00,
+            'unit' => 'kilometers',
+        ]);
+
+        $response->assertRedirect(route('chargeable-accounts.show', $account));
+        $this->assertDatabaseHas('sub_accounts', [
+            'id' => $subAccount->id,
+            'quantity' => 500.00,
+            'unit' => 'kilometers',
+        ]);
+    }
+
+    public function test_accomplishment_is_calculated_from_registry(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create([
+            'name' => 'Sub Account A',
+            'quantity' => 200.00,
+            'unit' => 'meters',
+        ]);
+
+        // Prior to accomplishments, percentage should be 0
+        $this->assertEquals(0.0, $subAccount->accomplishment);
+
+        // Add some accomplishment records
+        $subAccount->accomplishments()->create(['quantity' => 50.00]);
+        $subAccount->accomplishments()->create(['quantity' => 50.00]);
+
+        // Total done: 100, target: 200, accomplishment percentage should be 50.0%
+        $this->assertEquals(50.0, $subAccount->fresh()->accomplishment);
+    }
+
+    public function test_authorized_user_can_log_and_delete_accomplishments(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create([
+            'name' => 'Sub Account A',
+            'quantity' => 100.00,
+            'unit' => 'meters',
+        ]);
+
+        $response = $this->actingAs($user)->post(route('sub-accounts.accomplishments.store', $subAccount), [
+            'quantity' => 30.50,
+        ]);
+
+        $response->assertRedirect(route('sub-accounts.show', $subAccount));
+        $this->assertDatabaseHas('accomplishment_registry', [
+            'sub_account_id' => $subAccount->id,
+            'quantity' => 30.50,
+        ]);
+
+        $accomplishment = $subAccount->accomplishments()->first();
+
+        $deleteResponse = $this->actingAs($user)->delete(route('sub-accounts.accomplishments.destroy', $accomplishment));
+        $deleteResponse->assertRedirect(route('sub-accounts.show', $subAccount));
+        $this->assertDatabaseMissing('accomplishment_registry', [
+            'id' => $accomplishment->id,
+        ]);
+    }
+
+    public function test_unauthorized_user_cannot_log_accomplishments(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+        // Data logger role should not have access to manage accomplishments
+        $user = User::factory()->create(['role' => 'data_logger']);
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create([
+            'name' => 'Sub Account A',
+            'quantity' => 100.00,
+            'unit' => 'meters',
+        ]);
+
+        $response = $this->actingAs($user)->post(route('sub-accounts.accomplishments.store', $subAccount), [
+            'quantity' => 10.00,
+        ]);
+
+        $response->assertStatus(403);
+    }
 }

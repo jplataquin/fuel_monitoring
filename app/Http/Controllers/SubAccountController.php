@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccomplishmentRegistry;
 use App\Models\ChargeableAccount;
 use App\Models\FuelOrder;
 use App\Models\SubAccount;
@@ -47,6 +48,8 @@ class SubAccountController extends Controller
             ],
             'accomplishment' => 'sometimes|numeric|min:0|max:100',
             'type' => 'nullable|in:Controlled,Uncontrolled',
+            'quantity' => 'nullable|numeric|min:0',
+            'unit' => 'nullable|string|max:255',
         ], [
             'name.not_regex' => 'The Sub-Account Name cannot contain colons (:).',
         ]);
@@ -68,6 +71,8 @@ class SubAccountController extends Controller
                     ->whereNull('deleted_at'),
                 'not_regex:/[:]/',
             ],
+            'quantity' => 'nullable|numeric|min:0',
+            'unit' => 'nullable|string|max:255',
         ], [
             'name.not_regex' => 'The Sub-Account Name cannot contain colons (:).',
         ]);
@@ -83,6 +88,33 @@ class SubAccountController extends Controller
         $subAccount->delete();
 
         return redirect()->route('chargeable-accounts.show', $chargeableAccount)->with('status', 'Sub-account deleted successfully.');
+    }
+
+    public function storeAccomplishment(Request $request, SubAccount $subAccount): RedirectResponse
+    {
+        if (! in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'quantity' => 'required|numeric|min:0.01',
+        ]);
+
+        $subAccount->accomplishments()->create($validated);
+
+        return redirect()->route('sub-accounts.show', $subAccount)->with('status', 'Accomplishment logged successfully.');
+    }
+
+    public function destroyAccomplishment(AccomplishmentRegistry $accomplishment): RedirectResponse
+    {
+        if (! in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $subAccount = $accomplishment->subAccount;
+        $accomplishment->delete();
+
+        return redirect()->route('sub-accounts.show', $subAccount)->with('status', 'Accomplishment entry deleted successfully.');
     }
 
     public function merge(Request $request, SubAccount $subAccount): RedirectResponse

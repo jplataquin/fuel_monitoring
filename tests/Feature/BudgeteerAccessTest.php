@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\ChargeableAccount;
 use App\Models\SubAccount;
+use App\Models\SubAccountBudget;
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -181,9 +182,9 @@ class BudgeteerAccessTest extends TestCase
         $user = User::factory()->create(['role' => 'budgeteer']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
         $subAccount = $account->subAccounts()->create(['name' => 'Sub Account']);
-        
+
         // Ensure no pending budget exists first
-        \App\Models\SubAccountBudget::query()->delete();
+        SubAccountBudget::query()->delete();
 
         // Get index page and assert no bubble is shown
         $response = $this->actingAs($user)->get(route('account-budgets.index'));
@@ -241,7 +242,7 @@ class BudgeteerAccessTest extends TestCase
 
         // Assert pending count (pending: 5) is visible in option text
         $response = $this->actingAs($user)->get(route('account-budgets.index'));
-        
+
         $response->assertStatus(200);
         $response->assertSee('Pending Project (pending: 5)');
     }

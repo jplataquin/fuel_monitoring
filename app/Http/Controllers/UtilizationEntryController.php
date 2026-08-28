@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\UtilizationEntryImport;
 use App\Models\Asset;
 use App\Models\ChargeableAccount;
 use App\Models\SubAccount;
 use App\Models\UtilizationEntry;
-use App\Imports\UtilizationEntryImport;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -17,9 +17,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class UtilizationEntryController extends Controller
 {
@@ -605,13 +608,13 @@ class UtilizationEntryController extends Controller
             }
 
             if (count($sheet) > 50) {
-                return response()->json(['error' => 'Maximum allowable entries is 50 rows per bulk upload. The uploaded file has ' . count($sheet) . ' rows.'], 422);
+                return response()->json(['error' => 'Maximum allowable entries is 50 rows per bulk upload. The uploaded file has '.count($sheet).' rows.'], 422);
             }
 
             $mappedRows = [];
             foreach ($sheet as $rawRow) {
                 // Check if the row is entirely empty
-                $nonEmpty = array_filter($rawRow, fn($val) => $val !== null && $val !== '');
+                $nonEmpty = array_filter($rawRow, fn ($val) => $val !== null && $val !== '');
                 if (empty($nonEmpty)) {
                     continue;
                 }
@@ -631,7 +634,7 @@ class UtilizationEntryController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to parse Excel file: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to parse Excel file: '.$e->getMessage()], 500);
         }
     }
 
@@ -708,11 +711,11 @@ class UtilizationEntryController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => count($rows) . ' utilization entries created successfully.',
+                'message' => count($rows).' utilization entries created successfully.',
             ]);
 
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Database transaction failed: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Database transaction failed: '.$e->getMessage()], 500);
         }
     }
 
@@ -734,6 +737,7 @@ class UtilizationEntryController extends Controller
                     }
                 }
             }
+
             return null;
         };
 
@@ -744,7 +748,7 @@ class UtilizationEntryController extends Controller
         $subAccountName = '';
         $unbudgeted = false;
 
-        if (!empty($combinedValue) && str_contains($combinedValue, ' :: ')) {
+        if (! empty($combinedValue) && str_contains($combinedValue, ' :: ')) {
             $parts = explode(' :: ', $combinedValue);
             if (count($parts) >= 2) {
                 $subName = trim(array_pop($parts));
@@ -791,11 +795,14 @@ class UtilizationEntryController extends Controller
 
     private function parseExcelDate($value)
     {
-        if ($value === null || $value === '') return null;
+        if ($value === null || $value === '') {
+            return null;
+        }
         if (is_numeric($value)) {
             try {
-                return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value))->format('Y-m-d');
-            } catch (\Exception $e) {}
+                return Carbon::instance(Date::excelToDateTimeObject($value))->format('Y-m-d');
+            } catch (\Exception $e) {
+            }
         }
         try {
             return Carbon::parse($value)->format('Y-m-d');
@@ -806,11 +813,14 @@ class UtilizationEntryController extends Controller
 
     private function parseExcelTime($value)
     {
-        if ($value === null || $value === '') return null;
+        if ($value === null || $value === '') {
+            return null;
+        }
         if (is_numeric($value)) {
             try {
-                return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value))->format('H:i');
-            } catch (\Exception $e) {}
+                return Carbon::instance(Date::excelToDateTimeObject($value))->format('H:i');
+            } catch (\Exception $e) {
+            }
         }
         try {
             // If it's a string of HH:MM:SS or HH:MM
@@ -837,10 +847,10 @@ class UtilizationEntryController extends Controller
             $accountName = trim($row['chargeable_account'] ?? '');
             $account = null;
             if (empty($accountName)) {
-                $rowErrors[] = "Chargeable account is required.";
+                $rowErrors[] = 'Chargeable account is required.';
             } else {
                 $account = ChargeableAccount::where('name', $accountName)->first();
-                if (!$account) {
+                if (! $account) {
                     $rowErrors[] = "Chargeable account '{$accountName}' not found.";
                 } elseif ($account->status !== 'Active') {
                     $rowErrors[] = "Chargeable account '{$accountName}' is inactive.";
@@ -854,14 +864,14 @@ class UtilizationEntryController extends Controller
             // 3. Resolve Sub Account
             $subAccountName = trim($row['sub_account'] ?? '');
             $subAccount = null;
-            if (!$unbudgeted && $account) {
+            if (! $unbudgeted && $account) {
                 if (empty($subAccountName)) {
-                    $rowErrors[] = "Sub-account is required when not unbudgeted.";
+                    $rowErrors[] = 'Sub-account is required when not unbudgeted.';
                 } else {
                     $subAccount = SubAccount::where('chargeable_account_id', $account->id)
                         ->where('name', $subAccountName)
                         ->first();
-                    if (!$subAccount) {
+                    if (! $subAccount) {
                         $rowErrors[] = "Sub-account '{$subAccountName}' not found under account '{$accountName}'.";
                     }
                 }
@@ -870,7 +880,7 @@ class UtilizationEntryController extends Controller
             // 4. Validate Date Scope
             $entryDateStr = $row['date'];
             if (empty($entryDateStr)) {
-                $rowErrors[] = "Date is required.";
+                $rowErrors[] = 'Date is required.';
             } else {
                 try {
                     $entryDate = Carbon::parse($entryDateStr);
@@ -880,14 +890,14 @@ class UtilizationEntryController extends Controller
                         $compDate = $entryDate->startOfDay();
 
                         if ($startDate && $compDate->lt($startDate)) {
-                            $rowErrors[] = "Date (" . Carbon::parse($entryDateStr)->format('M d, Y') . ") must be after or on Chargeable Account's start date (" . $startDate->format('M d, Y') . ").";
+                            $rowErrors[] = 'Date ('.Carbon::parse($entryDateStr)->format('M d, Y').") must be after or on Chargeable Account's start date (".$startDate->format('M d, Y').').';
                         }
                         if ($endDate && $compDate->gt($endDate)) {
-                            $rowErrors[] = "Date (" . Carbon::parse($entryDateStr)->format('M d, Y') . ") must be before or on Chargeable Account's end date (" . $endDate->format('M d, Y') . ").";
+                            $rowErrors[] = 'Date ('.Carbon::parse($entryDateStr)->format('M d, Y').") must be before or on Chargeable Account's end date (".$endDate->format('M d, Y').').';
                         }
                     }
                 } catch (\Exception $e) {
-                    $rowErrors[] = "Invalid date format.";
+                    $rowErrors[] = 'Invalid date format.';
                 }
             }
 
@@ -895,17 +905,17 @@ class UtilizationEntryController extends Controller
             $calcType = trim($row['calculation_type'] ?? '');
             $allowedTypes = ['Kilometer Reading', 'Hour Reading', 'Timeframe', 'Actual Hours'];
             if (empty($calcType)) {
-                $rowErrors[] = "Calculation type is required.";
-            } elseif (!in_array($calcType, $allowedTypes)) {
-                $rowErrors[] = "Invalid calculation type '{$calcType}'. Must be one of: " . implode(', ', $allowedTypes);
+                $rowErrors[] = 'Calculation type is required.';
+            } elseif (! in_array($calcType, $allowedTypes)) {
+                $rowErrors[] = "Invalid calculation type '{$calcType}'. Must be one of: ".implode(', ', $allowedTypes);
             }
 
             // 6. Validate basic fields
             if (empty($row['driver_operator_name'])) {
-                $rowErrors[] = "Personnel In-Charge is required.";
+                $rowErrors[] = 'Personnel In-Charge is required.';
             }
             if (empty($row['particulars'])) {
-                $rowErrors[] = "Particulars / Mission is required.";
+                $rowErrors[] = 'Particulars / Mission is required.';
             }
 
             // 7. Validate Times and readings sequentiality
@@ -913,29 +923,29 @@ class UtilizationEntryController extends Controller
             $endTimeStr = $row['end_time'];
 
             if (empty($startTimeStr)) {
-                $rowErrors[] = "Start Time is required.";
+                $rowErrors[] = 'Start Time is required.';
             }
             if (empty($endTimeStr)) {
-                $rowErrors[] = "End Time is required.";
+                $rowErrors[] = 'End Time is required.';
             }
 
-            if (!empty($entryDateStr) && !empty($startTimeStr)) {
+            if (! empty($entryDateStr) && ! empty($startTimeStr)) {
                 try {
-                    $reqDateTime = Carbon::parse($entryDateStr . ' ' . $startTimeStr);
+                    $reqDateTime = Carbon::parse($entryDateStr.' '.$startTimeStr);
 
                     // Compare with running asset last date/time
                     if ($simulatedDate !== null && $simulatedTime !== null) {
-                        $assetDateTime = Carbon::parse($simulatedDate . ' ' . $simulatedTime);
+                        $assetDateTime = Carbon::parse($simulatedDate.' '.$simulatedTime);
                         if ($reqDateTime->lessThan($assetDateTime)) {
-                            $rowErrors[] = "Date and Start Time cannot be earlier than previous log's end time (" . $assetDateTime->format('M d, Y H:i') . ").";
+                            $rowErrors[] = "Date and Start Time cannot be earlier than previous log's end time (".$assetDateTime->format('M d, Y H:i').').';
                         }
                     }
 
                     // End time check
-                    if (!empty($endTimeStr)) {
-                        $reqEndDateTime = Carbon::parse($entryDateStr . ' ' . $endTimeStr);
+                    if (! empty($endTimeStr)) {
+                        $reqEndDateTime = Carbon::parse($entryDateStr.' '.$endTimeStr);
                         if ($reqEndDateTime->lessThanOrEqualTo($reqDateTime)) {
-                            $rowErrors[] = "End Time must be after Start Time.";
+                            $rowErrors[] = 'End Time must be after Start Time.';
                         }
 
                         if (empty($rowErrors)) {
@@ -944,7 +954,7 @@ class UtilizationEntryController extends Controller
                         }
                     }
                 } catch (\Exception $e) {
-                    $rowErrors[] = "Invalid date/time values.";
+                    $rowErrors[] = 'Invalid date/time values.';
                 }
             }
 
@@ -956,7 +966,7 @@ class UtilizationEntryController extends Controller
             if ($calcType === 'Kilometer Reading') {
                 $startVal = $row['start_reading'] ?? $row['start_kilometer_reading'] ?? null;
                 if ($startVal === null || $startVal === '') {
-                    $rowErrors[] = "Start Reading (Odometer) is required.";
+                    $rowErrors[] = 'Start Reading (Odometer) is required.';
                 } else {
                     if ($simulatedOdometer !== null && $startReading < $simulatedOdometer) {
                         $rowErrors[] = "Start Odometer ({$startReading}) cannot be less than previous log's End Odometer ({$simulatedOdometer}).";
@@ -964,7 +974,7 @@ class UtilizationEntryController extends Controller
                 }
                 $endVal = $row['end_reading'] ?? $row['end_kilometer_reading'] ?? null;
                 if ($endVal === null || $endVal === '') {
-                    $rowErrors[] = "End Reading (Odometer) is required.";
+                    $rowErrors[] = 'End Reading (Odometer) is required.';
                 } elseif ($endReading <= $startReading) {
                     $rowErrors[] = "End Odometer ({$endReading}) must be greater than Start Odometer ({$startReading}).";
                 }
@@ -974,7 +984,7 @@ class UtilizationEntryController extends Controller
             } elseif ($calcType === 'Hour Reading') {
                 $startVal = $row['start_reading'] ?? $row['start_hour_reading'] ?? null;
                 if ($startVal === null || $startVal === '') {
-                    $rowErrors[] = "Start Reading (Engine Hours) is required.";
+                    $rowErrors[] = 'Start Reading (Engine Hours) is required.';
                 } else {
                     if ($simulatedEngineHours !== null && $startReading < $simulatedEngineHours) {
                         $rowErrors[] = "Start Engine Hours ({$startReading}) cannot be less than previous log's End Engine Hours ({$simulatedEngineHours}).";
@@ -982,7 +992,7 @@ class UtilizationEntryController extends Controller
                 }
                 $endVal = $row['end_reading'] ?? $row['end_hour_reading'] ?? null;
                 if ($endVal === null || $endVal === '') {
-                    $rowErrors[] = "End Reading (Engine Hours) is required.";
+                    $rowErrors[] = 'End Reading (Engine Hours) is required.';
                 } elseif ($endReading <= $startReading) {
                     $rowErrors[] = "End Engine Hours ({$endReading}) must be greater than Start Engine Hours ({$startReading}).";
                 }
@@ -991,7 +1001,7 @@ class UtilizationEntryController extends Controller
                 }
             } elseif ($calcType === 'Actual Hours') {
                 if ($row['actual_hours'] === null || $row['actual_hours'] === '') {
-                    $rowErrors[] = "Actual Hours is required.";
+                    $rowErrors[] = 'Actual Hours is required.';
                 } elseif ($actualHours <= 0) {
                     $rowErrors[] = "Actual Hours ({$actualHours}) must be greater than 0.";
                 }
@@ -1017,11 +1027,11 @@ class UtilizationEntryController extends Controller
                 'end_hour_reading' => $calcType === 'Hour Reading' ? $endReading : 0,
                 'actual_hours' => $calcType === 'Actual Hours' ? $actualHours : 0,
                 'remarks' => $row['remarks'] ?? '',
-                'has_errors' => !empty($rowErrors),
+                'has_errors' => ! empty($rowErrors),
                 'errors' => $rowErrors,
             ];
 
-            if (!empty($rowErrors)) {
+            if (! empty($rowErrors)) {
                 $hasErrorsTotal = true;
             }
         }
@@ -1034,7 +1044,7 @@ class UtilizationEntryController extends Controller
 
     public function bulkTemplate(Asset $asset)
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle(substr($asset->fleet_no, 0, 31));
 
@@ -1050,19 +1060,19 @@ class UtilizationEntryController extends Controller
             'Actual Hours',          // Column I
             'Particulars / Mission', // Column J
             'Reference',             // Column K
-            'Remarks'                // Column L
+            'Remarks',                // Column L
         ];
 
         // Format Header
         foreach ($headers as $colIndex => $header) {
-            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
-            $sheet->setCellValue($colLetter . '1', $header);
+            $colLetter = Coordinate::stringFromColumnIndex($colIndex + 1);
+            $sheet->setCellValue($colLetter.'1', $header);
             $sheet->getColumnDimension($colLetter)->setAutoSize(true);
         }
 
         // Fetch options
         $accounts = ChargeableAccount::where('status', 'Active')
-            ->with(['subAccounts' => function($q) {
+            ->with(['subAccounts' => function ($q) {
                 $q->orderBy('name', 'asc');
             }])
             ->orderBy('name', 'asc')
@@ -1080,11 +1090,11 @@ class UtilizationEntryController extends Controller
         // Add Options sheet
         $optionsSheet = $spreadsheet->createSheet();
         $optionsSheet->setTitle('Options');
-        $optionsSheet->setSheetState(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet::SHEETSTATE_HIDDEN);
+        $optionsSheet->setSheetState(Worksheet::SHEETSTATE_HIDDEN);
 
         // Write options
         foreach ($dropdownOptions as $idx => $option) {
-            $optionsSheet->setCellValue('A' . ($idx + 1), $option);
+            $optionsSheet->setCellValue('A'.($idx + 1), $option);
         }
 
         // Reset active sheet to Template
@@ -1094,7 +1104,7 @@ class UtilizationEntryController extends Controller
         for ($row = 2; $row <= 51; $row++) {
             // Dropdown validation for Account - Sub Account (Column E)
             if (count($dropdownOptions) > 0) {
-                $validationAccount = $sheet->getCell('E' . $row)->getDataValidation();
+                $validationAccount = $sheet->getCell('E'.$row)->getDataValidation();
                 $validationAccount->setType(DataValidation::TYPE_LIST);
                 $validationAccount->setErrorStyle(DataValidation::STYLE_INFORMATION);
                 $validationAccount->setAllowBlank(false);
@@ -1105,11 +1115,11 @@ class UtilizationEntryController extends Controller
                 $validationAccount->setError('Value is not in list');
                 $validationAccount->setPromptTitle('Pick from list');
                 $validationAccount->setPrompt('Please choose an Account :: Sub Account combination');
-                $validationAccount->setFormula1('Options!$A$1:$A$' . count($dropdownOptions));
+                $validationAccount->setFormula1('Options!$A$1:$A$'.count($dropdownOptions));
             }
 
             // Dropdown validation for Calculation Type (Column F)
-            $validationCalc = $sheet->getCell('F' . $row)->getDataValidation();
+            $validationCalc = $sheet->getCell('F'.$row)->getDataValidation();
             $validationCalc->setType(DataValidation::TYPE_LIST);
             $validationCalc->setErrorStyle(DataValidation::STYLE_INFORMATION);
             $validationCalc->setAllowBlank(false);
@@ -1124,7 +1134,7 @@ class UtilizationEntryController extends Controller
         }
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = $asset->fleet_no . ' - Bulk Utilization Upload.xlsx';
+        $fileName = $asset->fleet_no.' - Bulk Utilization Upload.xlsx';
 
         return response()->streamDownload(function () use ($writer) {
             $writer->save('php://output');
@@ -1158,12 +1168,12 @@ class UtilizationEntryController extends Controller
 
         // If it's the final chunk, assemble and process it
         if ($chunkIndex === $totalChunks - 1) {
-            $assembledDir = "temp_uploads";
+            $assembledDir = 'temp_uploads';
             $assembledFileName = "{$fileId}_{$originalFileName}";
             $assembledPath = "{$assembledDir}/{$assembledFileName}";
 
             // Ensure directory exists
-            if (!Storage::exists($assembledDir)) {
+            if (! Storage::exists($assembledDir)) {
                 Storage::makeDirectory($assembledDir);
             }
 
@@ -1174,9 +1184,10 @@ class UtilizationEntryController extends Controller
             // Merge chunks sequentially
             for ($i = 0; $i < $totalChunks; $i++) {
                 $segmentPath = Storage::path("{$chunkDir}/{$i}");
-                if (!Storage::exists("{$chunkDir}/{$i}")) {
+                if (! Storage::exists("{$chunkDir}/{$i}")) {
                     fclose($out);
                     Storage::deleteDirectory($chunkDir);
+
                     return response()->json(['error' => "Chunk fragment {$i} is missing. Please retry upload."], 422);
                 }
                 $in = fopen($segmentPath, 'rb');
@@ -1201,12 +1212,12 @@ class UtilizationEntryController extends Controller
                 }
 
                 if (count($sheet) > 50) {
-                    return response()->json(['error' => 'Maximum allowable entries is 50 rows per bulk upload. The uploaded file has ' . count($sheet) . ' rows.'], 422);
+                    return response()->json(['error' => 'Maximum allowable entries is 50 rows per bulk upload. The uploaded file has '.count($sheet).' rows.'], 422);
                 }
 
                 $mappedRows = [];
                 foreach ($sheet as $rawRow) {
-                    $nonEmpty = array_filter($rawRow, fn($val) => $val !== null && $val !== '');
+                    $nonEmpty = array_filter($rawRow, fn ($val) => $val !== null && $val !== '');
                     if (empty($nonEmpty)) {
                         continue;
                     }
@@ -1230,7 +1241,8 @@ class UtilizationEntryController extends Controller
                 if (Storage::exists($assembledPath)) {
                     Storage::delete($assembledPath);
                 }
-                return response()->json(['error' => 'Failed to parse Excel file chunks: ' . $e->getMessage()], 500);
+
+                return response()->json(['error' => 'Failed to parse Excel file chunks: '.$e->getMessage()], 500);
             }
         }
 

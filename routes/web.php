@@ -70,6 +70,8 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
         Route::patch('sub-accounts/{sub_account}', [SubAccountController::class, 'update'])->name('sub-accounts.update');
         Route::post('chargeable-accounts/{chargeable_account}/sub-accounts', [SubAccountController::class, 'store'])->name('chargeable-accounts.sub-accounts.store');
         Route::delete('sub-accounts/{sub_account}', [SubAccountController::class, 'destroy'])->name('sub-accounts.destroy');
+        Route::post('sub-accounts/{sub_account}/accomplishments', [SubAccountController::class, 'storeAccomplishment'])->name('sub-accounts.accomplishments.store');
+        Route::delete('accomplishments/{accomplishment}', [SubAccountController::class, 'destroyAccomplishment'])->name('sub-accounts.accomplishments.destroy');
     });
 
     // Admin and Moderator only routes for budget approval

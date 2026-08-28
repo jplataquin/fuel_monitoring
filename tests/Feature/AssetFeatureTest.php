@@ -15,7 +15,7 @@ class AssetFeatureTest extends TestCase
     public function test_assets_index_page_groups_assets_in_tabs_by_classification_with_counts()
     {
         $user = User::factory()->create(['role' => 'administrator']);
-        
+
         $typeBackhoe = AssetType::create(['name' => 'Backhoe']);
         $typeTruck = AssetType::create(['name' => 'Truck']);
 
@@ -58,7 +58,7 @@ class AssetFeatureTest extends TestCase
         $response = $this->actingAs($user)->get(route('assets.index'));
 
         $response->assertStatus(200);
-        
+
         // Check that classifications and counts are rendered correctly including the "All" tab
         $response->assertSee('All (4)');
         $response->assertSee('Backhoe (3)');

@@ -256,7 +256,7 @@ class CreateFuelOrder extends Component
             $total['balance'] = $total['remaining'] - $total['quantity'];
             if ($total['balance'] < 0) {
                 $subAccount = $subAccountsMap[$name] ?? null;
-                if (!$subAccount || $subAccount->type !== 'Uncontrolled') {
+                if (! $subAccount || $subAccount->type !== 'Uncontrolled') {
                     $this->has_negative_balance = true;
                 }
             }

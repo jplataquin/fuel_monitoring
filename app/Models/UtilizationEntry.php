@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -94,22 +95,25 @@ class UtilizationEntry extends Model
 
         if (str_contains($calcType, 'kilometer')) {
             $calcKm = max(0, $this->end_kilometer_reading - $this->start_kilometer_reading);
+
             return $this->fuel_factor_km > 0 ? $calcKm / $this->fuel_factor_km : 0;
         } elseif (str_contains($calcType, 'timeframe')) {
             if ($this->end_time && $this->start_time) {
-                $dateStr = $this->date instanceof \Carbon\Carbon ? $this->date->format('Y-m-d') : \Carbon\Carbon::parse($this->date)->format('Y-m-d');
-                $startStr = $this->start_time instanceof \Carbon\Carbon ? $this->start_time->format('H:i:s') : \Carbon\Carbon::parse($this->start_time)->format('H:i:s');
-                $endStr = $this->end_time instanceof \Carbon\Carbon ? $this->end_time->format('H:i:s') : \Carbon\Carbon::parse($this->end_time)->format('H:i:s');
+                $dateStr = $this->date instanceof Carbon ? $this->date->format('Y-m-d') : Carbon::parse($this->date)->format('Y-m-d');
+                $startStr = $this->start_time instanceof Carbon ? $this->start_time->format('H:i:s') : Carbon::parse($this->start_time)->format('H:i:s');
+                $endStr = $this->end_time instanceof Carbon ? $this->end_time->format('H:i:s') : Carbon::parse($this->end_time)->format('H:i:s');
 
-                $start = \Carbon\Carbon::parse($dateStr.' '.$startStr);
-                $end = \Carbon\Carbon::parse($dateStr.' '.$endStr);
+                $start = Carbon::parse($dateStr.' '.$startStr);
+                $end = Carbon::parse($dateStr.' '.$endStr);
                 $calcHours = max(0, $start->diffInMinutes($end) / 60);
+
                 return $calcHours * $this->fuel_factor_hr;
             }
         } elseif (str_contains($calcType, 'actual')) {
             return ($this->actual_hours ?? 0) * $this->fuel_factor_hr;
         } elseif (str_contains($calcType, 'hour')) {
             $calcHours = max(0, $this->end_hour_reading - $this->start_hour_reading);
+
             return $calcHours * $this->fuel_factor_hr;
         }
 

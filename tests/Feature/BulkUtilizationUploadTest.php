@@ -17,9 +17,13 @@ class BulkUtilizationUploadTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private Asset $asset;
+
     private AssetType $assetType;
+
     private ChargeableAccount $account;
+
     private SubAccount $subAccount;
 
     protected function setUp(): void
@@ -74,7 +78,7 @@ class BulkUtilizationUploadTest extends TestCase
             'Unbudgeted',
             'Particulars',
             'Reference',
-            'Remarks'
+            'Remarks',
         ]);
 
         // Rows
@@ -105,7 +109,7 @@ class BulkUtilizationUploadTest extends TestCase
             'Actual Hours',
             'Particulars',
             'Reference',
-            'Remarks'
+            'Remarks',
         ]);
 
         // Rows
@@ -145,7 +149,7 @@ class BulkUtilizationUploadTest extends TestCase
         $rows = [];
         for ($i = 0; $i < 51; $i++) {
             $rows[] = [
-                '2026-08-26', '08:00', '10:00', 'Operator ' . $i, 'Project Alpha', 'Civil Works', 'Timeframe', '0', '0', '0', 'No', 'Task', 'REF-001', ''
+                '2026-08-26', '08:00', '10:00', 'Operator '.$i, 'Project Alpha', 'Civil Works', 'Timeframe', '0', '0', '0', 'No', 'Task', 'REF-001', '',
             ];
         }
 
@@ -168,7 +172,7 @@ class BulkUtilizationUploadTest extends TestCase
             // Row 2: Invalid Kilometer Reading (Odo Decrement)
             ['2026-08-26', '10:30', '12:00', 'John Doe', 'Project Alpha', 'Civil Works', 'Kilometer Reading', '1040', '1080', '0', 'No', 'Odo decrement', 'REF-02', ''],
             // Row 3: Invalid Account Name
-            ['2026-08-26', '12:30', '14:00', 'John Doe', 'Non-existent Project', 'Civil Works', 'Timeframe', '0', '0', '0', 'No', 'Invalid project', 'REF-03', '']
+            ['2026-08-26', '12:30', '14:00', 'John Doe', 'Non-existent Project', 'Civil Works', 'Timeframe', '0', '0', '0', 'No', 'Invalid project', 'REF-03', ''],
         ];
 
         $file = $this->createCsvFile($rows);
@@ -202,7 +206,7 @@ class BulkUtilizationUploadTest extends TestCase
             // Row 1: Active account & sub-account combination
             ['2026-08-26', '08:00', '10:00', 'John Doe', 'Project Alpha :: Civil Works', 'Kilometer Reading', '1000', '1050', '0', 'First run', 'REF-01', ''],
             // Row 2: Account & Unbudgeted combination
-            ['2026-08-26', '10:30', '12:00', 'John Doe', 'Project Alpha :: Unbudgeted', 'Kilometer Reading', '1050', '1100', '0', 'Unbudgeted run', 'REF-02', '']
+            ['2026-08-26', '10:30', '12:00', 'John Doe', 'Project Alpha :: Unbudgeted', 'Kilometer Reading', '1050', '1100', '0', 'Unbudgeted run', 'REF-02', ''],
         ];
 
         $file = $this->createCombinedCsvFile($rows);
@@ -273,12 +277,12 @@ class BulkUtilizationUploadTest extends TestCase
                 'end_hour_reading' => 0.0,
                 'actual_hours' => 0.0,
                 'remarks' => '',
-            ]
+            ],
         ];
 
         $response = $this->actingAs($this->admin)
             ->post(route('assets.utilization-entries.bulk-store', $this->asset), [
-                'rows' => $validatedRows
+                'rows' => $validatedRows,
             ]);
 
         $response->assertStatus(200);
@@ -288,13 +292,13 @@ class BulkUtilizationUploadTest extends TestCase
         $this->assertDatabaseHas('utilization_entries', [
             'asset_id' => $this->asset->id,
             'end_kilometer_reading' => 1050.0,
-            'particulars' => 'Sequential task 1'
+            'particulars' => 'Sequential task 1',
         ]);
 
         $this->assertDatabaseHas('utilization_entries', [
             'asset_id' => $this->asset->id,
             'end_kilometer_reading' => 1110.0,
-            'particulars' => 'Sequential task 2'
+            'particulars' => 'Sequential task 2',
         ]);
 
         // Verify asset's technical specifications were updated with final readings
@@ -349,12 +353,12 @@ class BulkUtilizationUploadTest extends TestCase
                 'end_hour_reading' => 0.0,
                 'actual_hours' => 0.0,
                 'remarks' => '',
-            ]
+            ],
         ];
 
         $response = $this->actingAs($this->admin)
             ->post(route('assets.utilization-entries.bulk-store', $this->asset), [
-                'rows' => $validatedRows
+                'rows' => $validatedRows,
             ]);
 
         $response->assertStatus(422);
@@ -362,7 +366,7 @@ class BulkUtilizationUploadTest extends TestCase
         // Verify that NO entries were added in database (transaction rollback)
         $this->assertDatabaseMissing('utilization_entries', [
             'asset_id' => $this->asset->id,
-            'particulars' => 'Task 1'
+            'particulars' => 'Task 1',
         ]);
 
         // Verify that asset was NOT updated
@@ -379,13 +383,13 @@ class BulkUtilizationUploadTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        $response->assertHeader('Content-Disposition', 'attachment; filename="' . $this->asset->fleet_no . ' - Bulk Utilization Upload.xlsx"');
+        $response->assertHeader('Content-Disposition', 'attachment; filename="'.$this->asset->fleet_no.' - Bulk Utilization Upload.xlsx"');
     }
 
     public function test_bulk_upload_chunk_uploads_sequentially_and_parses(): void
     {
         $rows = [
-            ['2026-08-26', '08:00', '10:00', 'John Doe', 'Project Alpha', 'Civil Works', 'Kilometer Reading', '1000', '1050', '0', 'No', 'First run', 'REF-01', '']
+            ['2026-08-26', '08:00', '10:00', 'John Doe', 'Project Alpha', 'Civil Works', 'Kilometer Reading', '1000', '1050', '0', 'No', 'First run', 'REF-01', ''],
         ];
         $file = $this->createCsvFile($rows);
 

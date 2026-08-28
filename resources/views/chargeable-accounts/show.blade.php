@@ -79,18 +79,29 @@
                     <h4 class="h5 fw-bold text-white mb-4">Create Sub-Account</h4>
                     <form action="{{ route('chargeable-accounts.sub-accounts.store', $chargeableAccount) }}" method="POST">
                         @csrf
-                        <div class="mb-3">
-                            <input type="text" name="name" placeholder="e.g. Project Alpha" required class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-info" pattern="^[^:]+$" title="Colons (:) are not allowed in the sub-account name">
-                            @if ($errors->any())
-                                <div class="text-danger small fw-bold mt-2">
-                                    <ul class="list-unstyled mb-0">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="create_name" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Sub-Account Name</label>
+                                <input type="text" id="create_name" name="name" placeholder="e.g. Project Alpha" required class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-info" pattern="^[^:]+$" title="Colons (:) are not allowed in the sub-account name">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="create_quantity" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Target Quantity</label>
+                                <input type="number" id="create_quantity" name="quantity" step="0.01" min="0" placeholder="e.g. 100.00" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-info">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="create_unit" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Unit</label>
+                                <input type="text" id="create_unit" name="unit" placeholder="e.g. meters" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-info">
+                            </div>
                         </div>
+                        @if ($errors->any())
+                            <div class="text-danger small fw-bold mb-3">
+                                <ul class="list-unstyled mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                         <div class="d-flex justify-content-end pt-1 pb-3 border-bottom border-secondary border-opacity-25">
                             <button type="submit" class="btn btn-info px-4 py-2 rounded-pill fw-bold small text-uppercase tracking-wider shadow">
                                 Add
@@ -115,8 +126,11 @@
                                         @forelse($chargeableAccount->subAccounts as $subAccount)
                                             <tr>
                                                 <td class="px-4 py-3 align-middle">
-                                                    <div class="d-flex align-items-center">
+                                                    <div class="d-flex flex-column">
                                                         <span class="text-light fw-medium">{{ $subAccount->display_name }}</span>
+                                                        @if($subAccount->quantity)
+                                                            <span class="text-secondary smaller fw-bold text-uppercase mt-1" style="font-size: 0.75rem;">Target: {{ number_format($subAccount->quantity, 2) }} {{ $subAccount->unit }}</span>
+                                                        @endif
                                                     </div>
                                                 </td>
                                                 <td class="px-4 py-3 align-middle text-end font-monospace text-info fw-bold">

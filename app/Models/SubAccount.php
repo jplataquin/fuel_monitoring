@@ -22,6 +22,8 @@ class SubAccount extends Model
         'merge_remarks',
         'accomplishment',
         'type',
+        'quantity',
+        'unit',
     ];
 
     protected $appends = [
@@ -31,7 +33,24 @@ class SubAccount extends Model
     protected $casts = [
         'merged_at' => 'datetime',
         'accomplishment' => 'float',
+        'quantity' => 'float',
     ];
+
+    public function accomplishments(): HasMany
+    {
+        return $this->hasMany(AccomplishmentRegistry::class);
+    }
+
+    public function getAccomplishmentAttribute(): float
+    {
+        if ($this->quantity && $this->quantity > 0) {
+            $totalAccomplished = $this->accomplishments()->sum('quantity');
+
+            return ($totalAccomplished / $this->quantity) * 100;
+        }
+
+        return (float) ($this->attributes['accomplishment'] ?? 0.0);
+    }
 
     public function chargeableAccount(): BelongsTo
     {
@@ -109,6 +128,6 @@ class SubAccount extends Model
 
     public function getDisplayNameAttribute(): string
     {
-        return $this->name . ($this->type === 'Uncontrolled' ? ' 🔓' : '');
+        return $this->name.($this->type === 'Uncontrolled' ? ' 🔓' : '');
     }
 }

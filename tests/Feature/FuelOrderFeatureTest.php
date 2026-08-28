@@ -8,6 +8,7 @@ use App\Models\AssetType;
 use App\Models\ChargeableAccount;
 use App\Models\FuelOrder;
 use App\Models\SubAccount;
+use App\Models\SubAccountBudget;
 use App\Models\User;
 use App\Models\UtilizationEntry;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
@@ -680,7 +681,7 @@ class FuelOrderFeatureTest extends TestCase
         $type = AssetType::create(['name' => 'Vehicle']);
         $account = ChargeableAccount::create(['name' => 'Project Alpha', 'status' => 'Active']);
         $subAccount = $account->subAccounts()->create(['name' => 'Sub Alpha']);
-        
+
         // Approve a very small budget of 2.0 Liters
         $subAccount->budgets()->create([
             'budget_quantity' => 2.0,
@@ -724,7 +725,7 @@ class FuelOrderFeatureTest extends TestCase
                     'quantity' => 15.0,
                     'remaining' => 2.0,
                     'balance' => -13.0,
-                ]
+                ],
             ]);
     }
 
@@ -733,7 +734,7 @@ class FuelOrderFeatureTest extends TestCase
         $user = User::factory()->create(['role' => 'data_logger']);
         $account = ChargeableAccount::create(['name' => 'Project Alpha', 'status' => 'Active']);
         $subAccount = $account->subAccounts()->create(['name' => 'Sub Alpha']);
-        
+
         // Approve a very small budget of 2.0 Liters
         $subAccount->budgets()->create([
             'budget_quantity' => 2.0,
@@ -758,7 +759,7 @@ class FuelOrderFeatureTest extends TestCase
         $account = ChargeableAccount::create([
             'name' => 'Project Alpha',
             'classification' => 'Running',
-            'status' => 'Active'
+            'status' => 'Active',
         ]);
 
         $subAccount = SubAccount::create([
@@ -767,7 +768,7 @@ class FuelOrderFeatureTest extends TestCase
         ]);
 
         // Allocate budget of 500 liters
-        \App\Models\SubAccountBudget::create([
+        SubAccountBudget::create([
             'sub_account_id' => $subAccount->id,
             'budget_quantity' => 500,
             'status' => 'Approved',
@@ -916,42 +917,42 @@ class FuelOrderFeatureTest extends TestCase
         // Filter by All (no status query) should show all orders
         $response = $this->actingAs($user)->get(route('fuel-orders.index'));
         $response->assertStatus(200);
-        $response->assertSee('#' . str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertSee('#' . str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertSee('#' . str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertSee('#' . str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#'.str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#'.str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#'.str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#'.str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
 
         // Filter by PEND (excluding pending waiver)
         $response = $this->actingAs($user)->get(route('fuel-orders.index', ['status' => 'PEND']));
         $response->assertStatus(200);
-        $response->assertSee('#' . str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertDontSee('#' . str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertDontSee('#' . str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertDontSee('#' . str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#'.str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#'.str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#'.str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#'.str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
 
         // Filter by PENDING_WAIVER
         $response = $this->actingAs($user)->get(route('fuel-orders.index', ['status' => 'PENDING_WAIVER']));
         $response->assertStatus(200);
-        $response->assertDontSee('#' . str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertSee('#' . str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertDontSee('#' . str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertDontSee('#' . str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#'.str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#'.str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#'.str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#'.str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
 
         // Filter by DONE
         $response = $this->actingAs($user)->get(route('fuel-orders.index', ['status' => 'DONE']));
         $response->assertStatus(200);
-        $response->assertDontSee('#' . str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertDontSee('#' . str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertSee('#' . str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertDontSee('#' . str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#'.str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#'.str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#'.str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#'.str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
 
         // Filter by VOID
         $response = $this->actingAs($user)->get(route('fuel-orders.index', ['status' => 'VOID']));
         $response->assertStatus(200);
-        $response->assertDontSee('#' . str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertDontSee('#' . str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertDontSee('#' . str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
-        $response->assertSee('#' . str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#'.str_pad($pendOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#'.str_pad($waiverOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertDontSee('#'.str_pad($doneOrder->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#'.str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
     }
 
     public function test_fuel_orders_show_breakdown_by_charged_to_rows_are_clickable()
@@ -1005,7 +1006,7 @@ class FuelOrderFeatureTest extends TestCase
         ]);
 
         // Check if the markup has the onclick attribute pointing to that url and style pointer
-        $response->assertSee('onclick="window.open(\'' . $expectedUrl . '\', \'_blank\')"', false);
+        $response->assertSee('onclick="window.open(\''.$expectedUrl.'\', \'_blank\')"', false);
         $response->assertSee('style="cursor: pointer;"', false);
     }
 
@@ -1013,9 +1014,9 @@ class FuelOrderFeatureTest extends TestCase
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $user = User::factory()->create(['role' => 'administrator']);
-        
+
         $account = ChargeableAccount::create(['name' => 'General Overhead', 'status' => 'Active']);
-        
+
         // 1. Controlled sub-account with some budget
         $controlledSub = $account->subAccounts()->create(['name' => 'Controlled Sub', 'type' => 'Controlled']);
         $controlledSub->budgets()->create([
@@ -1034,8 +1035,8 @@ class FuelOrderFeatureTest extends TestCase
 
         // 3. Creating direct order for Controlled sub-account going overbudget (150L > 100L remaining)
         // Should require a waiver (is_waiver_pending = true)
-        \Livewire\Livewire::actingAs($user)
-            ->test(\App\Livewire\CreateFuelOrder::class)
+        Livewire::actingAs($user)
+            ->test(CreateFuelOrder::class)
             ->set('chargeable_account_id', $account->id)
             ->set('sub_account_id', $controlledSub->id)
             ->set('say_quantity', 150.0)
@@ -1046,12 +1047,12 @@ class FuelOrderFeatureTest extends TestCase
 
         // Assert that the created order has is_waiver_pending = true
         $controlledOrder = FuelOrder::latest('id')->first();
-        $this->assertTrue((bool)$controlledOrder->is_waiver_pending);
+        $this->assertTrue((bool) $controlledOrder->is_waiver_pending);
 
         // 4. Creating direct order for Uncontrolled sub-account going overbudget (150L > 100L remaining)
         // Should NOT require a waiver (is_waiver_pending = false)
-        \Livewire\Livewire::actingAs($user)
-            ->test(\App\Livewire\CreateFuelOrder::class)
+        Livewire::actingAs($user)
+            ->test(CreateFuelOrder::class)
             ->set('chargeable_account_id', $account->id)
             ->set('sub_account_id', $uncontrolledSub->id)
             ->set('say_quantity', 150.0)
@@ -1062,7 +1063,7 @@ class FuelOrderFeatureTest extends TestCase
 
         // Assert that the created order has is_waiver_pending = false
         $uncontrolledOrder = FuelOrder::latest('id')->first();
-        $this->assertFalse((bool)$uncontrolledOrder->is_waiver_pending);
+        $this->assertFalse((bool) $uncontrolledOrder->is_waiver_pending);
     }
 
     public function test_fuel_orders_show_displays_em_dash_for_uncontrolled_sub_accounts_remaining_and_balance()
@@ -1070,10 +1071,10 @@ class FuelOrderFeatureTest extends TestCase
         $user = User::factory()->create(['role' => 'administrator']);
         $type = AssetType::create(['name' => 'Vehicle']);
         $account = ChargeableAccount::create(['name' => 'General Overhead', 'status' => 'Active']);
-        
+
         // 1. Create an Uncontrolled sub-account
         $uncontrolledSub = $account->subAccounts()->create(['name' => 'Uncontrolled Sub', 'type' => 'Uncontrolled']);
-        
+
         $asset = Asset::create([
             'fleet_no' => 'V-101',
             'asset_type_id' => $type->id,
@@ -1206,8 +1207,8 @@ class FuelOrderFeatureTest extends TestCase
         $this->assertEquals($fuelOrder->id, $entry2->fresh()->fuel_order_id);
 
         // 4. Verify fuel order calculations are updated (calculated_quantity should now be 20 L, and km = 50)
-        $this->assertEquals(20.0, (float)$fuelOrder->fresh()->calculated_quantity);
-        $this->assertEquals(50.0, (float)$fuelOrder->fresh()->calculated_kilometers);
+        $this->assertEquals(20.0, (float) $fuelOrder->fresh()->calculated_quantity);
+        $this->assertEquals(50.0, (float) $fuelOrder->fresh()->calculated_kilometers);
 
         // 5. A moderator should be able to unlink Sub Two row as well
         $response = $this->actingAs($moderator)->post(route('fuel-orders.unlink-sub-account', $fuelOrder), [
@@ -1215,10 +1216,10 @@ class FuelOrderFeatureTest extends TestCase
             'unbudgeted' => false,
         ]);
         $response->assertRedirect(route('fuel-orders.show', $fuelOrder));
-        
+
         // 6. Verify entry2 is also unlinked and order has 0 totals
         $this->assertNull($entry2->fresh()->fuel_order_id);
-        $this->assertEquals(0.0, (float)$fuelOrder->fresh()->calculated_quantity);
-        $this->assertEquals(0.0, (float)$fuelOrder->fresh()->calculated_kilometers);
+        $this->assertEquals(0.0, (float) $fuelOrder->fresh()->calculated_quantity);
+        $this->assertEquals(0.0, (float) $fuelOrder->fresh()->calculated_kilometers);
     }
 }

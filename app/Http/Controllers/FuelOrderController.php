@@ -6,6 +6,7 @@ use App\Models\ChargeableAccount;
 use App\Models\FuelOrder;
 use App\Models\SubAccount;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -128,7 +129,7 @@ class FuelOrderController extends Controller
             'status' => 'required|in:PEND,DONE,VOID',
         ];
 
-        if (!$fuelOrder->asset_id) {
+        if (! $fuelOrder->asset_id) {
             $rules['sub_account_id'] = 'required|exists:sub_accounts,id';
         }
 
@@ -142,7 +143,7 @@ class FuelOrderController extends Controller
                 'updated_by' => Auth::id(),
             ];
 
-            if (!$fuelOrder->asset_id) {
+            if (! $fuelOrder->asset_id) {
                 $updateData['sub_account_id'] = $validated['sub_account_id'];
             }
 
@@ -293,7 +294,7 @@ class FuelOrderController extends Controller
 
         $query = $fuelOrder->utilizationEntries();
 
-        if ($subAccountId === 'null' || !$subAccountId) {
+        if ($subAccountId === 'null' || ! $subAccountId) {
             $query->whereNull('sub_account_id');
         } else {
             $query->where('sub_account_id', $subAccountId);
@@ -344,8 +345,8 @@ class FuelOrderController extends Controller
                         $qty = $fuelOrder->fuel_factor_km > 0 ? $diff / $fuelOrder->fuel_factor_km : 0;
                     } elseif (str_contains($calcType, 'timeframe')) {
                         if ($entry->end_time && $entry->start_time) {
-                            $start = \Illuminate\Support\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
-                            $end = \Illuminate\Support\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
+                            $start = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
+                            $end = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
                             $hours = max(0, $start->diffInMinutes($end) / 60);
                             $calcHours += $hours;
                             $qty = $hours * $fuelOrder->fuel_factor_hr;
