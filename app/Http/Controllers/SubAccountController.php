@@ -98,6 +98,7 @@ class SubAccountController extends Controller
 
         $validated = $request->validate([
             'quantity' => 'required|numeric|min:0.01',
+            'date_at' => 'required|date',
         ]);
 
         $subAccount->accomplishments()->create($validated);

@@ -15,10 +15,12 @@ class AccomplishmentRegistry extends Model
     protected $fillable = [
         'sub_account_id',
         'quantity',
+        'date_at',
     ];
 
     protected $casts = [
         'quantity' => 'float',
+        'date_at' => 'date',
     ];
 
     public function subAccount(): BelongsTo

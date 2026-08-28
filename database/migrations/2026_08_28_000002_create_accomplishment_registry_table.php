@@ -17,6 +17,7 @@ return new class extends Migration
                 ->constrained('sub_accounts')
                 ->cascadeOnDelete();
             $table->float('quantity');
+            $table->date('date_at');
             $table->timestamps();
         });
     }

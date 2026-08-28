@@ -22,7 +22,7 @@
                         <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Sub-Account Name</h3>
                         <span class="h4 text-white fw-bold d-block">{{ $subAccount->display_name }}</span>
                         @if($subAccount->quantity)
-                            <span class="text-secondary small fw-bold text-uppercase">Target: {{ number_format($subAccount->quantity, 2) }} {{ $subAccount->unit }}</span>
+                            <span class="text-secondary small fw-bold text-uppercase">Quantity: {{ number_format($subAccount->quantity, 2) }} {{ $subAccount->unit }}</span>
                         @endif
                     </div>
                
@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            @if($subAccount->quantity && in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
+            @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
                 <!-- Log Accomplishment Card -->
                 <div class="card bg-dark border-secondary border-start border-4 border-success shadow-lg rounded-4 p-4 mb-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -54,14 +54,21 @@
                         @csrf
                         
                         <div class="row g-4 mb-4">
-                            <div class="col-md-6">
-                                <label for="quantity" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Accomplished Quantity ({{ $subAccount->unit }})</label>
+                            <div class="col-md-4">
+                                <label for="quantity" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Accomplished Quantity{{ $subAccount->unit ? ' (' . $subAccount->unit . ')' : '' }}</label>
                                 <input type="number" name="quantity" id="quantity" step="0.01" min="0.01" required placeholder="0.00" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-success">
                                 @error('quantity')
                                     <div class="text-danger small fw-bold mt-2">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6 d-flex align-items-end">
+                            <div class="col-md-4">
+                                <label for="date_at" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Date of Accomplishment</label>
+                                <input type="date" name="date_at" id="date_at" required value="{{ date('Y-m-d') }}" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-success">
+                                @error('date_at')
+                                    <div class="text-danger small fw-bold mt-2">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
                                 <button type="submit" class="btn btn-success px-4 py-3 rounded-pill fw-bold small text-uppercase tracking-wider shadow w-100">
                                     Register Accomplishment
                                 </button>
@@ -85,11 +92,11 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($subAccount->accomplishments()->orderBy('created_at', 'desc')->get() as $acc)
+                                        @forelse($subAccount->accomplishments()->orderBy('date_at', 'desc')->orderBy('created_at', 'desc')->get() as $acc)
                                             <tr>
                                                 <td class="px-4 py-3 align-middle">
-                                                    <span class="text-white small">{{ $acc->created_at->format('M d, Y') }}</span>
-                                                    <span class="d-block text-secondary smaller fw-bold text-uppercase">{{ $acc->created_at->format('h:i A') }}</span>
+                                                    <span class="text-white small">{{ $acc->date_at->format('M d, Y') }}</span>
+                                                    <span class="d-block text-secondary smaller fw-bold text-uppercase">Logged on {{ $acc->created_at->format('M d, Y h:i A') }}</span>
                                                 </td>
                                                 <td class="px-4 py-3 align-middle text-end font-monospace fw-bold text-success">
                                                     {{ number_format($acc->quantity, 2) }} {{ $subAccount->unit }}

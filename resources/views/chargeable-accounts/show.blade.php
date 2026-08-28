@@ -85,7 +85,7 @@
                                 <input type="text" id="create_name" name="name" placeholder="e.g. Project Alpha" required class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-info" pattern="^[^:]+$" title="Colons (:) are not allowed in the sub-account name">
                             </div>
                             <div class="col-md-3">
-                                <label for="create_quantity" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Target Quantity</label>
+                                <label for="create_quantity" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Quantity</label>
                                 <input type="number" id="create_quantity" name="quantity" step="0.01" min="0" placeholder="e.g. 100.00" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-info">
                             </div>
                             <div class="col-md-3">
@@ -129,7 +129,7 @@
                                                     <div class="d-flex flex-column">
                                                         <span class="text-light fw-medium">{{ $subAccount->display_name }}</span>
                                                         @if($subAccount->quantity)
-                                                            <span class="text-secondary smaller fw-bold text-uppercase mt-1" style="font-size: 0.75rem;">Target: {{ number_format($subAccount->quantity, 2) }} {{ $subAccount->unit }}</span>
+                                                            <span class="text-secondary smaller fw-bold text-uppercase mt-1" style="font-size: 0.75rem;">Quantity: {{ number_format($subAccount->quantity, 2) }} {{ $subAccount->unit }}</span>
                                                         @endif
                                                     </div>
                                                 </td>

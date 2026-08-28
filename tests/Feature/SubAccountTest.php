@@ -516,8 +516,8 @@ class SubAccountTest extends TestCase
         $this->assertEquals(0.0, $subAccount->accomplishment);
 
         // Add some accomplishment records
-        $subAccount->accomplishments()->create(['quantity' => 50.00]);
-        $subAccount->accomplishments()->create(['quantity' => 50.00]);
+        $subAccount->accomplishments()->create(['quantity' => 50.00, 'date_at' => '2026-08-28']);
+        $subAccount->accomplishments()->create(['quantity' => 50.00, 'date_at' => '2026-08-28']);
 
         // Total done: 100, target: 200, accomplishment percentage should be 50.0%
         $this->assertEquals(50.0, $subAccount->fresh()->accomplishment);
@@ -536,12 +536,14 @@ class SubAccountTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('sub-accounts.accomplishments.store', $subAccount), [
             'quantity' => 30.50,
+            'date_at' => '2026-08-28',
         ]);
 
         $response->assertRedirect(route('sub-accounts.show', $subAccount));
         $this->assertDatabaseHas('accomplishment_registry', [
             'sub_account_id' => $subAccount->id,
             'quantity' => 30.50,
+            'date_at' => '2026-08-28 00:00:00',
         ]);
 
         $accomplishment = $subAccount->accomplishments()->first();
@@ -567,6 +569,7 @@ class SubAccountTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('sub-accounts.accomplishments.store', $subAccount), [
             'quantity' => 10.00,
+            'date_at' => '2026-08-28',
         ]);
 
         $response->assertStatus(403);
