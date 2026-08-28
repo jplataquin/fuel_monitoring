@@ -17,7 +17,7 @@ class FuelOrderController extends Controller
      */
     public function index(Request $request)
     {
-        $query = FuelOrder::with(['asset', 'creator', 'chargeableAccount', 'subAccount']);
+        $query = FuelOrder::with(['asset', 'creator', 'chargeableAccount', 'subAccount', 'utilizationEntries.chargeableAccount']);
 
         if ($request->filled('fleet_no')) {
             $searchTerm = $request->fleet_no;

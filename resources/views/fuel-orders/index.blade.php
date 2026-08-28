@@ -98,7 +98,13 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="fw-bold text-light small tracking-tight">
-                                            {{ $order->chargeableAccount->name ?? '—' }}
+                                            @if($order->chargeableAccount)
+                                                {{ $order->chargeableAccount->name }}
+                                            @elseif($order->utilizationEntries->isNotEmpty())
+                                                {{ $order->utilizationEntries->pluck('chargeableAccount.name')->filter()->unique()->implode(', ') ?: '—' }}
+                                            @else
+                                                —
+                                            @endif
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">
