@@ -71,7 +71,6 @@
                                 <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">ID</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Asset</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Chargeable Account</th>
-                                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Sub-Account</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Calculated</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest">Say Qty</th>
                                 <th class="px-4 py-3 text-secondary text-uppercase small fw-bold tracking-widest text-center">Status</th>
@@ -100,11 +99,6 @@
                                     <td class="px-4 py-3">
                                         <div class="fw-bold text-light small tracking-tight">
                                             {{ $order->chargeableAccount->name ?? '—' }}
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <div class="fw-bold text-light small tracking-tight">
-                                            {{ $order->subAccount->display_name ?? '—' }}
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">
@@ -163,7 +157,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="10" class="px-4 py-5 text-center border-0">
+                                    <td colspan="9" class="px-4 py-5 text-center border-0">
                                         <div class="d-flex flex-column align-items-center justify-content-center py-5">
                                             <div class="bg-secondary bg-opacity-20 rounded-4 d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
                                                 <svg width="32" height="32" class="text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>

@@ -8,7 +8,7 @@
     <div class="container-xl py-5">
         <div class="row justify-content-center">
             <div class="col-md-10 col-lg-8">
-                <div class="card bg-dark border-secondary border-opacity-25 shadow-lg rounded-4 overflow-hidden">
+                <div class="card bg-dark border border-secondary border-opacity-25 rounded-2 overflow-hidden">
                     <div class="card-body p-4 p-md-5">
                         <div class="mb-4 border-bottom border-secondary border-opacity-25 pb-4">
                             <h3 class="h5 fw-bold text-primary mb-2">Issue Fuel Order</h3>
