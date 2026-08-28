@@ -526,7 +526,8 @@ class SubAccountTest extends TestCase
     public function test_authorized_user_can_log_and_delete_accomplishments(): void
     {
         $this->withoutMiddleware([ValidateCsrfToken::class]);
-        $user = User::factory()->create(['role' => 'administrator']);
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $moderator = User::factory()->create(['role' => 'moderator']);
         $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
         $subAccount = $account->subAccounts()->create([
             'name' => 'Sub Account A',
@@ -534,7 +535,8 @@ class SubAccountTest extends TestCase
             'unit' => 'meters',
         ]);
 
-        $response = $this->actingAs($user)->post(route('sub-accounts.accomplishments.store', $subAccount), [
+        // Moderator can log accomplishments
+        $response = $this->actingAs($moderator)->post(route('sub-accounts.accomplishments.store', $subAccount), [
             'quantity' => 30.50,
             'date_at' => '2026-08-28',
         ]);
@@ -548,11 +550,42 @@ class SubAccountTest extends TestCase
 
         $accomplishment = $subAccount->accomplishments()->first();
 
-        $deleteResponse = $this->actingAs($user)->delete(route('sub-accounts.accomplishments.destroy', $accomplishment));
-        $deleteResponse->assertRedirect(route('sub-accounts.show', $subAccount));
+        // Moderator is BLOCKED from deleting (should return 403)
+        $deleteModResponse = $this->actingAs($moderator)->delete(route('sub-accounts.accomplishments.destroy', $accomplishment));
+        $deleteModResponse->assertStatus(403);
+
+        // Admin is ALLOWED to delete (should redirect and delete row)
+        $deleteAdminResponse = $this->actingAs($admin)->delete(route('sub-accounts.accomplishments.destroy', $accomplishment));
+        $deleteAdminResponse->assertRedirect(route('sub-accounts.show', $subAccount));
         $this->assertDatabaseMissing('accomplishment_registry', [
             'id' => $accomplishment->id,
         ]);
+    }
+
+    public function test_accomplishment_date_must_be_unique_per_sub_account(): void
+    {
+        $this->withoutMiddleware([ValidateCsrfToken::class]);
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create([
+            'name' => 'Sub Account A',
+            'quantity' => 100.00,
+            'unit' => 'meters',
+        ]);
+
+        // Register first accomplishment
+        $response1 = $this->actingAs($user)->post(route('sub-accounts.accomplishments.store', $subAccount), [
+            'quantity' => 30.50,
+            'date_at' => '2026-08-28',
+        ]);
+        $response1->assertRedirect();
+
+        // Register second accomplishment with same date_at (should fail)
+        $response2 = $this->actingAs($user)->post(route('sub-accounts.accomplishments.store', $subAccount), [
+            'quantity' => 25.00,
+            'date_at' => '2026-08-28',
+        ]);
+        $response2->assertSessionHasErrors('date_at');
     }
 
     public function test_unauthorized_user_cannot_log_accomplishments(): void

@@ -11,6 +11,7 @@ use App\Models\UtilizationEntry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -96,9 +97,26 @@ class SubAccountController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        if ($request->has('date_at') && ! empty($request->input('date_at'))) {
+            try {
+                $formatted = Carbon::parse($request->input('date_at'))->startOfDay()->format('Y-m-d H:i:s');
+                $request->merge(['date_at' => $formatted]);
+            } catch (\Exception $e) {
+                // Let validator handle invalid date
+            }
+        }
+
         $validated = $request->validate([
             'quantity' => 'required|numeric|min:0.01',
-            'date_at' => 'required|date',
+            'date_at' => [
+                'required',
+                'date',
+                Rule::unique('accomplishment_registry')->where(function ($query) use ($subAccount) {
+                    return $query->where('sub_account_id', $subAccount->id);
+                }),
+            ],
+        ], [
+            'date_at.unique' => 'An accomplishment has already been registered for this date.',
         ]);
 
         $subAccount->accomplishments()->create($validated);
@@ -108,7 +126,7 @@ class SubAccountController extends Controller
 
     public function destroyAccomplishment(AccomplishmentRegistry $accomplishment): RedirectResponse
     {
-        if (! in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer'])) {
+        if (Auth::user()->role !== 'administrator') {
             abort(403, 'Unauthorized action.');
         }
 
