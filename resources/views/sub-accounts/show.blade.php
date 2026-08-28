@@ -121,7 +121,6 @@
                                             <tr>
                                                 <td class="px-4 py-3 align-middle">
                                                     <span class="text-white small">{{ $acc->date_at->format('M d, Y') }}</span>
-                                                    <span class="d-block text-secondary smaller fw-bold text-uppercase">Logged on {{ $acc->created_at->format('M d, Y h:i A') }}</span>
                                                 </td>
                                                 <td class="px-4 py-3 align-middle text-end font-monospace fw-bold text-success">
                                                     {{ number_format($acc->quantity, 2) }} {{ $subAccount->unit }}
