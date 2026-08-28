@@ -17,25 +17,50 @@
         <div class="container" style="max-width: 1000px;">
             <!-- Sub-Account Info -->
             <div class="card bg-dark border-secondary shadow-lg rounded-4 p-4 mb-5">
-                <div class="row align-items-center">
-                    <div class="col-md-4">
+                <div class="row align-items-center g-4">
+                    <div class="col-md-3">
                         <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Sub-Account Name</h3>
                         <span class="h4 text-white fw-bold d-block">{{ $subAccount->display_name }}</span>
-                        @if($subAccount->quantity)
-                            <span class="text-secondary small fw-bold text-uppercase">Quantity: {{ number_format($subAccount->quantity, 2) }} {{ $subAccount->unit }}</span>
-                        @endif
+                    </div>
+
+                    <div class="col-md-2">
+                        <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Quantity</h3>
+                        <span class="h4 text-white fw-bold font-monospace d-block">
+                            @if($subAccount->quantity)
+                                {{ number_format($subAccount->quantity, 2) }} <span class="h6 text-secondary text-uppercase">{{ $subAccount->unit }}</span>
+                            @else
+                                —
+                            @endif
+                        </span>
                     </div>
                
-                    <div class="col-md-3">
-                        <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Accomplishment</h3>
+                    <div class="col-md-2">
+                        <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Progress</h3>
                         <span class="h4 text-white fw-bold font-monospace d-block">{{ number_format($subAccount->accomplishment, 2) }}%</span>
                         @if($subAccount->quantity)
-                            <span class="text-secondary small fw-bold text-uppercase">Done: {{ number_format($subAccount->accomplishments()->sum('quantity'), 2) }} {{ $subAccount->unit }}</span>
+                            <span class="text-secondary smaller fw-bold text-uppercase mt-1 d-block" style="font-size: 0.75rem;">Done: {{ number_format($subAccount->accomplishments()->sum('quantity'), 2) }} {{ $subAccount->unit }}</span>
                         @endif
                     </div>
 
-                    <div class="col-md-5 text-md-end">
-                        <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Total Approved Budget</h3>
+                    <div class="col-md-2">
+                        <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Latest Accomplishment</h3>
+                        @php
+                            $latestAcc = $subAccount->accomplishments()->orderBy('date_at', 'desc')->orderBy('created_at', 'desc')->first();
+                        @endphp
+                        <span class="h4 text-white fw-bold font-monospace d-block">
+                            @if($latestAcc)
+                                {{ number_format($latestAcc->quantity, 2) }} <span class="h6 text-secondary text-uppercase">{{ $subAccount->unit }}</span>
+                            @else
+                                —
+                            @endif
+                        </span>
+                        @if($latestAcc)
+                            <span class="text-secondary smaller fw-bold text-uppercase mt-1 d-block" style="font-size: 0.75rem;">On {{ $latestAcc->date_at->format('M d, Y') }}</span>
+                        @endif
+                    </div>
+
+                    <div class="col-md-3 text-md-end">
+                        <h3 class="text-info small fw-bold text-uppercase tracking-widest mb-2">Approved Budget</h3>
                         <p class="display-6 fw-bold text-white mb-0 font-monospace">
                             {{ number_format($subAccount->budgets()->where('status', 'Approved')->sum('budget_quantity'), 2) }} <span class="h6 text-secondary uppercase">L</span>
                         </p>
