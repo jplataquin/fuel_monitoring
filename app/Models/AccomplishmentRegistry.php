@@ -16,6 +16,7 @@ class AccomplishmentRegistry extends Model
         'sub_account_id',
         'quantity',
         'date_at',
+        'reference_id',
     ];
 
     protected $casts = [

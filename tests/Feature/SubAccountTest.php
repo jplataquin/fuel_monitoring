@@ -607,4 +607,40 @@ class SubAccountTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_accomplishment_registry_supports_nullable_reference_id(): void
+    {
+        $account = ChargeableAccount::create(['name' => 'Main Account', 'status' => 'Active']);
+        $subAccount = $account->subAccounts()->create([
+            'name' => 'Sub Account A',
+            'quantity' => 100.00,
+            'unit' => 'meters',
+        ]);
+
+        // 1. Verify we can create an accomplishment entry with a null reference_id
+        $entry1 = $subAccount->accomplishments()->create([
+            'quantity' => 15.00,
+            'date_at' => '2026-08-27',
+            'reference_id' => null,
+        ]);
+
+        $this->assertNull($entry1->reference_id);
+        $this->assertDatabaseHas('accomplishment_registry', [
+            'id' => $entry1->id,
+            'reference_id' => null,
+        ]);
+
+        // 2. Verify we can create an accomplishment entry with a non-null reference_id
+        $entry2 = $subAccount->accomplishments()->create([
+            'quantity' => 20.00,
+            'date_at' => '2026-08-28',
+            'reference_id' => 'sync-ref-12345',
+        ]);
+
+        $this->assertEquals('sync-ref-12345', $entry2->reference_id);
+        $this->assertDatabaseHas('accomplishment_registry', [
+            'id' => $entry2->id,
+            'reference_id' => 'sync-ref-12345',
+        ]);
+    }
 }
