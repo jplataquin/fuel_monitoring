@@ -35,6 +35,31 @@ class SubAccountBudgetController extends Controller
         return view('sub-account-budgets.index', compact('budgets', 'accounts'));
     }
 
+    public function print(Request $request)
+    {
+        $query = SubAccountBudget::query()
+            ->select('sub_account_budgets.*', 'sub_accounts.chargeable_account_id')
+            ->join('sub_accounts', 'sub_account_budgets.sub_account_id', '=', 'sub_accounts.id')
+            ->join('chargeable_accounts', 'sub_accounts.chargeable_account_id', '=', 'chargeable_accounts.id')
+            ->with(['subAccount.chargeableAccount', 'creator'])
+            ->orderBy('chargeable_accounts.name', 'asc')
+            ->orderBy('sub_accounts.name', 'asc')
+            ->orderBy('sub_account_budgets.created_at', 'desc');
+
+        if ($request->filled('chargeable_account_id')) {
+            $query->where('sub_accounts.chargeable_account_id', $request->chargeable_account_id);
+            $budgets = $query->get();
+        } else {
+            $budgets = collect();
+        }
+
+        $account = $request->filled('chargeable_account_id')
+            ? ChargeableAccount::find($request->chargeable_account_id)
+            : null;
+
+        return view('sub-account-budgets.print', compact('budgets', 'account', 'request'));
+    }
+
     public function show(SubAccountBudget $accountBudget)
     {
         $accountBudget->load(['subAccount', 'creator', 'updater', 'approver', 'rejecter']);

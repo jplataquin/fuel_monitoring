@@ -643,4 +643,26 @@ class SubAccountTest extends TestCase
             'reference_id' => 'sync-ref-12345',
         ]);
     }
+
+    public function test_account_budgets_print_page_loads_and_displays_allocated_budgets(): void
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'General Overhead', 'status' => 'Active']);
+        $sub = $account->subAccounts()->create(['name' => 'Sub One']);
+
+        $budget = SubAccountBudget::create([
+            'sub_account_id' => $sub->id,
+            'budget_quantity' => 1500.00,
+            'status' => 'Approved',
+            'created_by' => $user->id,
+            'remarks' => 'Initial Sub-Account Budget',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('account-budgets.print', ['chargeable_account_id' => $account->id]));
+        $response->assertStatus(200);
+        $response->assertSee('Budget Allocations List');
+        $response->assertSee('General Overhead');
+        $response->assertSee('Sub One');
+        $response->assertSee('1,500.00 L');
+    }
 }

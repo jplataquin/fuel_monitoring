@@ -84,6 +84,7 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
 
     // Admin, Moderator and Budgeteer routes
     Route::middleware('role:administrator,moderator,budgeteer')->group(function () {
+        Route::get('account-budgets/print', [SubAccountBudgetController::class, 'print'])->name('account-budgets.print');
         Route::resource('account-budgets', SubAccountBudgetController::class)->except(['create']);
     });
 
