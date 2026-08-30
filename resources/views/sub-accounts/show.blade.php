@@ -76,14 +76,14 @@
                 @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
                     <button @click="activeTab = 'accomplishments'" 
                             :class="activeTab === 'accomplishments' ? 'border-bottom border-3 border-success text-success fw-bold bg-success bg-opacity-5' : 'text-secondary hover-text-white'"
-                            class="px-4 py-3 small text-uppercase tracking-widest btn btn-link text-decoration-none transition focus-ring focus-ring-success rounded-0">
+                            class="px-4 py-3 small text-uppercase tracking-widest text-decoration-none transition border-0 rounded-0 bg-transparent focus-ring focus-ring-success" style="cursor: pointer;">
                         Progress Logs
                     </button>
                 @endif
                 @if(in_array(Auth::user()->role, ['administrator', 'budgeteer']))
                     <button @click="activeTab = 'budgets'" 
                             :class="activeTab === 'budgets' ? 'border-bottom border-3 border-info text-info fw-bold bg-info bg-opacity-5' : 'text-secondary hover-text-white'"
-                            class="px-4 py-3 small text-uppercase tracking-widest btn btn-link text-decoration-none transition focus-ring focus-ring-info rounded-0">
+                            class="px-4 py-3 small text-uppercase tracking-widest text-decoration-none transition border-0 rounded-0 bg-transparent focus-ring focus-ring-info" style="cursor: pointer;">
                         Budget Allocations
                     </button>
                 @endif
