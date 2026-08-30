@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\AppServiceProvider;
 use App\Livewire\CreateFuelOrder;
 use App\Models\Asset;
 use App\Models\AssetType;
@@ -1005,13 +1006,36 @@ class FuelOrderFeatureTest extends TestCase
     public function test_fuel_orders_create_wizard_navigation_and_reset()
     {
         $user = User::factory()->create(['role' => 'administrator']);
-        \Livewire\Livewire::actingAs($user)
-            ->test(\App\AppServiceProvider::class === null ? null : \App\Livewire\CreateFuelOrder::class)
+        Livewire::actingAs($user)
+            ->test(AppServiceProvider::class === null ? null : CreateFuelOrder::class)
             ->assertSet('creation_method', '')
             ->call('setCreationMethod', 'with_asset')
             ->assertSet('creation_method', 'with_asset')
             ->call('resetCreationMethod')
             ->assertSet('creation_method', '');
+    }
+
+    public function test_fuel_orders_print_page_loads_and_displays_data()
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'General Overhead', 'status' => 'Active']);
+        $sub = $account->subAccounts()->create(['name' => 'Sub One']);
+
+        $order = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub->id,
+            'say_quantity' => 125.50,
+            'status' => 'PEND',
+            'is_waiver_pending' => false,
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('fuel-orders.print', ['chargeable_account_id' => $account->id]));
+        $response->assertStatus(200);
+        $response->assertSee('Fuel Orders List');
+        $response->assertSee('#'.str_pad($order->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('125.50 L');
     }
 
     public function test_fuel_orders_show_breakdown_by_charged_to_rows_are_clickable()

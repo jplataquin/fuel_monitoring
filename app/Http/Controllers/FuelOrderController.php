@@ -69,6 +69,64 @@ class FuelOrderController extends Controller
     }
 
     /**
+     * Display a black and white printable table view of fuel orders list.
+     */
+    public function print(Request $request)
+    {
+        $query = FuelOrder::with(['asset', 'creator', 'chargeableAccount', 'subAccount', 'utilizationEntries.chargeableAccount']);
+
+        if ($request->filled('fleet_no')) {
+            $searchTerm = $request->fleet_no;
+            $searchId = ltrim($searchTerm, '#');
+            $searchIdInt = ltrim($searchId, '0');
+
+            $query->where(function ($q) use ($searchTerm, $searchId, $searchIdInt) {
+                $q->where('id', 'like', '%'.$searchTerm.'%');
+
+                if ($searchId !== '') {
+                    $q->orWhere('id', 'like', '%'.$searchId.'%');
+                }
+                if ($searchIdInt !== '') {
+                    $q->orWhere('id', '=', $searchIdInt);
+                }
+
+                $q->orWhereHas('asset', function ($assetQuery) use ($searchTerm) {
+                    $assetQuery->where('fleet_no', 'like', '%'.$searchTerm.'%');
+                });
+            });
+        }
+
+        if ($request->filled('status')) {
+            if ($request->status === 'PENDING_WAIVER') {
+                $query->where('is_waiver_pending', true);
+            } elseif ($request->status === 'PEND') {
+                $query->where('status', 'PEND')
+                    ->where('is_waiver_pending', false);
+            } else {
+                $query->where('status', $request->status);
+            }
+        }
+
+        if ($request->filled('chargeable_account_id')) {
+            $accountId = $request->chargeable_account_id;
+            $query->where(function ($q) use ($accountId) {
+                $q->where('chargeable_account_id', $accountId)
+                    ->orWhereHas('utilizationEntries', function ($ueQ) use ($accountId) {
+                        $ueQ->where('chargeable_account_id', $accountId);
+                    });
+            });
+        }
+
+        $fuelOrders = $query->latest()->get();
+
+        $chargeableAccount = $request->filled('chargeable_account_id')
+            ? ChargeableAccount::find($request->chargeable_account_id)
+            : null;
+
+        return view('fuel-orders.print', compact('fuelOrders', 'chargeableAccount', 'request'));
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
