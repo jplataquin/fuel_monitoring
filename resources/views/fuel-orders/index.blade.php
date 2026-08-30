@@ -15,17 +15,6 @@
                         @endforeach
                     </select>
 
-                    <select name="sub_account_id" class="form-select bg-dark text-light border-secondary border-opacity-50 rounded-pill px-3 py-2 text-sm" style="width: 200px;" onchange="this.form.submit()">
-                        <option value="">All Sub-Accounts</option>
-                        @foreach($subAccounts as $sub)
-                            @if(!request('chargeable_account_id') || $sub->chargeable_account_id == request('chargeable_account_id'))
-                                <option value="{{ $sub->id }}" {{ request('sub_account_id') == $sub->id ? 'selected' : '' }}>
-                                    {{ $sub->display_name }}
-                                </option>
-                            @endif
-                        @endforeach
-                    </select>
-
                     <select name="status" class="form-select bg-dark text-light border-secondary border-opacity-50 rounded-pill px-3 py-2 text-sm" style="width: 150px;" onchange="this.form.submit()">
                         <option value="">All Statuses</option>
                         <option value="PEND" {{ request('status') === 'PEND' ? 'selected' : '' }}>Pending</option>
@@ -169,7 +158,7 @@
                                                 <svg width="32" height="32" class="text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                             </div>
                                             <p class="fw-bold text-light mb-1">No fuel orders found.</p>
-                                            @if(request('fleet_no') || request('chargeable_account_id') || request('sub_account_id'))
+                                            @if(request('fleet_no') || request('chargeable_account_id'))
                                                 <p class="text-secondary small mb-3">Try adjusting your search filter.</p>
                                                 <a href="{{ route('fuel-orders.index') }}" class="btn btn-link text-primary fw-bold text-decoration-none small text-uppercase tracking-widest">Clear Filter</a>
                                             @endif

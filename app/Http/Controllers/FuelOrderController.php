@@ -61,16 +61,11 @@ class FuelOrderController extends Controller
             });
         }
 
-        if ($request->filled('sub_account_id')) {
-            $query->where('sub_account_id', $request->sub_account_id);
-        }
-
         $fuelOrders = $query->latest()->paginate(10)->withQueryString();
 
         $chargeableAccounts = ChargeableAccount::where('status', 'Active')->orderBy('name')->get();
-        $subAccounts = SubAccount::orderBy('name')->get();
 
-        return view('fuel-orders.index', compact('fuelOrders', 'chargeableAccounts', 'subAccounts'));
+        return view('fuel-orders.index', compact('fuelOrders', 'chargeableAccounts'));
     }
 
     /**

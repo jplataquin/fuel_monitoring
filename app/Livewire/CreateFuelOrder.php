@@ -54,10 +54,65 @@ class CreateFuelOrder extends Component
 
     public $has_negative_balance = false;
 
+    public $creation_method = '';
+
     public function mount()
     {
         $this->assets = Asset::all();
         $this->chargeable_accounts = ChargeableAccount::where('status', 'Active')->orderBy('name', 'asc')->get();
+        if ($this->asset_id) {
+            $this->creation_method = 'with_asset';
+        } elseif ($this->chargeable_account_id) {
+            $this->creation_method = 'direct';
+        }
+    }
+
+    public function setCreationMethod($method)
+    {
+        $this->creation_method = $method;
+        if ($method === 'with_asset') {
+            $this->chargeable_account_id = '';
+            $this->sub_account_id = '';
+            $this->unbudgeted = false;
+            $this->remarks = '';
+            $this->say_quantity = '';
+            $this->has_negative_balance = false;
+        } elseif ($method === 'direct') {
+            $this->asset_id = '';
+            $this->date_from = '';
+            $this->date_to = '';
+            $this->calculated_quantity = 0;
+            $this->calculated_hours = 0;
+            $this->calculated_kilometers = 0;
+            $this->grouped_totals = [];
+            $this->fuel_factor_km = 0;
+            $this->fuel_factor_hr = 0;
+            $this->unprocessed_entries_count = 0;
+            $this->unprocessed_entries = [];
+        }
+    }
+
+    public function resetCreationMethod()
+    {
+        $this->creation_method = '';
+        $this->asset_id = '';
+        $this->date_from = '';
+        $this->date_to = '';
+        $this->chargeable_account_id = '';
+        $this->sub_account_id = '';
+        $this->unbudgeted = false;
+        $this->remarks = '';
+        $this->say_quantity = '';
+        $this->calculated_quantity = 0;
+        $this->calculated_hours = 0;
+        $this->calculated_kilometers = 0;
+        $this->grouped_totals = [];
+        $this->fuel_factor_km = 0;
+        $this->fuel_factor_hr = 0;
+        $this->unprocessed_entries_count = 0;
+        $this->unprocessed_entries = [];
+        $this->has_negative_balance = false;
+        $this->resetErrorBag();
     }
 
     public function updatedAssetId()

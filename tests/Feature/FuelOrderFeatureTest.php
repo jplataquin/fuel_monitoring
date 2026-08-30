@@ -955,6 +955,65 @@ class FuelOrderFeatureTest extends TestCase
         $response->assertSee('#'.str_pad($voidOrder->id, 5, '0', STR_PAD_LEFT));
     }
 
+    public function test_fuel_orders_index_does_not_filter_by_sub_account_and_view_does_not_receive_sub_accounts()
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'General Overhead', 'status' => 'Active']);
+        $sub1 = $account->subAccounts()->create(['name' => 'Sub One']);
+        $sub2 = $account->subAccounts()->create(['name' => 'Sub Two']);
+
+        // Create order for sub1
+        $order1 = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub1->id,
+            'say_quantity' => 100,
+            'status' => 'PEND',
+            'is_waiver_pending' => false,
+            'created_by' => $user->id,
+        ]);
+
+        // Create order for sub2
+        $order2 = FuelOrder::create([
+            'asset_id' => null,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $sub2->id,
+            'say_quantity' => 200,
+            'status' => 'PEND',
+            'is_waiver_pending' => false,
+            'created_by' => $user->id,
+        ]);
+
+        // Access index page passing sub_account_id filter - it should ignore it and show both orders
+        $response = $this->actingAs($user)->get(route('fuel-orders.index', ['sub_account_id' => $sub1->id]));
+        $response->assertStatus(200);
+        $response->assertSee('#'.str_pad($order1->id, 5, '0', STR_PAD_LEFT));
+        $response->assertSee('#'.str_pad($order2->id, 5, '0', STR_PAD_LEFT));
+
+        // Assert that the 'subAccounts' variable is NOT passed to the view
+        $response->assertViewMissing('subAccounts');
+    }
+
+    public function test_fuel_orders_create_shows_step_1_by_default()
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $response = $this->actingAs($user)->get(route('fuel-orders.create'));
+        $response->assertStatus(200);
+        $response->assertSee('Choose Fuel Order Creation Method');
+    }
+
+    public function test_fuel_orders_create_wizard_navigation_and_reset()
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        \Livewire\Livewire::actingAs($user)
+            ->test(\App\AppServiceProvider::class === null ? null : \App\Livewire\CreateFuelOrder::class)
+            ->assertSet('creation_method', '')
+            ->call('setCreationMethod', 'with_asset')
+            ->assertSet('creation_method', 'with_asset')
+            ->call('resetCreationMethod')
+            ->assertSet('creation_method', '');
+    }
+
     public function test_fuel_orders_show_breakdown_by_charged_to_rows_are_clickable()
     {
         $user = User::factory()->create(['role' => 'administrator']);
