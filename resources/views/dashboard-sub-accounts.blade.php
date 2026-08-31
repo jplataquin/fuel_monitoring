@@ -217,7 +217,7 @@
                                                     ? ($sa['quantity'] - $sa['accomplished_qty']) / $rateVal
                                                     : null;
 
-                                                $isProjectedLess = $projectedVal !== null && $projectedVal < $sa['remaining'];
+                                                $isProjectedMore = $projectedVal !== null && $projectedVal > $sa['remaining'];
                                             @endphp
                                             <tr @click="clickRow('{{ route('utilization-entries.index', ['chargeable_account_id' => $chargeableAccount->id, 'sub_account_id' => $sa['id'], 'fuel_order_status' => 'DONE']) }}', $event)" class="text-nowrap" style="cursor: pointer;">
                                                 <td class="px-4 py-3 fw-bold text-white border-secondary text-nowrap">
@@ -253,7 +253,7 @@
                                                         —
                                                     @endif
                                                 </td>
-                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-nowrap {{ $isProjectedLess ? 'text-danger' : 'text-secondary' }}">
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-nowrap {{ $isProjectedMore ? 'text-danger' : 'text-secondary' }}">
                                                     @if($projectedVal !== null)
                                                         {{ number_format($projectedVal, 2) }} L
                                                     @else
