@@ -82,6 +82,10 @@ class SubAccountDashboardTest extends TestCase
         // Check that the breakdown table includes the Accomplishment (%) column and formatted value
         $response->assertSee('Accomplishment (%)');
         $response->assertSee('45.50%');
+
+        // Check that the breakdown table includes the Optimal column and formatted value
+        $response->assertSee('Optimal');
+        $response->assertSee('0.05 meters / L');
     }
 
     public function test_sub_account_dashboard_calculates_remaining_balance_correctly(): void
