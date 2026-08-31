@@ -86,6 +86,10 @@ class SubAccountDashboardTest extends TestCase
         // Check that the breakdown table includes the Optimal column and formatted value
         $response->assertSee('Optimal');
         $response->assertSee('0.05 meters / L');
+
+        // Check that the breakdown table includes the Remaining (Qty) column and formatted value
+        $response->assertSee('Remaining (Qty)');
+        $response->assertSee('54.50');
     }
 
     public function test_sub_account_dashboard_calculates_remaining_balance_correctly(): void

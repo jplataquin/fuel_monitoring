@@ -6,6 +6,14 @@
 
 <x-dynamic-component :component="$layout" :title="$title">
     @if(!$isPrint)
+        <style>
+            .sticky-thead th {
+                position: sticky !important;
+                top: 73px !important; /* Sit right below the sticky navbar */
+                z-index: 10 !important;
+                background-color: #2b3035 !important; /* Match table-secondary bg in dark mode */
+            }
+        </style>
         <x-slot name="header">
             <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3">
                 <div>
@@ -176,8 +184,8 @@
                                  @mouseup="mouseup($event)"
                                  @mousemove="mousemove($event)"
                                  style="cursor: grab; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 1900px;">
-                                    <thead class="table-secondary">
+                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 2080px;">
+                                    <thead class="table-secondary sticky-thead">
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
                                             <th class="px-4 py-3 border-secondary" style="min-width: 220px;">Sub-Account Name</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Total Budget (L)</th>
@@ -185,6 +193,7 @@
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Remaining (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Quantity</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Accomplished (Qty)</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Remaining (Qty)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Rate</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Projected</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Optimal</th>
@@ -223,6 +232,10 @@
                                                 $optimalVal = $sa['remaining'] > 0 && $sa['quantity'] !== null && $sa['accomplished_qty'] !== null
                                                     ? ($sa['quantity'] - $sa['accomplished_qty']) / $sa['remaining']
                                                     : null;
+
+                                                $remainingQty = $sa['quantity'] !== null && $sa['accomplished_qty'] !== null
+                                                    ? $sa['quantity'] - $sa['accomplished_qty']
+                                                    : null;
                                             @endphp
                                             <tr @click="clickRow('{{ route('utilization-entries.index', ['chargeable_account_id' => $chargeableAccount->id, 'sub_account_id' => $sa['id'], 'fuel_order_status' => 'DONE']) }}', $event)" class="text-nowrap" style="cursor: pointer;">
                                                 <td class="px-4 py-3 fw-bold text-white border-secondary text-nowrap">
@@ -247,6 +260,13 @@
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-success text-nowrap">
                                                     @if($sa['accomplished_qty'] !== null)
                                                         {{ number_format($sa['accomplished_qty'], 2) }} <span class="small text-muted">{{ $sa['unit'] }}</span>
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </td>
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary text-nowrap">
+                                                    @if($remainingQty !== null)
+                                                        {{ number_format($remainingQty, 2) }} <span class="small text-muted">{{ $sa['unit'] }}</span>
                                                     @else
                                                         —
                                                     @endif
@@ -286,7 +306,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="12" class="px-4 py-5 text-center text-secondary border-secondary">
+                                                <td colspan="13" class="px-4 py-5 text-center text-secondary border-secondary">
                                                     No sub-accounts allocated to this chargeable account.
                                                 </td>
                                             </tr>
