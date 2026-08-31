@@ -176,7 +176,7 @@
                                  @mouseup="mouseup($event)"
                                  @mousemove="mousemove($event)"
                                  style="cursor: grab; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 1600px;">
+                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 1750px;">
                                     <thead class="table-secondary">
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
                                             <th class="px-4 py-3 border-secondary" style="min-width: 220px;">Sub-Account Name</th>
@@ -186,6 +186,7 @@
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Quantity</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Accomplished (Qty)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Rate</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Projected</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Accomplishment (%)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Fuel Used (%)</th>
                                             <th class="px-4 py-3 border-secondary text-center" style="min-width: 180px; width: 15%">Utilization Status</th>
@@ -211,6 +212,12 @@
                                                 $rateVal = $sa['consumed'] > 0 && $sa['accomplished_qty'] !== null 
                                                     ? ceil(($sa['accomplished_qty'] / $sa['consumed']) * 100) / 100 
                                                     : null;
+
+                                                $projectedVal = $rateVal > 0 && $sa['quantity'] !== null && $sa['accomplished_qty'] !== null
+                                                    ? ($sa['quantity'] - $sa['accomplished_qty']) / $rateVal
+                                                    : null;
+
+                                                $isProjectedLess = $projectedVal !== null && $projectedVal < $sa['remaining'];
                                             @endphp
                                             <tr @click="clickRow('{{ route('utilization-entries.index', ['chargeable_account_id' => $chargeableAccount->id, 'sub_account_id' => $sa['id'], 'fuel_order_status' => 'DONE']) }}', $event)" class="text-nowrap" style="cursor: pointer;">
                                                 <td class="px-4 py-3 fw-bold text-white border-secondary text-nowrap">
@@ -246,6 +253,13 @@
                                                         —
                                                     @endif
                                                 </td>
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-nowrap {{ $isProjectedLess ? 'text-danger' : 'text-secondary' }}">
+                                                    @if($projectedVal !== null)
+                                                        {{ number_format($projectedVal, 2) }} L
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </td>
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info text-nowrap">
                                                     {{ number_format($sa['accomplishment'] ?? 0.0, 2) }}%
                                                 </td>
@@ -260,7 +274,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="10" class="px-4 py-5 text-center text-secondary border-secondary">
+                                                <td colspan="11" class="px-4 py-5 text-center text-secondary border-secondary">
                                                     No sub-accounts allocated to this chargeable account.
                                                 </td>
                                             </tr>
