@@ -184,6 +184,7 @@
                                             <th class="px-4 py-3 border-secondary text-end">Consumed (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end">Remaining (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end">Quantity</th>
+                                            <th class="px-4 py-3 border-secondary text-end">Accomplished (Qty)</th>
                                             <th class="px-4 py-3 border-secondary text-end">Accomplishment (%)</th>
                                             <th class="px-4 py-3 border-secondary text-end">Fuel Used (%)</th>
                                             <th class="px-4 py-3 border-secondary text-center" style="width: 15%">Utilization Status</th>
@@ -226,6 +227,13 @@
                                                         —
                                                     @endif
                                                 </td>
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-success">
+                                                    @if($sa['accomplished_qty'] !== null)
+                                                        {{ number_format($sa['accomplished_qty'], 2) }} <span class="small text-muted">{{ $sa['unit'] }}</span>
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </td>
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info">
                                                     {{ number_format($sa['accomplishment'] ?? 0.0, 2) }}%
                                                 </td>
@@ -240,7 +248,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="8" class="px-4 py-5 text-center text-secondary border-secondary">
+                                                <td colspan="9" class="px-4 py-5 text-center text-secondary border-secondary">
                                                     No sub-accounts allocated to this chargeable account.
                                                 </td>
                                             </tr>

@@ -342,6 +342,9 @@ trait DashboardDataTrait
             $chartLabels[] = $sa->name;
             $remainingBalances[] = round($remaining, 2);
 
+            $latestAccomplishment = $sa->accomplishments()->latest('date_at')->latest('id')->first();
+            $accomplishedQty = $latestAccomplishment ? $latestAccomplishment->quantity : null;
+
             $subAccountData[] = [
                 'id' => $sa->id,
                 'name' => $sa->name,
@@ -351,6 +354,7 @@ trait DashboardDataTrait
                 'accomplishment' => $sa->accomplishment,
                 'quantity' => $sa->quantity,
                 'unit' => $sa->unit,
+                'accomplished_qty' => $accomplishedQty,
             ];
         }
 
