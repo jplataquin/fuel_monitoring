@@ -44,9 +44,13 @@ class SubAccount extends Model
     public function getAccomplishmentAttribute(): float
     {
         if ($this->quantity && $this->quantity > 0) {
-            $totalAccomplished = $this->accomplishments()->sum('quantity');
+            $latestAccomplishment = $this->accomplishments()->latest('date_at')->latest('id')->first();
 
-            return ($totalAccomplished / $this->quantity) * 100;
+            if ($latestAccomplishment) {
+                return ($latestAccomplishment->quantity / $this->quantity) * 100;
+            }
+
+            return 0.0;
         }
 
         return (float) ($this->attributes['accomplishment'] ?? 0.0);

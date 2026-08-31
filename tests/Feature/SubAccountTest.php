@@ -515,12 +515,17 @@ class SubAccountTest extends TestCase
         // Prior to accomplishments, percentage should be 0
         $this->assertEquals(0.0, $subAccount->accomplishment);
 
-        // Add some accomplishment records
-        $subAccount->accomplishments()->create(['quantity' => 50.00, 'date_at' => '2026-08-28']);
-        $subAccount->accomplishments()->create(['quantity' => 50.00, 'date_at' => '2026-08-28']);
+        // Add first accomplishment record
+        $subAccount->accomplishments()->create(['quantity' => 50.00, 'date_at' => '2026-08-27']);
 
-        // Total done: 100, target: 200, accomplishment percentage should be 50.0%
-        $this->assertEquals(50.0, $subAccount->fresh()->accomplishment);
+        // Latest quantity is 50.0, target: 200, accomplishment percentage should be 25.0%
+        $this->assertEquals(25.0, $subAccount->fresh()->accomplishment);
+
+        // Add a later accomplishment record (which becomes the latest log)
+        $subAccount->accomplishments()->create(['quantity' => 80.00, 'date_at' => '2026-08-28']);
+
+        // Latest quantity is 80.0, target: 200, accomplishment percentage should be 40.0%
+        $this->assertEquals(40.0, $subAccount->fresh()->accomplishment);
     }
 
     public function test_authorized_user_can_log_and_delete_accomplishments(): void
