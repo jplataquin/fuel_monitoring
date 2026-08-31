@@ -349,6 +349,8 @@ trait DashboardDataTrait
                 'consumed' => $consumed,
                 'remaining' => $remaining,
                 'accomplishment' => $sa->accomplishment,
+                'quantity' => $sa->quantity,
+                'unit' => $sa->unit,
             ];
         }
 

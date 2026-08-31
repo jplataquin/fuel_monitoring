@@ -416,7 +416,7 @@ class SubAccountDashboardTest extends TestCase
             'fuel_order_status' => 'DONE',
         ]);
 
-        $response->assertSee("window.open('".e($expectedUrl)."', '_blank')", false);
+        $response->assertSee("clickRow('".e($expectedUrl)."', \$event)", false);
     }
 
     public function test_dashboard_calculations_exclude_soft_deleted_and_unassigned_utilization_entries(): void

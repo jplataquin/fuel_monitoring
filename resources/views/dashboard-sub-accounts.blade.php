@@ -132,16 +132,60 @@
                             <p class="text-secondary small mb-0">Detailed breakdown of budgets and consumption per sub-account.</p>
                         </div>
                         <div class="card-body p-0 text-light">
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 1100px;">
+                            <div class="table-responsive" 
+                                 x-data="{ 
+                                     isDown: false, 
+                                     startX: 0, 
+                                     scrollLeft: 0,
+                                     dragged: false,
+                                     mousedown(e) {
+                                         this.isDown = true;
+                                         this.dragged = false;
+                                         this.startX = e.pageX - $el.offsetLeft;
+                                         this.scrollLeft = $el.scrollLeft;
+                                         $el.style.cursor = 'grabbing';
+                                         $el.style.userSelect = 'none';
+                                     },
+                                     mouseleave() {
+                                         this.isDown = false;
+                                         $el.style.cursor = 'grab';
+                                         $el.style.removeProperty('user-select');
+                                     },
+                                     mouseup(e) {
+                                         this.isDown = false;
+                                         $el.style.cursor = 'grab';
+                                         $el.style.removeProperty('user-select');
+                                     },
+                                     mousemove(e) {
+                                         if (!this.isDown) return;
+                                         const x = e.pageX - $el.offsetLeft;
+                                         const walk = (x - this.startX) * 1.5;
+                                         if (Math.abs(walk) > 5) {
+                                             this.dragged = true;
+                                         }
+                                         $el.scrollLeft = this.scrollLeft - walk;
+                                     },
+                                     clickRow(url, e) {
+                                         if (!this.dragged) {
+                                             window.open(url, '_blank');
+                                         }
+                                     }
+                                 }"
+                                 @mousedown="mousedown($event)"
+                                 @mouseleave="mouseleave()"
+                                 @mouseup="mouseup($event)"
+                                 @mousemove="mousemove($event)"
+                                 style="cursor: grab; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 1200px;">
                                     <thead class="table-secondary">
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
                                             <th class="px-4 py-3 border-secondary">Sub-Account Name</th>
                                             <th class="px-4 py-3 border-secondary text-end">Total Budget (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end">Consumed (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end">Remaining (L)</th>
-                                            <th class="px-4 py-3 border-secondary text-end">Fuel Used (%)</th>
+                                            <th class="px-4 py-3 border-secondary text-end">Quantity</th>
                                             <th class="px-4 py-3 border-secondary text-end">Accomplishment (%)</th>
+                                            <th class="px-4 py-3 border-secondary text-end">Fuel Used (%)</th>
                                             <th class="px-4 py-3 border-secondary text-center" style="width: 15%">Utilization Status</th>
                                         </tr>
                                     </thead>
@@ -162,7 +206,7 @@
                                                     $saStatusBg = 'bg-warning bg-opacity-10 text-warning';
                                                 }
                                             @endphp
-                                            <tr onclick="window.open('{{ route('utilization-entries.index', ['chargeable_account_id' => $chargeableAccount->id, 'sub_account_id' => $sa['id'], 'fuel_order_status' => 'DONE']) }}', '_blank')" style="cursor: pointer;">
+                                            <tr @click="clickRow('{{ route('utilization-entries.index', ['chargeable_account_id' => $chargeableAccount->id, 'sub_account_id' => $sa['id'], 'fuel_order_status' => 'DONE']) }}', $event)" style="cursor: pointer;">
                                                 <td class="px-4 py-3 fw-bold text-white border-secondary">
                                                     {{ $sa['name'] }}
                                                 </td>
@@ -175,11 +219,18 @@
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info">
                                                     {{ number_format($sa['remaining'], 2) }}
                                                 </td>
-                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-light">
-                                                    {{ number_format($saPercent, 1) }}%
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary">
+                                                    @if($sa['quantity'])
+                                                        {{ number_format($sa['quantity'], 2) }} <span class="small text-muted">{{ $sa['unit'] }}</span>
+                                                    @else
+                                                        —
+                                                    @endif
                                                 </td>
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info">
                                                     {{ number_format($sa['accomplishment'] ?? 0.0, 2) }}%
+                                                </td>
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-light">
+                                                    {{ number_format($saPercent, 1) }}%
                                                 </td>
                                                 <td class="px-4 py-3 text-center border-secondary">
                                                     <span class="badge rounded-pill fw-bold text-uppercase small px-3 py-2 {{ $saStatusBg }}">
@@ -189,7 +240,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="7" class="px-4 py-5 text-center text-secondary border-secondary">
+                                                <td colspan="8" class="px-4 py-5 text-center text-secondary border-secondary">
                                                     No sub-accounts allocated to this chargeable account.
                                                 </td>
                                             </tr>
