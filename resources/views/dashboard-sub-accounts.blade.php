@@ -9,7 +9,7 @@
         <style>
             .sticky-thead th {
                 position: sticky !important;
-                top: 73px !important; /* Sit right below the sticky navbar */
+                top: 0 !important; /* Sit at the top of the scrollable container */
                 z-index: 10 !important;
                 background-color: #2b3035 !important; /* Match table-secondary bg in dark mode */
             }
@@ -183,7 +183,7 @@
                                  @mouseleave="mouseleave()"
                                  @mouseup="mouseup($event)"
                                  @mousemove="mousemove($event)"
-                                 style="cursor: grab; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                                 style="cursor: grab; overflow: auto; max-height: calc(100vh - 280px); position: relative; -webkit-overflow-scrolling: touch;">
                                 <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 2080px;">
                                     <thead class="table-secondary sticky-thead">
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
