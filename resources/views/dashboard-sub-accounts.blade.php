@@ -185,6 +185,7 @@
                                             <th class="px-4 py-3 border-secondary text-end">Remaining (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end">Quantity</th>
                                             <th class="px-4 py-3 border-secondary text-end">Accomplished (Qty)</th>
+                                            <th class="px-4 py-3 border-secondary text-end">Rate</th>
                                             <th class="px-4 py-3 border-secondary text-end">Accomplishment (%)</th>
                                             <th class="px-4 py-3 border-secondary text-end">Fuel Used (%)</th>
                                             <th class="px-4 py-3 border-secondary text-center" style="width: 15%">Utilization Status</th>
@@ -206,6 +207,10 @@
                                                     $saStatus = 'Warning';
                                                     $saStatusBg = 'bg-warning bg-opacity-10 text-warning';
                                                 }
+
+                                                $rateVal = $sa['consumed'] > 0 && $sa['accomplished_qty'] !== null 
+                                                    ? ceil(($sa['accomplished_qty'] / $sa['consumed']) * 100) / 100 
+                                                    : null;
                                             @endphp
                                             <tr @click="clickRow('{{ route('utilization-entries.index', ['chargeable_account_id' => $chargeableAccount->id, 'sub_account_id' => $sa['id'], 'fuel_order_status' => 'DONE']) }}', $event)" style="cursor: pointer;">
                                                 <td class="px-4 py-3 fw-bold text-white border-secondary">
@@ -235,6 +240,13 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info">
+                                                    @if($rateVal !== null)
+                                                        {{ number_format($rateVal, 2) }}{{ $sa['unit'] ? ' ' . $sa['unit'] : '' }} / L
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </td>
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info">
                                                     {{ number_format($sa['accomplishment'] ?? 0.0, 2) }}%
                                                 </td>
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-light">
@@ -248,7 +260,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="9" class="px-4 py-5 text-center text-secondary border-secondary">
+                                                <td colspan="10" class="px-4 py-5 text-center text-secondary border-secondary">
                                                     No sub-accounts allocated to this chargeable account.
                                                 </td>
                                             </tr>
