@@ -38,15 +38,6 @@
                     </div>
 
                     <div class="mb-4">
-                        <label for="accomplishment" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Accomplishment (%)</label>
-                        <input id="accomplishment" name="accomplishment" type="number" step="0.01" min="0" max="100" class="form-control bg-dark border-secondary text-white rounded-3 p-3 focus-ring focus-ring-primary" value="{{ old('accomplishment', $subAccount->accomplishment) }}">
-                        <span class="text-secondary small d-block mt-1" style="font-size: 0.8rem;">Note: This manual percentage is only used if Quantity is blank or zero. Otherwise, accomplishment is computed automatically from logged achievements.</span>
-                        @error('accomplishment')
-                            <div class="text-danger small mt-2 fw-bold">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-4">
                         <div class="form-check form-switch p-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-10 rounded-3 d-flex align-items-center justify-content-between">
                             <div class="flex-grow-1 pe-3">
                                 <label class="form-check-label text-secondary small fw-bold text-uppercase tracking-wider d-block mb-1" style="cursor: pointer;" for="type_toggle">Uncontrolled Sub-Account 🔓</label>

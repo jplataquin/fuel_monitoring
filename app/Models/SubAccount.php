@@ -20,7 +20,6 @@ class SubAccount extends Model
         'merged_by',
         'merged_at',
         'merge_remarks',
-        'accomplishment',
         'type',
         'quantity',
         'unit',
@@ -32,7 +31,6 @@ class SubAccount extends Model
 
     protected $casts = [
         'merged_at' => 'datetime',
-        'accomplishment' => 'float',
         'quantity' => 'float',
     ];
 
@@ -49,11 +47,9 @@ class SubAccount extends Model
             if ($latestAccomplishment) {
                 return ($latestAccomplishment->quantity / $this->quantity) * 100;
             }
-
-            return 0.0;
         }
 
-        return (float) ($this->attributes['accomplishment'] ?? 0.0);
+        return 0.0;
     }
 
     public function chargeableAccount(): BelongsTo

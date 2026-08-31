@@ -47,7 +47,6 @@ class SubAccountController extends Controller
                     ->whereNull('deleted_at'),
                 'not_regex:/[:]/',
             ],
-            'accomplishment' => 'sometimes|numeric|min:0|max:100',
             'type' => 'nullable|in:Controlled,Uncontrolled',
             'quantity' => 'nullable|numeric|min:0',
             'unit' => 'nullable|string|max:255',

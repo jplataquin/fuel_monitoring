@@ -17,11 +17,16 @@
             
             <!-- Sub-Account Info (Flat-Canvas Terminal Theme) -->
             <div class="card bg-dark border border-secondary border-opacity-25 rounded-2 p-4 mb-5">
-                <div class="row align-items-center g-4">
-                    <div class="col-md-3">
+                
+                <div class="row">
+                    <div class="col-md-12">
                         <h3 class="text-secondary small fw-bold text-uppercase tracking-widest mb-2" style="font-size: 0.75rem;">Sub-Account Name</h3>
                         <span class="h4 text-white fw-bold d-block">{{ $subAccount->display_name }}</span>
                     </div>
+
+                </div>
+
+                <div class="row align-items-center g-4">
 
                     <div class="col-md-2">
                         <h3 class="text-secondary small fw-bold text-uppercase tracking-widest mb-2" style="font-size: 0.75rem;">Quantity</h3>
@@ -62,7 +67,11 @@
                         @endif
                     </div>
 
-                    <div class="col-md-3 text-md-end">
+                </div>
+
+                <div class="row">
+                    
+                    <div class="col-md-12 text-md-end">
                         <h3 class="text-secondary small fw-bold text-uppercase tracking-widest mb-2" style="font-size: 0.75rem;">Approved Budget</h3>
                         <p class="display-6 fw-bold text-white mb-0 font-monospace">
                             {{ number_format($subAccount->budgets()->where('status', 'Approved')->sum('budget_quantity'), 2) }} <span class="h6 text-secondary text-uppercase" style="font-size: 0.75rem;">L</span>

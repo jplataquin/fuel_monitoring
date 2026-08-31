@@ -48,7 +48,13 @@ class SubAccountDashboardTest extends TestCase
         $subAccount = SubAccount::create([
             'chargeable_account_id' => $account->id,
             'name' => 'Sub Active',
-            'accomplishment' => 45.5,
+            'quantity' => 100.00,
+            'unit' => 'meters',
+        ]);
+
+        $subAccount->accomplishments()->create([
+            'quantity' => 45.50,
+            'date_at' => '2026-08-30',
         ]);
 
         SubAccountBudget::create([
