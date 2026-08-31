@@ -176,19 +176,19 @@
                                  @mouseup="mouseup($event)"
                                  @mousemove="mousemove($event)"
                                  style="cursor: grab; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 1200px;">
+                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 1600px;">
                                     <thead class="table-secondary">
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
-                                            <th class="px-4 py-3 border-secondary">Sub-Account Name</th>
-                                            <th class="px-4 py-3 border-secondary text-end">Total Budget (L)</th>
-                                            <th class="px-4 py-3 border-secondary text-end">Consumed (L)</th>
-                                            <th class="px-4 py-3 border-secondary text-end">Remaining (L)</th>
-                                            <th class="px-4 py-3 border-secondary text-end">Quantity</th>
-                                            <th class="px-4 py-3 border-secondary text-end">Accomplished (Qty)</th>
-                                            <th class="px-4 py-3 border-secondary text-end">Rate</th>
-                                            <th class="px-4 py-3 border-secondary text-end">Accomplishment (%)</th>
-                                            <th class="px-4 py-3 border-secondary text-end">Fuel Used (%)</th>
-                                            <th class="px-4 py-3 border-secondary text-center" style="width: 15%">Utilization Status</th>
+                                            <th class="px-4 py-3 border-secondary" style="min-width: 220px;">Sub-Account Name</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Total Budget (L)</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Consumed (L)</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Remaining (L)</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Quantity</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Accomplished (Qty)</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Rate</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Accomplishment (%)</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Fuel Used (%)</th>
+                                            <th class="px-4 py-3 border-secondary text-center" style="min-width: 180px; width: 15%">Utilization Status</th>
                                         </tr>
                                     </thead>
                                     <tbody class="border-secondary">
@@ -212,47 +212,47 @@
                                                     ? ceil(($sa['accomplished_qty'] / $sa['consumed']) * 100) / 100 
                                                     : null;
                                             @endphp
-                                            <tr @click="clickRow('{{ route('utilization-entries.index', ['chargeable_account_id' => $chargeableAccount->id, 'sub_account_id' => $sa['id'], 'fuel_order_status' => 'DONE']) }}', $event)" style="cursor: pointer;">
-                                                <td class="px-4 py-3 fw-bold text-white border-secondary">
+                                            <tr @click="clickRow('{{ route('utilization-entries.index', ['chargeable_account_id' => $chargeableAccount->id, 'sub_account_id' => $sa['id'], 'fuel_order_status' => 'DONE']) }}', $event)" class="text-nowrap" style="cursor: pointer;">
+                                                <td class="px-4 py-3 fw-bold text-white border-secondary text-nowrap">
                                                     {{ $sa['name'] }}
                                                 </td>
-                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary">
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary text-nowrap">
                                                     {{ number_format($sa['total_budget'], 2) }}
                                                 </td>
-                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-warning">
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-warning text-nowrap">
                                                     {{ number_format($sa['consumed'], 2) }}
                                                 </td>
-                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info">
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info text-nowrap">
                                                     {{ number_format($sa['remaining'], 2) }}
                                                 </td>
-                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary">
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary text-nowrap">
                                                     @if($sa['quantity'])
                                                         {{ number_format($sa['quantity'], 2) }} <span class="small text-muted">{{ $sa['unit'] }}</span>
                                                     @else
                                                         —
                                                     @endif
                                                 </td>
-                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-success">
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-success text-nowrap">
                                                     @if($sa['accomplished_qty'] !== null)
                                                         {{ number_format($sa['accomplished_qty'], 2) }} <span class="small text-muted">{{ $sa['unit'] }}</span>
                                                     @else
                                                         —
                                                     @endif
                                                 </td>
-                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info">
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info text-nowrap">
                                                     @if($rateVal !== null)
                                                         {{ number_format($rateVal, 2) }}{{ $sa['unit'] ? ' ' . $sa['unit'] : '' }} / L
                                                     @else
                                                         —
                                                     @endif
                                                 </td>
-                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info">
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info text-nowrap">
                                                     {{ number_format($sa['accomplishment'] ?? 0.0, 2) }}%
                                                 </td>
-                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-light">
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-light text-nowrap">
                                                     {{ number_format($saPercent, 1) }}%
                                                 </td>
-                                                <td class="px-4 py-3 text-center border-secondary">
+                                                <td class="px-4 py-3 text-center border-secondary text-nowrap">
                                                     <span class="badge rounded-pill fw-bold text-uppercase small px-3 py-2 {{ $saStatusBg }}">
                                                         {{ $saStatus }}
                                                     </span>
