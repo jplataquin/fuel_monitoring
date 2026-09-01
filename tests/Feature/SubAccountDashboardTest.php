@@ -90,8 +90,8 @@ class SubAccountDashboardTest extends TestCase
         // Check that the breakdown table includes the Projected Variance column
         $response->assertSee('Projected Variance');
 
-        // Check that the Projection Variance section and cards are present
-        $response->assertSee('Projection Variance');
+        // Check that the Projection Summary section and cards are present
+        $response->assertSee('Projection Summary');
         $response->assertSee('Savings');
         $response->assertSee('Excess');
         $response->assertSee('Net');

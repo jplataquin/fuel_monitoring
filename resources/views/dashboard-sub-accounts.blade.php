@@ -151,11 +151,11 @@
                     }
                 @endphp
 
-                <!-- Projection Variance Section -->
+                <!-- Projection Summary Section -->
                 <div class="col-12">
                     <div class="card bg-dark border-secondary border-opacity-50 rounded-4 p-4">
                         <div class="card-header bg-transparent border-0 p-0 mb-3">
-                            <h3 class="h5 fw-bold text-light mb-1">Projection Variance</h3>
+                            <h3 class="h5 fw-bold text-light mb-1">Projection Summary</h3>
                             <p class="text-secondary small mb-0">Analysis of budget savings and excess based on projected consumption.</p>
                         </div>
                         <div class="card-body p-0">
@@ -200,7 +200,7 @@
                                                 <i class="bi bi-calculator fs-4"></i>
                                                 <span class="small fw-black text-uppercase tracking-wider">Net</span>
                                             </div>
-                                            <p class="text-secondary small mb-3">Overall net fuel variance (Savings minus Excess).</p>
+                                            <p class="text-secondary small mb-3">Overall projected net fuel variance (Savings minus Excess).</p>
                                         </div>
                                         <div class="h3 font-monospace fw-bold text-info mb-0">
                                             {{ number_format($totalSavings - $totalExcess, 2) }} L
@@ -290,7 +290,7 @@
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Accomplished (Qty)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Remaining (Qty)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Rate</th>
-                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Projected</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Projection</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Projected Variance</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Optimal</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Accomplishment (%)</th>
