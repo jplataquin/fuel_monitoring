@@ -87,6 +87,9 @@ class SubAccountDashboardTest extends TestCase
         $response->assertSee('Optimal');
         $response->assertSee('0.05 meters / L');
 
+        // Check that the breakdown table includes the Variance column
+        $response->assertSee('Variance');
+
         // Check that the breakdown table includes the Remaining (Qty) column and formatted value
         $response->assertSee('Remaining (Qty)');
         $response->assertSee('54.50');

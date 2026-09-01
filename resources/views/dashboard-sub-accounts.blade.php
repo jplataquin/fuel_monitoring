@@ -191,7 +191,7 @@
                                  @mouseup="mouseup($event)"
                                  @mousemove="mousemove($event)"
                                  style="cursor: grab; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 2080px;">
+                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 2230px;">
                                     <thead class="table-secondary" x-ref="thead" :style="'transform: translateY(' + translateY + 'px); z-index: 10; position: relative; background-color: #2b3035 !important;'">
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
                                             <th class="px-4 py-3 border-secondary" style="min-width: 220px;">Sub-Account Name</th>
@@ -203,6 +203,7 @@
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Remaining (Qty)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Rate</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Projected</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Variance</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Optimal</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Accomplishment (%)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Fuel Used (%)</th>
@@ -242,6 +243,10 @@
 
                                                 $remainingQty = $sa['quantity'] !== null && $sa['accomplished_qty'] !== null
                                                     ? $sa['quantity'] - $sa['accomplished_qty']
+                                                    : null;
+
+                                                $varianceVal = $projectedVal !== null
+                                                    ? $sa['remaining'] - $projectedVal
                                                     : null;
                                             @endphp
                                             <tr @click="clickRow('{{ route('utilization-entries.index', ['chargeable_account_id' => $chargeableAccount->id, 'sub_account_id' => $sa['id'], 'fuel_order_status' => 'DONE']) }}', $event)" class="text-nowrap" style="cursor: pointer;">
@@ -292,6 +297,13 @@
                                                         —
                                                     @endif
                                                 </td>
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-nowrap @if($varianceVal !== null) {{ $varianceVal < 0 ? 'text-danger' : 'text-success' }} @else text-secondary @endif">
+                                                    @if($varianceVal !== null)
+                                                        {{ number_format($varianceVal, 2) }} L
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </td>
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary text-nowrap">
                                                     @if($optimalVal !== null)
                                                         {{ number_format($optimalVal, 2) }}{{ $sa['unit'] ? ' ' . $sa['unit'] : '' }} / L
@@ -313,7 +325,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="13" class="px-4 py-5 text-center text-secondary border-secondary">
+                                                <td colspan="14" class="px-4 py-5 text-center text-secondary border-secondary">
                                                     No sub-accounts allocated to this chargeable account.
                                                 </td>
                                             </tr>
