@@ -6,14 +6,6 @@
 
 <x-dynamic-component :component="$layout" :title="$title">
     @if(!$isPrint)
-        <style>
-            .sticky-thead th {
-                position: sticky !important;
-                top: 0 !important; /* Sit at the top of the scrollable container */
-                z-index: 10 !important;
-                background-color: #2b3035 !important; /* Match table-secondary bg in dark mode */
-            }
-        </style>
         <x-slot name="header">
             <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3">
                 <div>
@@ -146,6 +138,7 @@
                                      startX: 0, 
                                      scrollLeft: 0,
                                      dragged: false,
+                                     translateY: 0,
                                      mousedown(e) {
                                          this.isDown = true;
                                          this.dragged = false;
@@ -177,15 +170,29 @@
                                          if (!this.dragged) {
                                              window.open(url, '_blank');
                                          }
+                                     },
+                                     handleScroll() {
+                                         const tableRect = this.$el.getBoundingClientRect();
+                                         const thead = this.$refs.thead;
+                                         if (!thead) return;
+                                         const navbarHeight = 73;
+                                         if (tableRect.top < navbarHeight && tableRect.bottom > (navbarHeight + thead.offsetHeight)) {
+                                             this.translateY = navbarHeight - tableRect.top;
+                                         } else if (tableRect.top < navbarHeight && tableRect.bottom <= (navbarHeight + thead.offsetHeight)) {
+                                             this.translateY = Math.max(0, tableRect.height - thead.offsetHeight);
+                                         } else {
+                                             this.translateY = 0;
+                                         }
                                      }
                                  }"
+                                 @scroll.window.passive="handleScroll()"
                                  @mousedown="mousedown($event)"
                                  @mouseleave="mouseleave()"
                                  @mouseup="mouseup($event)"
                                  @mousemove="mousemove($event)"
-                                 style="cursor: grab; overflow: auto; max-height: calc(100vh - 280px); position: relative; -webkit-overflow-scrolling: touch;">
+                                 style="cursor: grab; overflow-x: auto; -webkit-overflow-scrolling: touch;">
                                 <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 2080px;">
-                                    <thead class="table-secondary sticky-thead">
+                                    <thead class="table-secondary" x-ref="thead" :style="'transform: translateY(' + translateY + 'px); z-index: 10; position: relative; background-color: #2b3035 !important;'">
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
                                             <th class="px-4 py-3 border-secondary" style="min-width: 220px;">Sub-Account Name</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Total Budget (L)</th>
