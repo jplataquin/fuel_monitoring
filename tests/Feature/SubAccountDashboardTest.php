@@ -94,6 +94,7 @@ class SubAccountDashboardTest extends TestCase
         $response->assertSee('Variance Summary');
         $response->assertSee('Savings');
         $response->assertSee('Excess');
+        $response->assertSee('Net');
 
         // Check that the breakdown table includes the Remaining (Qty) column and formatted value
         $response->assertSee('Remaining (Qty)');

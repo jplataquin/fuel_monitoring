@@ -158,7 +158,7 @@
                         <div class="card-body p-0">
                             <div class="row g-3">
                                 <!-- Savings Card -->
-                                <div class="col-12 col-md-6">
+                                <div class="col-12 col-md-4">
                                     <div class="p-4 rounded-4 border border-success border-opacity-25 h-100 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, rgba(25, 135, 84, 0.15), rgba(25, 135, 84, 0.05));">
                                         <div>
                                             <div class="d-flex align-items-center gap-2 text-success mb-2">
@@ -174,7 +174,7 @@
                                 </div>
 
                                 <!-- Excess Card -->
-                                <div class="col-12 col-md-6">
+                                <div class="col-12 col-md-4">
                                     <div class="p-4 rounded-4 border border-danger border-opacity-25 h-100 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), rgba(220, 53, 69, 0.05));">
                                         <div>
                                             <div class="d-flex align-items-center gap-2 text-danger mb-2">
@@ -185,6 +185,22 @@
                                         </div>
                                         <div class="h3 font-monospace fw-bold text-danger mb-0">
                                             {{ number_format($totalExcess, 2) }} L
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Net Card -->
+                                <div class="col-12 col-md-4">
+                                    <div class="p-4 rounded-4 border border-info border-opacity-25 h-100 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, rgba(13, 202, 240, 0.15), rgba(13, 202, 240, 0.05));">
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 text-info mb-2">
+                                                <i class="bi bi-calculator fs-4"></i>
+                                                <span class="small fw-black text-uppercase tracking-wider">Net</span>
+                                            </div>
+                                            <p class="text-secondary small mb-3">Overall net fuel variance (Savings minus Excess).</p>
+                                        </div>
+                                        <div class="h3 font-monospace fw-bold text-info mb-0">
+                                            {{ number_format($totalSavings - $totalExcess, 2) }} L
                                         </div>
                                     </div>
                                 </div>
