@@ -124,6 +124,75 @@
                     </div>
                 </div>
 
+                @php
+                    $totalSavings = 0;
+                    $totalExcess = 0;
+
+                    foreach ($subAccountData as $sa) {
+                        $rateVal = $sa['consumed'] > 0 && $sa['accomplished_qty'] !== null 
+                            ? ceil(($sa['accomplished_qty'] / $sa['consumed']) * 100) / 100 
+                            : null;
+
+                        $projectedVal = $rateVal > 0 && $sa['quantity'] !== null && $sa['accomplished_qty'] !== null
+                            ? ($sa['quantity'] - $sa['accomplished_qty']) / $rateVal
+                            : null;
+
+                        if ($projectedVal !== null) {
+                            $varianceVal = $sa['remaining'] - $projectedVal;
+                            if ($varianceVal > 0) {
+                                $totalSavings += $varianceVal;
+                            } elseif ($varianceVal < 0) {
+                                $totalExcess += abs($varianceVal);
+                            }
+                        }
+                    }
+                @endphp
+
+                <!-- Variance Summary Section -->
+                <div class="col-12">
+                    <div class="card bg-dark border-secondary border-opacity-50 rounded-4 p-4">
+                        <div class="card-header bg-transparent border-0 p-0 mb-3">
+                            <h3 class="h5 fw-bold text-light mb-1">Variance Summary</h3>
+                            <p class="text-secondary small mb-0">Analysis of budget savings and excess based on projected consumption.</p>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="row g-3">
+                                <!-- Savings Card -->
+                                <div class="col-12 col-md-6">
+                                    <div class="p-4 rounded-4 border border-success border-opacity-25 h-100 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, rgba(25, 135, 84, 0.15), rgba(25, 135, 84, 0.05));">
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 text-success mb-2">
+                                                <i class="bi bi-shield-check fs-4"></i>
+                                                <span class="small fw-black text-uppercase tracking-wider">Savings</span>
+                                            </div>
+                                            <p class="text-secondary small mb-3">Total projected fuel surplus across sub-accounts operating under budget.</p>
+                                        </div>
+                                        <div class="h3 font-monospace fw-bold text-success mb-0">
+                                            {{ number_format($totalSavings, 2) }} L
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Excess Card -->
+                                <div class="col-12 col-md-6">
+                                    <div class="p-4 rounded-4 border border-danger border-opacity-25 h-100 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), rgba(220, 53, 69, 0.05));">
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 text-danger mb-2">
+                                                <i class="bi bi-exclamation-triangle fs-4"></i>
+                                                <span class="small fw-black text-uppercase tracking-wider">Excess</span>
+                                            </div>
+                                            <p class="text-secondary small mb-3">Total projected fuel deficit across sub-accounts exceeding budget.</p>
+                                        </div>
+                                        <div class="h3 font-monospace fw-bold text-danger mb-0">
+                                            {{ number_format($totalExcess, 2) }} L
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Detailed Tabular List Card -->
                 <div class="col-12">
                     <div class="card bg-dark border-secondary border-opacity-50 rounded-4 overflow-hidden">

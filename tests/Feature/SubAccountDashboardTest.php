@@ -90,6 +90,11 @@ class SubAccountDashboardTest extends TestCase
         // Check that the breakdown table includes the Variance column
         $response->assertSee('Variance');
 
+        // Check that the Variance Summary section and cards are present
+        $response->assertSee('Variance Summary');
+        $response->assertSee('Savings');
+        $response->assertSee('Excess');
+
         // Check that the breakdown table includes the Remaining (Qty) column and formatted value
         $response->assertSee('Remaining (Qty)');
         $response->assertSee('54.50');
