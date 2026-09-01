@@ -87,11 +87,11 @@ class SubAccountDashboardTest extends TestCase
         $response->assertSee('Optimal');
         $response->assertSee('0.05 meters / L');
 
-        // Check that the breakdown table includes the Variance column
-        $response->assertSee('Variance');
+        // Check that the breakdown table includes the Projected Variance column
+        $response->assertSee('Projected Variance');
 
-        // Check that the Variance Summary section and cards are present
-        $response->assertSee('Variance Summary');
+        // Check that the Projection Variance section and cards are present
+        $response->assertSee('Projection Variance');
         $response->assertSee('Savings');
         $response->assertSee('Excess');
         $response->assertSee('Net');

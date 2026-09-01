@@ -137,8 +137,11 @@
                             ? ($sa['quantity'] - $sa['accomplished_qty']) / $rateVal
                             : null;
 
-                        if ($projectedVal !== null) {
-                            $varianceVal = $sa['remaining'] - $projectedVal;
+                        $varianceVal = $projectedVal !== null
+                            ? $sa['remaining'] - $projectedVal
+                            : ($rateVal === null && $sa['remaining'] < 0 ? $sa['remaining'] : null);
+
+                        if ($varianceVal !== null) {
                             if ($varianceVal > 0) {
                                 $totalSavings += $varianceVal;
                             } elseif ($varianceVal < 0) {
@@ -148,11 +151,11 @@
                     }
                 @endphp
 
-                <!-- Variance Summary Section -->
+                <!-- Projection Variance Section -->
                 <div class="col-12">
                     <div class="card bg-dark border-secondary border-opacity-50 rounded-4 p-4">
                         <div class="card-header bg-transparent border-0 p-0 mb-3">
-                            <h3 class="h5 fw-bold text-light mb-1">Variance Summary</h3>
+                            <h3 class="h5 fw-bold text-light mb-1">Projection Variance</h3>
                             <p class="text-secondary small mb-0">Analysis of budget savings and excess based on projected consumption.</p>
                         </div>
                         <div class="card-body p-0">
@@ -276,7 +279,7 @@
                                  @mouseup="mouseup($event)"
                                  @mousemove="mousemove($event)"
                                  style="cursor: grab; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 2230px;">
+                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 2260px;">
                                     <thead class="table-secondary" x-ref="thead" :style="'transform: translateY(' + translateY + 'px); z-index: 10; position: relative; background-color: #2b3035 !important;'">
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
                                             <th class="px-4 py-3 border-secondary" style="min-width: 220px;">Sub-Account Name</th>
@@ -288,7 +291,7 @@
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Remaining (Qty)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Rate</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Projected</th>
-                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Variance</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Projected Variance</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Optimal</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Accomplishment (%)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Fuel Used (%)</th>
@@ -332,7 +335,7 @@
 
                                                 $varianceVal = $projectedVal !== null
                                                     ? $sa['remaining'] - $projectedVal
-                                                    : null;
+                                                    : ($rateVal === null && $sa['remaining'] < 0 ? $sa['remaining'] : null);
                                             @endphp
                                             <tr @click="clickRow('{{ route('utilization-entries.index', ['chargeable_account_id' => $chargeableAccount->id, 'sub_account_id' => $sa['id'], 'fuel_order_status' => 'DONE']) }}', $event)" class="text-nowrap" style="cursor: pointer;">
                                                 <td class="px-4 py-3 fw-bold text-white border-secondary text-nowrap">
