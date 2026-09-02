@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JPM 8000 Guitar Amplifier Emulator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main Amplifier Head Section -->
+        <div class="amp-head">
+            <div class="tolex-edge"></div>
+            <div class="gold-piping top"></div>
+            
+            <!-- Brushed Gold Faceplate -->
+            <div class="gold-faceplate">
+                <div class="gold-brush-overlay"></div>
+                
+                <!-- Brand logo and model -->
+                <div class="brand-container">
+                    <h1 class="brand-name">JPM 8000</h1>
+                    <div class="model-badge">VINTAGE TUBE EMULATOR</div>
+                </div>
+
+                <!-- Control Knobs Grid -->
+                <div class="knobs-container">
+                    <!-- PREAMP -->
+                    <div class="control-group">
+                        <div class="knob-wrapper" data-param="pre_gain" data-min="0.0" data-max="10.0" data-value="1.0">
+                            <div class="knob-label">PRE-GAIN</div>
+                            <div class="knob"><div class="indicator"></div></div>
+                            <div class="value-display">1.0</div>
+                        </div>
+                    </div>
+
+                    <!-- TONE STACK (EQs) -->
+                    <div class="control-group divider">
+                        <div class="knob-wrapper" data-param="bass" data-min="0.0" data-max="1.0" data-value="0.5">
+                            <div class="knob-label">BASS</div>
+                            <div class="knob"><div class="indicator"></div></div>
+                            <div class="value-display">5.0</div>
+                        </div>
+                        <div class="knob-wrapper" data-param="mid" data-min="0.0" data-max="1.0" data-value="0.5">
+                            <div class="knob-label">MIDDLE</div>
+                            <div class="knob"><div class="indicator"></div></div>
+                            <div class="value-display">5.0</div>
+                        </div>
+                        <div class="knob-wrapper" data-param="treble" data-min="0.0" data-max="1.0" data-value="0.5">
+                            <div class="knob-label">TREBLE</div>
+                            <div class="knob"><div class="indicator"></div></div>
+                            <div class="value-display">5.0</div>
+                        </div>
+                    </div>
+
+                    <!-- POWER AMP -->
+                    <div class="control-group divider">
+                        <div class="knob-wrapper" data-param="master" data-min="0.0" data-max="2.0" data-value="1.0">
+                            <div class="knob-label">MASTER</div>
+                            <div class="knob"><div class="indicator"></div></div>
+                            <div class="value-display">1.0</div>
+                        </div>
+                        <div class="knob-wrapper" data-param="presence" data-min="0.0" data-max="1.0" data-value="0.5">
+                            <div class="knob-label">PRESENCE</div>
+                            <div class="knob"><div class="indicator"></div></div>
+                            <div class="value-display">5.0</div>
+                        </div>
+                        <div class="knob-wrapper" data-param="resonance" data-min="0.0" data-max="1.0" data-value="0.5">
+                            <div class="knob-label">RESONANCE</div>
+                            <div class="knob"><div class="indicator"></div></div>
+                            <div class="value-display">5.0</div>
+                        </div>
+                    </div>
+
+                    <!-- FX LOOP REVERB -->
+                    <div class="control-group divider">
+                        <div class="knob-wrapper" data-param="reverb_mix" data-min="0.0" data-max="1.0" data-value="0.25">
+                            <div class="knob-label">REVERB MIX</div>
+                            <div class="knob"><div class="indicator"></div></div>
+                            <div class="value-display">25%</div>
+                        </div>
+                        <div class="knob-wrapper" data-param="reverb_room_size" data-min="0.0" data-max="1.0" data-value="0.7">
+                            <div class="knob-label">ROOM SIZE</div>
+                            <div class="knob"><div class="indicator"></div></div>
+                            <div class="value-display">7.0</div>
+                        </div>
+                        <div class="knob-wrapper" data-param="reverb_damp" data-min="0.0" data-max="1.0" data-value="0.2">
+                            <div class="knob-label">DAMPING</div>
+                            <div class="knob"><div class="indicator"></div></div>
+                            <div class="value-display">2.0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Switches & Jacks Panel -->
+                <div class="switches-container">
+                    <!-- Routing Toggle Switch -->
+                    <div class="switch-wrapper">
+                        <div class="switch-label">ROUTING</div>
+                        <div class="toggle-switch-container">
+                            <span class="toggle-mode-label">STUDIO</span>
+                            <label class="rocker-switch slim">
+                                <input type="checkbox" id="routing-switch">
+                                <span class="switch-slider"></span>
+                            </label>
+                            <span class="toggle-mode-label">FX LOOP</span>
+                        </div>
+                    </div>
+
+                    <!-- Input 1/4" Jack Graphic -->
+                    <div class="jack-wrapper">
+                        <div class="switch-label">INPUT</div>
+                        <div class="input-jack" id="jack-click">
+                            <div class="jack-outer">
+                                <div class="jack-inner">
+                                    <div class="jack-hole"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="jack-subtext">CLICK TO PLAY AUDIO</div>
+                    </div>
+
+                    <!-- Input Source Toggle Switch -->
+                    <div class="switch-wrapper">
+                        <div class="switch-label">SOURCE</div>
+                        <div class="toggle-switch-container">
+                            <span class="toggle-mode-label">LOOP</span>
+                            <label class="rocker-switch slim">
+                                <input type="checkbox" id="source-switch">
+                                <span class="switch-slider"></span>
+                            </label>
+                            <span class="toggle-mode-label">LIVE</span>
+                        </div>
+                    </div>
+
+                    <!-- Power Section -->
+                    <div class="power-wrapper">
+                        <div class="switch-label">POWER</div>
+                        <label class="rocker-switch red" id="power-click">
+                            <input type="checkbox" id="power-switch">
+                            <span class="switch-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Jewel Indicator Lamp -->
+                    <div class="jewel-wrapper">
+                        <div class="switch-label">PILOT</div>
+                        <div class="jewel-lamp" id="jewel-lamp"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="gold-piping bottom"></div>
+            <div class="tolex-edge bottom"></div>
+        </div>
+
+        <!-- 4x12 Speaker Cabinet Section -->
+        <div class="speaker-cabinet">
+            <div class="cab-frame">
+                <div class="cab-grille">
+                    <div class="grille-woven-pattern"></div>
+                    
+                    <div class="cab-logo">V30 CUSTOM</div>
+                    
+                    <!-- Cabinet Controls and Drag Zone Overlay -->
+                    <div class="cabinet-overlay">
+                        <h2>CELESTION V30 4x12 CABINET</h2>
+                        
+                        <div class="cab-controls-row">
+                            <!-- Mic Blend Control -->
+                            <div class="cab-control">
+                                <span class="cab-label">MIC BLEND</span>
+                                <div class="mic-blend-labels">
+                                    <span>SM57 (EDGE)</span>
+                                    <span>R-121 (CONE)</span>
+                                </div>
+                                <input type="range" id="mic-blend-slider" min="0.0" max="1.0" step="0.01" value="0.5">
+                                <span class="cab-value" id="mic-blend-val">50% / 50%</span>
+                            </div>
+
+                            <!-- Mic Distance Control -->
+                            <div class="cab-control">
+                                <span class="cab-label">MIC DISTANCE</span>
+                                <div class="mic-blend-labels">
+                                    <span>CLOSE</span>
+                                    <span>FAR (AIR)</span>
+                                </div>
+                                <input type="range" id="mic-dist-slider" min="0.0" max="1.0" step="0.01" value="0.2">
+                                <span class="cab-value" id="mic-dist-val">0.2m</span>
+                            </div>
+                        </div>
+
+                        <!-- IR Drag & Drop Box -->
+                        <div class="drop-zone" id="drop-zone">
+                            <div class="drop-zone-icon">📥</div>
+                            <div class="drop-zone-text">DRAG & DROP CUSTOM .WAV IR HERE</div>
+                            <div class="drop-zone-sub">Default SM57 / R-121 models automatically loaded</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio File Upload and Help Section -->
+        <div class="footer-controls">
+            <div class="control-card">
+                <h3>🎸 QUICK START GUIDE</h3>
+                <ol>
+                    <li>Toggle the <strong>POWER rocker switch</strong> to turn on the amplifier (glowing pilot lamp).</li>
+                    <li>Click the <strong>INPUT jack</strong> to play or pause the built-in guitar loop.</li>
+                    <li>Drag vertical on any <strong>gold-brushed knob</strong> to shape your distortion, sag, and resonance!</li>
+                    <li>Swap the routing between <strong>STUDIO mode</strong> (post-cabinet tail) and <strong>FX LOOP mode</strong> (vintage power-tube tails).</li>
+                </ol>
+            </div>
+            
+            <div class="control-card file-card">
+                <h3>📂 CUSTOM AUDIO FILE</h3>
+                <p>Want to play your own guitar tracks through the JPM 8000? Upload a clean WAV or MP3 file below:</p>
+                <input type="file" id="audio-upload" accept="audio/*">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load WASM bindings and main logic -->
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

@@ -4,6 +4,7 @@ use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AssetTypeController;
 use App\Http\Controllers\ChargeableAccountController;
 use App\Http\Controllers\FuelOrderController;
+use App\Http\Controllers\JpmController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicDashboardController;
 use App\Http\Controllers\PublicDashboardLinkController;
@@ -128,3 +129,6 @@ require __DIR__.'/auth.php';
 Route::get('/shared/dashboard/{slug}', [PublicDashboardController::class, 'show'])->name('public.dashboard');
 Route::get('/shared/dashboard/{slug}/manifest.json', [PublicDashboardController::class, 'manifest'])->name('public.dashboard.manifest');
 Route::get('/shared/dashboard/{slug}/account/{chargeable_account}/sub-accounts', [PublicDashboardController::class, 'subAccountDashboard'])->name('public.dashboard.sub-accounts');
+
+// JPM 8000 Standalone Application Route
+Route::get('/jpm8000/{path?}', [JpmController::class, 'serve'])->where('path', '.*')->name('jpm8000');

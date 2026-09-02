@@ -1,0 +1,676 @@
+/* Vintage JPM 8000 Guitar Amplifier Emulator - Aesthetic Styling Stylesheet */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Oswald:wght@400;600&family=Share+Tech+Mono&display=swap');
+
+:root {
+    --gold-base: #c5a059;
+    --gold-dark: #8c6a2c;
+    --gold-light: #f3e5ab;
+    --gold-brushed: linear-gradient(135deg, #dfc08a 0%, #c49d52 40%, #ac7e37 70%, #dfc08a 100%);
+    --tolex-color: #1a1a1a;
+    --tolex-pattern: radial-gradient(circle, #2a2a2a 8%, transparent 8%), radial-gradient(circle, #222222 8%, #161616 8%);
+    --grille-pattern: repeating-linear-gradient(45deg, #2e281e 0px, #2e281e 3px, #1c1813 3px, #1c1813 6px);
+    --panel-glow: 0 0 12px rgba(223, 192, 138, 0.4);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #111111;
+    color: #eeeeee;
+    font-family: 'Oswald', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-image: radial-gradient(circle at center, #252525 0%, #0d0d0d 100%);
+}
+
+/* Main Container Wrapper */
+.app-container {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 2px rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+/* ==========================================================================
+   AMPLIFIER HEAD
+   ========================================================================== */
+.amp-head {
+    position: relative;
+    width: 100%;
+    background-color: var(--tolex-color);
+    background-image: var(--tolex-pattern);
+    background-size: 4px 4px;
+    background-position: 0 0, 2px 2px;
+    border-radius: 6px;
+    padding: 16px 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.9), inset 0 2px 8px rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Vintage Gold Piping Trim */
+.gold-piping {
+    height: 3px;
+    width: 100%;
+    background: linear-gradient(90deg, #8a6421 0%, #ffd700 30%, #ffd700 70%, #8a6421 100%);
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.gold-piping.top { margin-bottom: 2px; }
+.gold-piping.bottom { margin-top: 2px; }
+
+/* Tolex Edges Overlay */
+.tolex-edge {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.tolex-edge.top { top: 0; border-top-left-radius: 6px; border-top-right-radius: 6px; }
+.tolex-edge.bottom { bottom: 0; background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%); border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }
+
+/* Brushed Gold Faceplate */
+.gold-faceplate {
+    position: relative;
+    width: 100%;
+    background: var(--gold-brushed);
+    border: 2px solid #5a4212;
+    border-radius: 4px;
+    padding: 15px 20px;
+    box-shadow: inset 0 3px 6px rgba(255,255,255,0.3), inset 0 -3px 6px rgba(0,0,0,0.4), 0 5px 15px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow: hidden;
+}
+
+/* Brushed Metal Texture overlay */
+.gold-brush-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 2px);
+    pointer-events: none;
+}
+
+/* Logo and Badge Typography */
+.brand-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid rgba(90, 66, 18, 0.3);
+    padding-bottom: 8px;
+    z-index: 1;
+}
+
+.brand-name {
+    font-family: 'Cinzel', serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: #2b1f07;
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.4), -1px -1px 0px rgba(0,0,0,0.8);
+    letter-spacing: 2px;
+}
+
+.model-badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: #3b2808;
+    background-color: rgba(255,255,255,0.15);
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid rgba(90,66,18,0.3);
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.2);
+}
+
+/* Knobs Section */
+.knobs-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    z-index: 1;
+}
+
+.control-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.control-group.divider {
+    border-left: 1px solid rgba(90, 66, 18, 0.25);
+    padding-left: 12px;
+}
+
+/* Interactive Rotary Knob Styling */
+.knob-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 68px;
+}
+
+.knob-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #2b1f07;
+    text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
+    text-align: center;
+    margin-bottom: 6px;
+    height: 12px;
+    overflow: hidden;
+}
+
+.knob {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #2c2c2c 30%, #151515 80%, #000000 100%);
+    border: 3px solid #000000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 2px 3px rgba(255,255,255,0.2);
+    cursor: ns-resize;
+    transform: rotate(0deg); /* Manipulated in JS */
+}
+
+/* Gold Cap on top of Knob */
+.knob::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #f3e5ab 0%, #dfc08a 60%, #c49d52 100%);
+    border: 1px solid #7c5c16;
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.4);
+}
+
+/* Indicators pointer notch */
+.knob .indicator {
+    position: absolute;
+    top: 1px;
+    left: calc(50% - 1.5px);
+    width: 3px;
+    height: 10px;
+    background-color: #000000;
+    border-radius: 1.5px;
+    z-index: 3;
+    box-shadow: 0 1px 2px rgba(255,255,255,0.3);
+}
+
+.value-display {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: #1a1505;
+    background-color: rgba(255,255,255,0.2);
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-top: 6px;
+    width: 38px;
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Switches & Jacks Panel Layout */
+.switches-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(90, 66, 18, 0.3);
+    padding-top: 12px;
+    z-index: 1;
+}
+
+.switch-wrapper, .jack-wrapper, .power-wrapper, .jewel-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.switch-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #2b1f07;
+    text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
+}
+
+/* Rocker Switch Styling */
+.rocker-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 48px;
+    background-color: #1a1a1a;
+    border: 2px solid #000000;
+    border-radius: 4px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), 0 1px 2px rgba(255,255,255,0.3);
+}
+
+.rocker-switch input {
+    display: none;
+}
+
+.rocker-switch .switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg, #333333 0%, #222222 50%, #444444 100%);
+    border-radius: 2px;
+    box-shadow: inset 0 2px 2px rgba(255,255,255,0.2), inset 0 -2px 2px rgba(0,0,0,0.4);
+    transition: 0.1s;
+}
+
+.rocker-switch .switch-slider::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    height: 20px;
+    background-color: #555555;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    border-radius: 1px;
+}
+
+/* OFF state (top part pressed in, bottom popped out) */
+.rocker-switch .switch-slider::after {
+    bottom: 2px;
+}
+
+/* ON state (bottom part pressed in, top popped out) */
+.rocker-switch input:checked + .switch-slider {
+    background: linear-gradient(180deg, #111111 0%, #333333 50%, #222222 100%);
+}
+
+.rocker-switch input:checked + .switch-slider::after {
+    top: 2px;
+    bottom: auto;
+    background-color: #444444;
+}
+
+/* Red Power switch glow */
+.rocker-switch.red input:checked + .switch-slider {
+    background: linear-gradient(180deg, #8b0000 0%, #ff4500 50%, #3a0000 100%);
+    box-shadow: 0 0 15px rgba(255, 69, 0, 0.4), inset 0 1px 3px rgba(255,255,255,0.4);
+}
+
+.rocker-switch.red input:checked + .switch-slider::after {
+    background-color: #ff3333;
+}
+
+/* Slim switches for routing */
+.rocker-switch.slim {
+    width: 32px;
+    height: 38px;
+}
+
+.rocker-switch.slim .switch-slider::after {
+    height: 14px;
+}
+
+.toggle-switch-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(0,0,0,0.1);
+    padding: 3px 8px;
+    border-radius: 15px;
+    border: 1px solid rgba(90,66,18,0.2);
+}
+
+.toggle-mode-label {
+    font-size: 9px;
+    font-weight: bold;
+    color: #2b1f07;
+}
+
+/* Metal Input Jack Styling */
+.input-jack {
+    cursor: pointer;
+    width: 38px;
+    height: 38px;
+}
+
+.jack-outer {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #eeeeee 0%, #777777 50%, #999999 100%);
+    border: 2px solid #333333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.5);
+}
+
+.jack-inner {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from 0deg, #999999 0deg, #666666 45deg, #999999 90deg);
+    border: 1px solid #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.jack-hole {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #000000 60%, #333333 100%);
+    border: 1.5px solid #222222;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,1);
+}
+
+.jack-subtext {
+    font-size: 8px;
+    font-weight: bold;
+    color: #3b2808;
+    text-shadow: 1px 1px 0px rgba(255,255,255,0.1);
+}
+
+/* Glow-in-the-dark Jewel Pilot Lamp */
+.jewel-lamp {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #3d0505 0%, #1a0202 70%, #0c0101 100%);
+    border: 2px solid #000000;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), 0 2px 3px rgba(255,255,255,0.1);
+    transition: 0.2s;
+}
+
+/* Lamp ON state with pulsating animation */
+.jewel-lamp.active {
+    background: radial-gradient(circle, #ff9999 0%, #ff0000 60%, #800000 100%);
+    box-shadow: 0 0 20px #ff0000, 0 0 35px rgba(255,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.6);
+    border: 2px solid #222222;
+    animation: pilot-pulse 3s infinite alternate;
+}
+
+@keyframes pilot-pulse {
+    0% { filter: brightness(1); }
+    100% { filter: brightness(1.15) contrast(1.05); }
+}
+
+/* ==========================================================================
+   SPEAKER CABINET
+   ========================================================================== */
+.speaker-cabinet {
+    width: 100%;
+}
+
+.cab-frame {
+    background-color: var(--tolex-color);
+    background-image: var(--tolex-pattern);
+    background-size: 4px 4px;
+    background-position: 0 0, 2px 2px;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 25px 45px rgba(0,0,0,0.9), inset 0 2px 10px rgba(255,255,255,0.1);
+    border: 1px solid #111111;
+}
+
+/* Vintage Woven Grille Fabric Overlay */
+.cab-grille {
+    position: relative;
+    width: 100%;
+    min-height: 260px;
+    background-color: #2b2319;
+    background-image: var(--grille-pattern);
+    border: 15px solid #1c1c1c;
+    border-radius: 4px;
+    box-shadow: inset 0 10px 30px rgba(0,0,0,0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.grille-woven-pattern {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.15) 0px, rgba(0, 0, 0, 0.15) 2px, transparent 2px, transparent 4px);
+    pointer-events: none;
+}
+
+/* Retro Cabinet Logo Badge */
+.cab-logo {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: #eeeeee;
+    background-color: #111111;
+    border: 2.5px solid #dfc08a;
+    padding: 3px 10px;
+    box-shadow: 3px 3px 5px rgba(0,0,0,0.8);
+    letter-spacing: 1px;
+}
+
+/* Grille Controls & Drop Box overlay overlay */
+.cabinet-overlay {
+    width: 100%;
+    max-width: 600px;
+    background-color: rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(223, 192, 138, 0.15);
+    border-radius: 6px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    z-index: 1;
+}
+
+.cabinet-overlay h2 {
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--gold-light);
+    border-bottom: 1px solid rgba(223, 192, 138, 0.2);
+    padding-bottom: 6px;
+    text-align: center;
+}
+
+.cab-controls-row {
+    display: flex;
+    gap: 20px;
+}
+
+.cab-control {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cab-label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #aaaaaa;
+    font-weight: bold;
+}
+
+.mic-blend-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: #777777;
+    font-weight: bold;
+}
+
+/* Custom Styled Range Sliders for Cabinet */
+.cab-control input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: #222222;
+    border-radius: 3px;
+    outline: none;
+    border: 1px solid #333333;
+}
+
+.cab-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--gold-brushed);
+    border: 1px solid #5a4212;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.cab-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--gold-light);
+    text-align: right;
+}
+
+/* Drag and Drop Zone Container */
+.drop-zone {
+    border: 2px dashed rgba(223, 192, 138, 0.3);
+    border-radius: 6px;
+    padding: 18px;
+    text-align: center;
+    background-color: rgba(223, 192, 138, 0.02);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.drop-zone.dragover {
+    border-color: var(--gold-light);
+    background-color: rgba(223, 192, 138, 0.1);
+    box-shadow: 0 0 15px rgba(223, 192, 138, 0.25);
+}
+
+.drop-zone-icon {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.drop-zone-text {
+    font-size: 11px;
+    font-weight: bold;
+    color: #dddddd;
+    letter-spacing: 0.5px;
+}
+
+.drop-zone-sub {
+    font-size: 9px;
+    color: #666666;
+    margin-top: 2px;
+}
+
+/* ==========================================================================
+   FOOTER INFO CARDS
+   ========================================================================== */
+.footer-controls {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.control-card {
+    flex: 1;
+    min-width: 280px;
+    background-color: rgba(20, 20, 20, 0.8);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 6px;
+    padding: 16px;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.05), 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.control-card h3 {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: var(--gold-light);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+}
+
+.control-card ol {
+    padding-left: 15px;
+    font-size: 11.5px;
+    color: #cccccc;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.control-card p {
+    font-size: 11.5px;
+    color: #aaaaaa;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+/* Style file uploads */
+.file-card input[type="file"] {
+    width: 100%;
+    font-size: 11px;
+    background: #111111;
+    border: 1px solid rgba(223, 192, 138, 0.2);
+    border-radius: 4px;
+    padding: 8px;
+    color: #aaaaaa;
+    cursor: pointer;
+    outline: none;
+}
+
+.file-card input[type="file"]::-webkit-file-upload-button {
+    background: var(--gold-brushed);
+    border: 1px solid #5a4212;
+    border-radius: 3px;
+    color: #2b1f07;
+    padding: 4px 10px;
+    font-weight: bold;
+    font-size: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.file-card input[type="file"]::-webkit-file-upload-button:hover {
+    filter: brightness(1.1);
+}
+
+/* Active flashing effect when playing */
+.input-jack.playing .jack-outer {
+    box-shadow: 0 0 15px rgba(223, 192, 138, 0.5), inset 0 1px 2px rgba(255,255,255,0.7);
+    border-color: var(--gold-base);
+}
