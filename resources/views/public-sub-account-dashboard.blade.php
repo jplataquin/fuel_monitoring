@@ -272,7 +272,32 @@
                                 <p class="text-secondary small mb-0">Detailed breakdown of budgets and consumption per sub-account.</p>
                             </div>
                             <div class="card-body p-0 text-light">
-                                <div class="table-responsive">
+                                <div class="table-responsive"
+                                     x-data="{ 
+                                         tooltipVisible: false,
+                                         tooltipText: '',
+                                         tooltipX: 0,
+                                         tooltipY: 0,
+                                         touchTimeout: null,
+                                         showTooltip(name, x, y) {
+                                             this.tooltipText = name;
+                                             this.tooltipX = x;
+                                             this.tooltipY = y;
+                                             this.tooltipVisible = true;
+                                         },
+                                         hideTooltip() {
+                                             this.tooltipVisible = false;
+                                             if (this.touchTimeout) {
+                                                 clearTimeout(this.touchTimeout);
+                                                 this.touchTimeout = null;
+                                             }
+                                         },
+                                         updateTooltipPos(x, y) {
+                                             this.tooltipX = x;
+                                             this.tooltipY = y;
+                                         }
+                                     }"
+                                     @mouseleave="hideTooltip()">
                                     <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 1100px;">
                                         <thead class="table-secondary">
                                             <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
@@ -302,7 +327,13 @@
                                                         $saStatusBg = 'bg-warning bg-opacity-10 text-warning';
                                                     }
                                                 @endphp
-                                                <tr>
+                                                <tr data-name="{{ $sa['name'] }}"
+                                                    @mouseenter="showTooltip($event.currentTarget.dataset.name, $event.clientX, $event.clientY)"
+                                                    @mousemove="updateTooltipPos($event.clientX, $event.clientY)"
+                                                    @mouseleave="hideTooltip()"
+                                                    @touchstart="let t = $event.touches[0]; let name = $event.currentTarget.dataset.name; touchTimeout = setTimeout(() => { showTooltip(name, t.clientX, t.clientY) }, 500)"
+                                                    @touchend="hideTooltip()"
+                                                    @touchmove="hideTooltip()">
                                                     <td class="px-4 py-3 fw-bold text-white border-secondary">
                                                         {{ $sa['name'] }}
                                                     </td>
@@ -336,6 +367,19 @@
                                             @endforelse
                                         </tbody>
                                     </table>
+
+                                    <!-- Tooltip bubble element -->
+                                    <div x-show="tooltipVisible"
+                                         x-transition:enter="transition ease-out duration-150"
+                                         x-transition:enter-start="opacity-0 scale-95"
+                                         x-transition:enter-end="opacity-100 scale-100"
+                                         x-transition:leave="transition ease-in duration-100"
+                                         x-transition:leave-start="opacity-100 scale-100"
+                                         x-transition:leave-end="opacity-0 scale-95"
+                                         class="position-fixed text-white px-3 py-2 rounded-3 shadow-lg text-nowrap"
+                                         :style="'left: ' + tooltipX + 'px; top: ' + tooltipY + 'px; z-index: 9999; transform: translate(-50%, calc(-100% - 15px)); pointer-events: none; max-width: 300px; font-size: 0.875rem; font-weight: 500; background-color: #1e293b !important; border: 1px solid #475569 !important;'"
+                                         x-text="tooltipText">
+                                    </div>
                                 </div>
                             </div>
                         </div>
