@@ -491,17 +491,8 @@
                     return budget > 0 ? Math.round((consumed / budget) * 100) : (consumed > 0 ? 100 : 0);
                 });
 
-                const fuelBackgroundColors = percentages.map(percent => {
-                    if (percent >= 100) return 'rgba(239, 68, 68, 0.75)'; // Red for Exhausted
-                    if (percent >= 75) return 'rgba(245, 158, 11, 0.75)';  // Orange for Warning
-                    return 'rgba(52, 211, 153, 0.75)';                    // Green for Healthy
-                });
-
-                const fuelBorderColors = percentages.map(percent => {
-                    if (percent >= 100) return 'rgb(239, 68, 68)';
-                    if (percent >= 75) return 'rgb(245, 158, 11)';
-                    return 'rgb(52, 211, 153)';
-                });
+                const fuelBackgroundColors = percentages.map(() => 'rgba(52, 211, 153, 0.75)'); // Green for Healthy
+                const fuelBorderColors = percentages.map(() => 'rgb(52, 211, 153)');
 
                 const accomplishmentBackgroundColors = accomplishmentValues.map(() => 'rgba(56, 189, 248, 0.75)'); // Material Blue
                 const accomplishmentBorderColors = accomplishmentValues.map(() => 'rgb(56, 189, 248)');

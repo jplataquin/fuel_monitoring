@@ -1046,7 +1046,15 @@ class UtilizationEntryController extends Controller
     {
         $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle(substr($asset->fleet_no, 0, 31));
+
+        // Sanitize the sheet title to remove characters not allowed in Excel worksheet names: \ / ? * : [ ]
+        $safeTitle = str_replace(['\\', '/', '?', '*', ':', '[', ']'], '', $asset->fleet_no);
+        $safeTitle = trim($safeTitle, "'"); // Remove leading/trailing single quotes which can also be restricted
+        $safeTitle = substr($safeTitle, 0, 31);
+        if (empty($safeTitle)) {
+            $safeTitle = 'Asset Template';
+        }
+        $sheet->setTitle($safeTitle);
 
         $headers = [
             'Date (YYYY-MM-DD)',
@@ -1115,7 +1123,7 @@ class UtilizationEntryController extends Controller
                 $validationAccount->setError('Value is not in list');
                 $validationAccount->setPromptTitle('Pick from list');
                 $validationAccount->setPrompt('Please choose an Account :: Sub Account combination');
-                $validationAccount->setFormula1('Options!$A$1:$A$'.count($dropdownOptions));
+                $validationAccount->setFormula1('=Options!$A$1:$A$'.count($dropdownOptions));
             }
 
             // Dropdown validation for Calculation Type (Column F)
@@ -1134,7 +1142,8 @@ class UtilizationEntryController extends Controller
         }
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = $asset->fleet_no.' - Bulk Utilization Upload.xlsx';
+        $safeFileName = str_replace(['/', '\\'], '-', $asset->fleet_no);
+        $fileName = $safeFileName.' - Bulk Utilization Upload.xlsx';
 
         return response()->streamDownload(function () use ($writer) {
             $writer->save('php://output');

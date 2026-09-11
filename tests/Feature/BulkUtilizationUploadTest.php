@@ -386,6 +386,29 @@ class BulkUtilizationUploadTest extends TestCase
         $response->assertHeader('Content-Disposition', 'attachment; filename="'.$this->asset->fleet_no.' - Bulk Utilization Upload.xlsx"');
     }
 
+    public function test_bulk_template_downloads_successfully_with_invalid_characters_in_fleet_no(): void
+    {
+        $assetWithSpecialChars = Asset::create([
+            'fleet_no' => 'EQ/01-TR:5[A]',
+            'asset_type_id' => $this->assetType->id,
+            'fuel_factor_km' => 3.0,
+            'fuel_factor_hr' => 2.0,
+            'tank_capacity' => 150,
+            'last_kilometer_reading' => 1000.0,
+            'last_engine_hours' => 50.0,
+            'last_date' => '2026-08-25',
+            'last_time' => '12:00',
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('assets.utilization-entries.bulk-template', $assetWithSpecialChars));
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $expectedFileName = str_replace(['/', '\\'], '-', $assetWithSpecialChars->fleet_no).' - Bulk Utilization Upload.xlsx';
+        $response->assertHeader('Content-Disposition', 'attachment; filename="'.$expectedFileName.'"');
+    }
+
     public function test_bulk_upload_chunk_uploads_sequentially_and_parses(): void
     {
         $rows = [
