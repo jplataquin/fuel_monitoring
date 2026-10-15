@@ -243,10 +243,8 @@ trait DashboardDataTrait
         // 1. Get all active sub-accounts
         $subAccounts = $chargeableAccount->subAccounts()->get();
 
-        // 2. Fetch all fuel orders associated with this account (using the exact calculation logic)
-        $fuelOrders = FuelOrder::with(['utilizationEntries' => function ($q) use ($chargeableAccount) {
-            $q->where('chargeable_account_id', $chargeableAccount->id);
-        }])
+        // 2. Fetch all fuel orders associated with this account (loading all entries for prorating)
+        $fuelOrders = FuelOrder::with('utilizationEntries')
             ->where('status', 'DONE')
             ->whereHas('utilizationEntries', function ($q) use ($chargeableAccount) {
                 $q->where('chargeable_account_id', $chargeableAccount->id);
@@ -259,12 +257,13 @@ trait DashboardDataTrait
             $subAccountConsumption[$sa->id] = 0;
         }
 
-        // Loop over fuel orders and calculate prorated entry calculated quantities
+        $totalActualQuantity = 0;
+
+        // Loop over fuel orders and calculate prorated entry calculated quantities in a single pass
         foreach ($fuelOrders as $order) {
             $orderTotalCalcQty = 0;
-            $orderActualQty = $order->actual_quantity;
+            $projectCalcQty = 0;
 
-            // Calculate total calculated qty for the entire order
             foreach ($order->utilizationEntries as $entry) {
                 if ($entry->trashed() || $entry->fuel_order_id === null) {
                     continue;
@@ -292,37 +291,39 @@ trait DashboardDataTrait
 
                 $entry->_calculated_qty = $qty;
                 $orderTotalCalcQty += $qty;
-            }
 
-            // Accumulate calculated qty per sub-account
-            foreach ($order->utilizationEntries as $entry) {
-                if ($entry->trashed() || $entry->fuel_order_id === null) {
-                    continue;
-                }
+                // Process project-specific entries and update sub-account consumption
+                if ($entry->chargeable_account_id == $chargeableAccount->id && $entry->sub_account_id) {
+                    // If scoped, apply scoped date boundaries
+                    $dateMatches = true;
+                    if ($chargeableAccount->classification === 'Scoped') {
+                        $entryDate = $entry->date ? Carbon::parse($entry->date)->startOfDay() : null;
+                        $startDate = $chargeableAccount->start_date ? Carbon::parse($chargeableAccount->start_date)->startOfDay() : null;
+                        $endDate = $chargeableAccount->end_date ? Carbon::parse($chargeableAccount->end_date)->startOfDay() : null;
 
-                if ($entry->chargeable_account_id != $chargeableAccount->id || ! $entry->sub_account_id) {
-                    continue;
-                }
-
-                // If scoped, apply scoped date boundaries
-                if ($chargeableAccount->classification === 'Scoped') {
-                    $entryDate = $entry->date ? Carbon::parse($entry->date)->startOfDay() : null;
-                    $startDate = $chargeableAccount->start_date ? Carbon::parse($chargeableAccount->start_date)->startOfDay() : null;
-                    $endDate = $chargeableAccount->end_date ? Carbon::parse($chargeableAccount->end_date)->startOfDay() : null;
-
-                    if ($entryDate) {
-                        if ($startDate && $entryDate->lt($startDate)) {
-                            continue;
+                        if ($entryDate) {
+                            if ($startDate && $entryDate->lt($startDate)) {
+                                $dateMatches = false;
+                            }
+                            if ($endDate && $entryDate->gt($endDate)) {
+                                $dateMatches = false;
+                            }
                         }
-                        if ($endDate && $entryDate->gt($endDate)) {
-                            continue;
+                    }
+
+                    if ($dateMatches) {
+                        $projectCalcQty += $qty;
+                        if (isset($subAccountConsumption[$entry->sub_account_id])) {
+                            $subAccountConsumption[$entry->sub_account_id] += $qty;
                         }
                     }
                 }
+            }
 
-                if (isset($subAccountConsumption[$entry->sub_account_id])) {
-                    $subAccountConsumption[$entry->sub_account_id] += $entry->_calculated_qty;
-                }
+            // Prorate actual quantity based on project weighted percentage of computed fuel
+            if ($orderTotalCalcQty > 0 && $projectCalcQty > 0) {
+                $weightedPercentage = $projectCalcQty / $orderTotalCalcQty;
+                $totalActualQuantity += $order->actual_quantity * $weightedPercentage;
             }
         }
 
@@ -357,8 +358,6 @@ trait DashboardDataTrait
                 'accomplished_qty' => $accomplishedQty,
             ];
         }
-
-        $totalActualQuantity = $fuelOrders->sum('actual_quantity');
 
         return [
             'chartLabels' => $chartLabels,

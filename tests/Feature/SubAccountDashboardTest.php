@@ -543,4 +543,82 @@ class SubAccountDashboardTest extends TestCase
         $this->assertEquals(10.0, $subSummary['consumed']);
         $this->assertEquals(90.0, $subSummary['remaining']);
     }
+
+    public function test_sub_account_dashboard_calculates_prorated_total_actual_quantity_correctly(): void
+    {
+        $account1 = ChargeableAccount::create([
+            'name' => 'Project 1',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+        $sub1 = SubAccount::create([
+            'chargeable_account_id' => $account1->id,
+            'name' => 'Sub 1',
+        ]);
+
+        $account2 = ChargeableAccount::create([
+            'name' => 'Project 2',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+        $sub2 = SubAccount::create([
+            'chargeable_account_id' => $account2->id,
+            'name' => 'Sub 2',
+        ]);
+
+        $order = FuelOrder::create([
+            'order_no' => 'FO-MULTI-01',
+            'asset_id' => $this->asset->id,
+            'status' => 'DONE',
+            'calculated_quantity' => 100,
+            'say_quantity' => 100,
+            'actual_quantity' => 80, // Total dispensed is 80
+        ]);
+
+        // Entry 1 belongs to Project 1: 10 hours * 2 = 20 L
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'end_time' => '18:00',
+            'driver_operator_name' => 'Operator A',
+            'chargeable_account_id' => $account1->id,
+            'sub_account_id' => $sub1->id,
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Operation 1',
+            'reference' => 'REF-01',
+            'fuel_order_id' => $order->id,
+            'fuel_factor_hr' => 2.0,
+        ]);
+
+        // Entry 2 belongs to Project 2: 30 hours * 2 = 60 L
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'actual_hours' => 30,
+            'driver_operator_name' => 'Operator B',
+            'chargeable_account_id' => $account2->id,
+            'sub_account_id' => $sub2->id,
+            'calculation_type' => 'Actual Operation Time',
+            'particulars' => 'Operation 2',
+            'reference' => 'REF-02',
+            'fuel_order_id' => $order->id,
+            'fuel_factor_hr' => 2.0,
+        ]);
+
+        // Total calculated for the order = 20 + 60 = 80 L
+        // Project 1 share = 20 / 80 = 25%
+        // Project 1 prorated actual = 80 * 25% = 20 L
+        // Project 2 share = 60 / 80 = 75%
+        // Project 2 prorated actual = 80 * 75% = 60 L
+
+        $response1 = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account1));
+        $response1->assertStatus(200);
+        $this->assertEquals(20.0, $response1->viewData('totalActualQuantity'));
+
+        $response2 = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account2));
+        $response2->assertStatus(200);
+        $this->assertEquals(60.0, $response2->viewData('totalActualQuantity'));
+    }
 }
