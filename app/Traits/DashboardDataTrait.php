@@ -258,6 +258,7 @@ trait DashboardDataTrait
         }
 
         $totalActualQuantity = 0;
+        $totalCalculatedQuantity = 0;
 
         // Loop over fuel orders and calculate prorated entry calculated quantities in a single pass
         foreach ($fuelOrders as $order) {
@@ -293,7 +294,7 @@ trait DashboardDataTrait
                 $orderTotalCalcQty += $qty;
 
                 // Process project-specific entries and update sub-account consumption
-                if ($entry->chargeable_account_id == $chargeableAccount->id && $entry->sub_account_id) {
+                if ($entry->chargeable_account_id == $chargeableAccount->id) {
                     // If scoped, apply scoped date boundaries
                     $dateMatches = true;
                     if ($chargeableAccount->classification === 'Scoped') {
@@ -313,7 +314,9 @@ trait DashboardDataTrait
 
                     if ($dateMatches) {
                         $projectCalcQty += $qty;
-                        if (isset($subAccountConsumption[$entry->sub_account_id])) {
+                        $totalCalculatedQuantity += $qty;
+
+                        if ($entry->sub_account_id && isset($subAccountConsumption[$entry->sub_account_id])) {
                             $subAccountConsumption[$entry->sub_account_id] += $qty;
                         }
                     }
@@ -364,6 +367,7 @@ trait DashboardDataTrait
             'remainingBalances' => $remainingBalances,
             'subAccountData' => $subAccountData,
             'totalActualQuantity' => $totalActualQuantity,
+            'totalCalculatedQuantity' => $totalCalculatedQuantity,
         ];
     }
 }

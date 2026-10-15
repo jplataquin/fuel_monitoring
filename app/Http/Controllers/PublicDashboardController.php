@@ -51,8 +51,10 @@ class PublicDashboardController extends Controller
         $chartLabels = $data['chartLabels'];
         $remainingBalances = $data['remainingBalances'];
         $subAccountData = $data['subAccountData'];
+        $totalActualQuantity = $data['totalActualQuantity'];
+        $totalCalculatedQuantity = $data['totalCalculatedQuantity'];
 
-        return view('public-sub-account-dashboard', compact('link', 'chargeableAccount', 'chartLabels', 'remainingBalances', 'subAccountData'));
+        return view('public-sub-account-dashboard', compact('link', 'chargeableAccount', 'chartLabels', 'remainingBalances', 'subAccountData', 'totalActualQuantity', 'totalCalculatedQuantity'));
     }
 
     public function manifest(string $slug)

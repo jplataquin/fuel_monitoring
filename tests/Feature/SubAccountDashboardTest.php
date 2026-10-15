@@ -616,9 +616,11 @@ class SubAccountDashboardTest extends TestCase
         $response1 = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account1));
         $response1->assertStatus(200);
         $this->assertEquals(20.0, $response1->viewData('totalActualQuantity'));
+        $this->assertEquals(20.0, $response1->viewData('totalCalculatedQuantity'));
 
         $response2 = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account2));
         $response2->assertStatus(200);
         $this->assertEquals(60.0, $response2->viewData('totalActualQuantity'));
+        $this->assertEquals(60.0, $response2->viewData('totalCalculatedQuantity'));
     }
 }

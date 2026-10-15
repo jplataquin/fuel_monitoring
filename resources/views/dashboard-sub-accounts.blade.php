@@ -80,7 +80,7 @@
                         <div class="card-body p-0">
                             @php
                                 $totalBudgets = collect($subAccountData)->sum('total_budget');
-                                $totalConsumed = collect($subAccountData)->sum('consumed');
+                                $totalConsumed = $totalCalculatedQuantity ?? collect($subAccountData)->sum('consumed');
                                 $totalRemaining = $totalBudgets - ($totalActualQuantity ?? 0);
                                 $utilizationPercent = $totalBudgets > 0 ? ($totalConsumed / $totalBudgets) * 100 : 0;
                             @endphp

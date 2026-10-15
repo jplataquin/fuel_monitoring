@@ -417,7 +417,8 @@ class ReportController extends Controller
         $remainingBalances = $data['remainingBalances'];
         $subAccountData = $data['subAccountData'];
         $totalActualQuantity = $data['totalActualQuantity'];
+        $totalCalculatedQuantity = $data['totalCalculatedQuantity'];
 
-        return view('dashboard-sub-accounts', compact('chargeableAccount', 'chartLabels', 'remainingBalances', 'subAccountData', 'totalActualQuantity'));
+        return view('dashboard-sub-accounts', compact('chargeableAccount', 'chartLabels', 'remainingBalances', 'subAccountData', 'totalActualQuantity', 'totalCalculatedQuantity'));
     }
 }
