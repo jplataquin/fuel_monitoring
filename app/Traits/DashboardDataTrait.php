@@ -253,8 +253,10 @@ trait DashboardDataTrait
 
         // Initialize consumption data
         $subAccountConsumption = [];
+        $subAccountActualConsumption = [];
         foreach ($subAccounts as $sa) {
             $subAccountConsumption[$sa->id] = 0;
+            $subAccountActualConsumption[$sa->id] = 0;
         }
 
         $totalActualQuantity = 0;
@@ -264,6 +266,7 @@ trait DashboardDataTrait
         foreach ($fuelOrders as $order) {
             $orderTotalCalcQty = 0;
             $projectCalcQty = 0;
+            $orderSubAccountCalcQty = [];
 
             foreach ($order->utilizationEntries as $entry) {
                 if ($entry->trashed() || $entry->fuel_order_id === null) {
@@ -318,15 +321,25 @@ trait DashboardDataTrait
 
                         if ($entry->sub_account_id && isset($subAccountConsumption[$entry->sub_account_id])) {
                             $subAccountConsumption[$entry->sub_account_id] += $qty;
+                            $orderSubAccountCalcQty[$entry->sub_account_id] = ($orderSubAccountCalcQty[$entry->sub_account_id] ?? 0) + $qty;
                         }
                     }
                 }
             }
 
             // Prorate actual quantity based on project weighted percentage of computed fuel
-            if ($orderTotalCalcQty > 0 && $projectCalcQty > 0) {
-                $weightedPercentage = $projectCalcQty / $orderTotalCalcQty;
-                $totalActualQuantity += $order->actual_quantity * $weightedPercentage;
+            if ($orderTotalCalcQty > 0) {
+                if ($projectCalcQty > 0) {
+                    $weightedPercentage = $projectCalcQty / $orderTotalCalcQty;
+                    $totalActualQuantity += $order->actual_quantity * $weightedPercentage;
+                }
+
+                foreach ($orderSubAccountCalcQty as $subAccountId => $saCalcQty) {
+                    if ($saCalcQty > 0) {
+                        $saWeightedPercentage = $saCalcQty / $orderTotalCalcQty;
+                        $subAccountActualConsumption[$subAccountId] += $order->actual_quantity * $saWeightedPercentage;
+                    }
+                }
             }
         }
 
@@ -341,6 +354,7 @@ trait DashboardDataTrait
                 ->sum('budget_quantity');
 
             $consumed = $subAccountConsumption[$sa->id] ?? 0;
+            $actualConsumed = $subAccountActualConsumption[$sa->id] ?? 0;
             $remaining = $totalBudget - $consumed;
 
             $chartLabels[] = $sa->name;
@@ -354,6 +368,7 @@ trait DashboardDataTrait
                 'name' => $sa->name,
                 'total_budget' => $totalBudget,
                 'consumed' => $consumed,
+                'actual_consumed' => $actualConsumed,
                 'remaining' => $remaining,
                 'accomplishment' => $sa->accomplishment,
                 'quantity' => $sa->quantity,
