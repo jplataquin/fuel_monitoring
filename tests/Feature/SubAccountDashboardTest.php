@@ -151,7 +151,8 @@ class SubAccountDashboardTest extends TestCase
         $this->assertEquals('Sub Section A', $subAccountData[0]['name']);
         $this->assertEquals(1000.0, $subAccountData[0]['total_budget']);
         $this->assertEquals(4.0, $subAccountData[0]['consumed']);
-        $this->assertEquals(996.0, $subAccountData[0]['remaining']);
+        $this->assertEquals(200.0, $subAccountData[0]['actual_consumed']);
+        $this->assertEquals(800.0, $subAccountData[0]['remaining']);
     }
 
     public function test_zero_budget_with_non_zero_consumption_is_exhausted(): void
@@ -536,12 +537,13 @@ class SubAccountDashboardTest extends TestCase
         $subResponse = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account));
         $subResponse->assertStatus(200);
 
-        // Sub-account dashboard consumed should be 10.0 L, remaining should be 90.0 L (100 - 10)
+        // Sub-account dashboard consumed should be 10.0 L, actual_consumed should be 20.0 L, remaining should be 80.0 L (100 - 20)
         $subAccountData = $subResponse->viewData('subAccountData');
         $subSummary = collect($subAccountData)->firstWhere('name', 'Calc Sub');
         $this->assertNotNull($subSummary);
         $this->assertEquals(10.0, $subSummary['consumed']);
-        $this->assertEquals(90.0, $subSummary['remaining']);
+        $this->assertEquals(20.0, $subSummary['actual_consumed']);
+        $this->assertEquals(80.0, $subSummary['remaining']);
     }
 
     public function test_sub_account_dashboard_calculates_prorated_total_actual_quantity_correctly(): void

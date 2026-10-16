@@ -355,7 +355,7 @@ trait DashboardDataTrait
 
             $consumed = $subAccountConsumption[$sa->id] ?? 0;
             $actualConsumed = $subAccountActualConsumption[$sa->id] ?? 0;
-            $remaining = $totalBudget - $consumed;
+            $remaining = $totalBudget - $actualConsumed;
 
             $chartLabels[] = $sa->name;
             $remainingBalances[] = round($remaining, 2);
