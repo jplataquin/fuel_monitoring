@@ -308,7 +308,7 @@
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
                                             <th class="px-4 py-3 border-secondary" style="min-width: 220px;">Sub-Account Name</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Total Budget (L)</th>
-                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Consumed (L)</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Calc. Qty</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Remaining (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Quantity</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Accomplished (Qty)</th>
@@ -377,7 +377,7 @@
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary text-nowrap">
                                                     {{ number_format($sa['total_budget'], 2) }}
                                                 </td>
-                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-warning text-nowrap">
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-success text-nowrap">
                                                     {{ number_format($sa['consumed'], 2) }}
                                                 </td>
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-info text-nowrap">
