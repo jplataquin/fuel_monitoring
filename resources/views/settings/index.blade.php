@@ -10,7 +10,7 @@
     <div class="container-xl py-5">
         <div class="row g-4 justify-content-center">
             <!-- Users Card -->
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-3">
                 <div class="card bg-dark border-secondary border-opacity-25 shadow-sm h-100 overflow-hidden transition hover-shadow" style="transition: all 0.2s ease-in-out;">
                     <div class="card-body p-4 d-flex flex-column justify-content-between">
                         <div>
@@ -33,7 +33,7 @@
             </div>
 
             <!-- Classifications Card -->
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-3">
                 <div class="card bg-dark border-secondary border-opacity-25 shadow-sm h-100 overflow-hidden transition hover-shadow" style="transition: all 0.2s ease-in-out;">
                     <div class="card-body p-4 d-flex flex-column justify-content-between">
                         <div>
@@ -57,7 +57,7 @@
             </div>
 
             <!-- Shared Links Card -->
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-3">
                 <div class="card bg-dark border-secondary border-opacity-25 shadow-sm h-100 overflow-hidden transition hover-shadow" style="transition: all 0.2s ease-in-out;">
                     <div class="card-body p-4 d-flex flex-column justify-content-between">
                         <div>
@@ -74,6 +74,29 @@
                         </div>
                         <a href="{{ route('public-dashboard-links.index') }}" class="btn btn-outline-info rounded-pill w-100 fw-bold text-uppercase small py-2.5 cursor-pointer">
                             Manage Shared Links
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MCP Tokens Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card bg-dark border-secondary border-opacity-25 shadow-sm h-100 overflow-hidden transition hover-shadow" style="transition: all 0.2s ease-in-out;">
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="bg-warning bg-opacity-10 p-3 rounded-4 d-inline-block mb-3 text-warning">
+                                <!-- Key / Token SVG Icon -->
+                                <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+                                </svg>
+                            </div>
+                            <h3 class="h5 fw-bold text-light mb-2">MCP Tokens</h3>
+                            <p class="text-secondary small mb-4">
+                                Generate, inspect, and revoke Sanctum bearer tokens for AI agents and external clients accessing read-only MCP server endpoints.
+                            </p>
+                        </div>
+                        <a href="{{ route('mcp-tokens.index') }}" class="btn btn-outline-warning rounded-pill w-100 fw-bold text-uppercase small py-2.5 cursor-pointer">
+                            Manage Tokens
                         </a>
                     </div>
                 </div>

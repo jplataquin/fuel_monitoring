@@ -5,6 +5,7 @@ use App\Http\Controllers\AssetTypeController;
 use App\Http\Controllers\ChargeableAccountController;
 use App\Http\Controllers\FuelOrderController;
 use App\Http\Controllers\JpmController;
+use App\Http\Controllers\PersonalAccessTokenController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicDashboardController;
 use App\Http\Controllers\PublicDashboardLinkController;
@@ -115,6 +116,11 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
 
         // Merge Sub Account
         Route::post('sub-accounts/{sub_account}/merge', [SubAccountController::class, 'merge'])->name('sub-accounts.merge');
+
+        // MCP Personal Access Tokens
+        Route::get('settings/mcp-tokens', [PersonalAccessTokenController::class, 'index'])->name('mcp-tokens.index');
+        Route::post('settings/mcp-tokens', [PersonalAccessTokenController::class, 'store'])->name('mcp-tokens.store');
+        Route::delete('settings/mcp-tokens/{token}', [PersonalAccessTokenController::class, 'destroy'])->name('mcp-tokens.destroy');
     });
 });
 

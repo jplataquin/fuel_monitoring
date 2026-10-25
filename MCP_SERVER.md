@@ -19,7 +19,15 @@ The MCP server is served over HTTP at `/mcp` and is secured with **Laravel Sanct
   ```
 
 ### Generating a Token
-To generate a bearer token for an existing user via Laravel Tinker:
+
+#### Option 1: Admin Web Interface (Recommended)
+Administrators can generate, inspect, and revoke tokens directly from the system UI:
+1. Log in with an **Administrator** account.
+2. Navigate to **Settings** &rarr; **MCP Tokens** (`/settings/mcp-tokens`).
+3. Enter a label (e.g., `Claude Desktop`, `Cursor AI`) and select the user context.
+4. Click **Generate Token** and copy the plaintext token.
+
+#### Option 2: Via Laravel Tinker (CLI)
 ```bash
 php artisan tinker
 ```
