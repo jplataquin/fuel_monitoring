@@ -146,6 +146,14 @@ Inspect milestone progress, target volume, and accomplishment history for a sub-
   }
   ```
 
+### 5. `get_asset_performance`
+Retrieve asset performance and variance data comparing estimated fuel orders (`say_quantity`) against actual consumption (`actual_quantity`).
+- **Parameters**:
+  - `start_date` *(string, optional)*: Filter orders from this date (`YYYY-MM-DD`).
+  - `end_date` *(string, optional)*: Filter orders up to this date (`YYYY-MM-DD`).
+  - `asset_id` *(integer, optional)*: Retrieve performance metrics for a specific asset.
+- **Returns**: A list of assets with aggregated `total_say`, `total_actual`, `variance_percent`, and completed `order_count`.
+
 ---
 
 ## 5. Testing & Debugging

@@ -8,6 +8,7 @@ use App\Mcp\Resources\AssetsListResource;
 use App\Mcp\Resources\DashboardResource;
 use App\Mcp\Resources\RecentFuelOrdersResource;
 use App\Mcp\Servers\FuelMonitoringServer;
+use App\Mcp\Tools\GetAssetPerformanceTool;
 use App\Mcp\Tools\GetAssetUtilizationLogsTool;
 use App\Mcp\Tools\GetFuelOrderDetailsTool;
 use App\Mcp\Tools\GetSubAccountAccomplishmentTool;
@@ -62,7 +63,8 @@ class McpServerTest extends TestCase
             ]);
 
         $response->assertOk()
-            ->assertJsonPath('result.serverInfo.name', 'Fuel Monitoring Server');
+            ->assertJsonPath('result.serverInfo.name', 'Fuel Monitoring Server')
+            ->assertJsonPath('result.instructions', fn ($instructions) => str_contains($instructions, 'Critical Over-Consumption'));
     }
 
     public function test_mcp_server_lists_all_tools_and_resources(): void
@@ -74,6 +76,7 @@ class McpServerTest extends TestCase
             GetAssetUtilizationLogsTool::class,
             GetFuelOrderDetailsTool::class,
             GetSubAccountAccomplishmentTool::class,
+            GetAssetPerformanceTool::class,
         ]);
 
         FuelMonitoringServer::actingAs($user)->resources()->assertRegistered([
@@ -308,5 +311,40 @@ class McpServerTest extends TestCase
             ->assertSee('Earthworks')
             ->assertSee('REF-001')
             ->assertSee('25');
+    }
+
+    public function test_get_asset_performance_tool(): void
+    {
+        $user = User::factory()->create();
+        $type = AssetType::create(['name' => 'Dump Truck']);
+        $asset = Asset::create([
+            'fleet_no' => 'DT-500',
+            'plate_no' => 'XYZ-500',
+            'asset_type_id' => $type->id,
+            'tank_capacity' => 200,
+            'fuel_type' => 'Diesel',
+        ]);
+
+        $account = ChargeableAccount::create(['name' => 'Project Delta', 'classification' => 'Running']);
+        $subAccount = SubAccount::create(['name' => 'Hauling', 'chargeable_account_id' => $account->id]);
+
+        FuelOrder::create([
+            'asset_id' => $asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'status' => 'DONE',
+            'say_quantity' => 100,
+            'actual_quantity' => 110,
+        ]);
+
+        $response = FuelMonitoringServer::actingAs($user)->tool(GetAssetPerformanceTool::class, [
+            'asset_id' => $asset->id,
+        ]);
+
+        $response->assertOk()
+            ->assertSee('DT-500')
+            ->assertSee('100')
+            ->assertSee('110')
+            ->assertSee('10');
     }
 }
