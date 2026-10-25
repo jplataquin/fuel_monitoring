@@ -1,0 +1,312 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Mcp\Resources\AccountBudgetsResource;
+use App\Mcp\Resources\AssetResource;
+use App\Mcp\Resources\AssetsListResource;
+use App\Mcp\Resources\DashboardResource;
+use App\Mcp\Resources\RecentFuelOrdersResource;
+use App\Mcp\Servers\FuelMonitoringServer;
+use App\Mcp\Tools\GetAssetUtilizationLogsTool;
+use App\Mcp\Tools\GetFuelOrderDetailsTool;
+use App\Mcp\Tools\GetSubAccountAccomplishmentTool;
+use App\Mcp\Tools\SearchAssetsTool;
+use App\Models\AccomplishmentRegistry;
+use App\Models\Asset;
+use App\Models\AssetType;
+use App\Models\ChargeableAccount;
+use App\Models\FuelOrder;
+use App\Models\SubAccount;
+use App\Models\SubAccountBudget;
+use App\Models\User;
+use App\Models\UtilizationEntry;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class McpServerTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_mcp_route_requires_sanctum_authentication(): void
+    {
+        $response = $this->postJson('/mcp', [
+            'jsonrpc' => '2.0',
+            'method' => 'initialize',
+            'id' => 1,
+            'params' => [
+                'protocolVersion' => '2024-11-05',
+                'capabilities' => [],
+                'clientInfo' => ['name' => 'test', 'version' => '1.0'],
+            ],
+        ]);
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_mcp_route_succeeds_with_sanctum_bearer_token(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/mcp', [
+                'jsonrpc' => '2.0',
+                'method' => 'initialize',
+                'id' => 1,
+                'params' => [
+                    'protocolVersion' => '2024-11-05',
+                    'capabilities' => [],
+                    'clientInfo' => ['name' => 'test', 'version' => '1.0'],
+                ],
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('result.serverInfo.name', 'Fuel Monitoring Server');
+    }
+
+    public function test_mcp_server_lists_all_tools_and_resources(): void
+    {
+        $user = User::factory()->create();
+
+        FuelMonitoringServer::actingAs($user)->tools()->assertRegistered([
+            SearchAssetsTool::class,
+            GetAssetUtilizationLogsTool::class,
+            GetFuelOrderDetailsTool::class,
+            GetSubAccountAccomplishmentTool::class,
+        ]);
+
+        FuelMonitoringServer::actingAs($user)->resources()->assertRegistered([
+            AssetsListResource::class,
+            RecentFuelOrdersResource::class,
+            AccountBudgetsResource::class,
+        ]);
+    }
+
+    public function test_assets_list_resource(): void
+    {
+        $user = User::factory()->create();
+        $type = AssetType::create(['name' => 'Dump Truck']);
+        Asset::create([
+            'fleet_no' => 'DT-101',
+            'plate_no' => 'ABC-1234',
+            'asset_type_id' => $type->id,
+            'tank_capacity' => 150,
+            'fuel_type' => 'Diesel',
+        ]);
+
+        $response = FuelMonitoringServer::actingAs($user)->resource(AssetsListResource::class);
+
+        $response->assertOk()
+            ->assertSee('DT-101')
+            ->assertSee('ABC-1234');
+    }
+
+    public function test_asset_resource(): void
+    {
+        $user = User::factory()->create();
+        $type = AssetType::create(['name' => 'Excavator']);
+        $asset = Asset::create([
+            'fleet_no' => 'EX-201',
+            'plate_no' => 'XYZ-9876',
+            'asset_type_id' => $type->id,
+            'tank_capacity' => 250,
+            'fuel_type' => 'Diesel',
+        ]);
+
+        $response = FuelMonitoringServer::actingAs($user)->resource(AssetResource::class, [
+            'asset_id' => $asset->id,
+        ]);
+
+        $response->assertOk()
+            ->assertSee('EX-201')
+            ->assertSee('XYZ-9876')
+            ->assertSee('250');
+    }
+
+    public function test_recent_fuel_orders_resource(): void
+    {
+        $user = User::factory()->create();
+        $type = AssetType::create(['name' => 'Dump Truck']);
+        $asset = Asset::create([
+            'fleet_no' => 'DT-102',
+            'asset_type_id' => $type->id,
+            'tank_capacity' => 100,
+            'fuel_type' => 'Diesel',
+        ]);
+
+        $account = ChargeableAccount::create(['name' => 'Project Alpha', 'classification' => 'Running']);
+        $subAccount = SubAccount::create(['name' => 'Road Work', 'chargeable_account_id' => $account->id]);
+
+        FuelOrder::create([
+            'asset_id' => $asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'status' => 'DONE',
+            'actual_quantity' => 85.5,
+            'say_quantity' => 90,
+        ]);
+
+        $response = FuelMonitoringServer::actingAs($user)->resource(RecentFuelOrdersResource::class);
+
+        $response->assertOk()
+            ->assertSee('85.5')
+            ->assertSee('Road Work');
+    }
+
+    public function test_account_budgets_resource(): void
+    {
+        $user = User::factory()->create();
+        $account = ChargeableAccount::create(['name' => 'Account Beta', 'status' => 'Active', 'classification' => 'Running']);
+        $subAccount = SubAccount::create(['name' => 'Phase 1', 'chargeable_account_id' => $account->id]);
+        SubAccountBudget::create([
+            'sub_account_id' => $subAccount->id,
+            'budget_quantity' => 1000,
+            'status' => 'Approved',
+        ]);
+
+        $response = FuelMonitoringServer::actingAs($user)->resource(AccountBudgetsResource::class);
+
+        $response->assertOk()
+            ->assertSee('Account Beta')
+            ->assertSee('Phase 1');
+    }
+
+    public function test_dashboard_resource(): void
+    {
+        $user = User::factory()->create();
+        $account = ChargeableAccount::create(['name' => 'Account Gamma', 'classification' => 'Running']);
+        $subAccount = SubAccount::create(['name' => 'Site Prep', 'chargeable_account_id' => $account->id]);
+        SubAccountBudget::create([
+            'sub_account_id' => $subAccount->id,
+            'budget_quantity' => 500,
+            'status' => 'Approved',
+        ]);
+
+        $response = FuelMonitoringServer::actingAs($user)->resource(DashboardResource::class, [
+            'account_id' => $account->id,
+        ]);
+
+        $response->assertOk()
+            ->assertSee('Account Gamma')
+            ->assertSee('Site Prep')
+            ->assertSee('subAccountData');
+    }
+
+    public function test_search_assets_tool(): void
+    {
+        $user = User::factory()->create();
+        $type = AssetType::create(['name' => 'Truck']);
+        Asset::create([
+            'fleet_no' => 'TRK-55',
+            'plate_no' => 'XYZ-5555',
+            'asset_type_id' => $type->id,
+            'tank_capacity' => 120,
+            'fuel_type' => 'Diesel',
+        ]);
+        Asset::create([
+            'fleet_no' => 'GEN-01',
+            'plate_no' => 'ABC-1111',
+            'asset_type_id' => $type->id,
+            'tank_capacity' => 50,
+            'fuel_type' => 'Diesel',
+        ]);
+
+        $response = FuelMonitoringServer::actingAs($user)->tool(SearchAssetsTool::class, [
+            'query' => 'TRK',
+        ]);
+
+        $response->assertOk()
+            ->assertSee('TRK-55')
+            ->assertDontSee('GEN-01');
+    }
+
+    public function test_get_asset_utilization_logs_tool(): void
+    {
+        $user = User::factory()->create();
+        $type = AssetType::create(['name' => 'Truck']);
+        $asset = Asset::create([
+            'fleet_no' => 'TRK-99',
+            'asset_type_id' => $type->id,
+            'tank_capacity' => 120,
+            'fuel_type' => 'Diesel',
+        ]);
+
+        UtilizationEntry::create([
+            'asset_id' => $asset->id,
+            'reference' => 'REF-101',
+            'driver_operator_name' => 'John Doe',
+            'particulars' => 'Material hauling',
+            'date' => '2026-10-20',
+            'start_time' => '08:00',
+            'end_time' => '17:00',
+            'start_kilometer_reading' => 100,
+            'end_kilometer_reading' => 150,
+            'calculation_type' => 'kilometer',
+        ]);
+
+        $response = FuelMonitoringServer::actingAs($user)->tool(GetAssetUtilizationLogsTool::class, [
+            'asset_id' => $asset->id,
+        ]);
+
+        $response->assertOk()
+            ->assertSee('100')
+            ->assertSee('150');
+    }
+
+    public function test_get_fuel_order_details_tool(): void
+    {
+        $user = User::factory()->create();
+        $type = AssetType::create(['name' => 'Van']);
+        $asset = Asset::create([
+            'fleet_no' => 'VN-01',
+            'asset_type_id' => $type->id,
+            'tank_capacity' => 60,
+            'fuel_type' => 'Diesel',
+        ]);
+
+        $order = FuelOrder::create([
+            'asset_id' => $asset->id,
+            'status' => 'PENDING',
+            'say_quantity' => 45,
+            'remarks' => 'Routine refill',
+        ]);
+
+        $response = FuelMonitoringServer::actingAs($user)->tool(GetFuelOrderDetailsTool::class, [
+            'fuel_order_id' => $order->id,
+        ]);
+
+        $response->assertOk()
+            ->assertSee('Routine refill')
+            ->assertSee('VN-01');
+    }
+
+    public function test_get_sub_account_accomplishment_tool(): void
+    {
+        $user = User::factory()->create();
+        $account = ChargeableAccount::create(['name' => 'Highway Project', 'classification' => 'Running']);
+        $subAccount = SubAccount::create([
+            'name' => 'Earthworks',
+            'chargeable_account_id' => $account->id,
+            'quantity' => 1000,
+            'unit' => 'cu.m',
+        ]);
+
+        AccomplishmentRegistry::create([
+            'sub_account_id' => $subAccount->id,
+            'quantity' => 250,
+            'date_at' => '2026-10-22',
+            'reference_id' => 'REF-001',
+            'remarks' => 'First milestone reached',
+        ]);
+
+        $response = FuelMonitoringServer::actingAs($user)->tool(GetSubAccountAccomplishmentTool::class, [
+            'sub_account_id' => $subAccount->id,
+        ]);
+
+        $response->assertOk()
+            ->assertSee('Earthworks')
+            ->assertSee('REF-001')
+            ->assertSee('25');
+    }
+}
