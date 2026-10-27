@@ -99,6 +99,9 @@ class SubAccountDashboardTest extends TestCase
         // Check that the breakdown table includes the Remaining (Qty) column and formatted value
         $response->assertSee('Remaining (Qty)');
         $response->assertSee('54.50');
+
+        // Check that the Sub-Account Name column is frozen with sticky-col-first
+        $response->assertSee('sticky-col-first');
     }
 
     public function test_sub_account_dashboard_calculates_remaining_balance_correctly(): void
@@ -318,6 +321,7 @@ class SubAccountDashboardTest extends TestCase
         $response->assertSee('Public Sub Section');
         $response->assertSee('500.00');
         $response->assertSee('Public Test Link');
+        $response->assertSee('sticky-col-first');
     }
 
     public function test_guest_cannot_access_public_sub_account_dashboard_with_inactive_or_missing_slug(): void

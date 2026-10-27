@@ -307,7 +307,7 @@
                                 <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 2260px;">
                                     <thead class="table-secondary" x-ref="thead" :style="'transform: translateY(' + translateY + 'px); z-index: 10; position: relative; background-color: #2b3035 !important;'">
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
-                                            <th class="px-4 py-3 border-secondary" style="min-width: 220px;">Sub-Account Name</th>
+                                            <th class="px-4 py-3 border-secondary sticky-col-first" style="min-width: 220px;">Sub-Account Name</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Total Budget (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Calc. Qty</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Actu. Qty</th>
@@ -373,7 +373,7 @@
                                                 @touchmove="hideTooltip()"
                                                 class="text-nowrap" 
                                                 style="cursor: pointer;">
-                                                <td class="px-4 py-3 fw-bold text-white border-secondary text-nowrap">
+                                                <td class="px-4 py-3 fw-bold text-white border-secondary text-nowrap sticky-col-first">
                                                     {{ $sa['name'] }}
                                                 </td>
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary text-nowrap">

@@ -51,3 +51,33 @@ a, button, [role="button"], input[type="button"], input[type="submit"], input[ty
     cursor: not-allowed !important;
     opacity: 0.65;
 }
+
+/* Frozen / Sticky Table Columns (Excel style) */
+.table thead th.sticky-col-first {
+    position: sticky;
+    left: 0;
+    z-index: 15;
+    background-color: #2b3035 !important;
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.15), 3px 0 6px -2px rgba(0, 0, 0, 0.5);
+}
+
+.table tbody td.sticky-col-first {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background-color: #212529 !important;
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.15), 3px 0 6px -2px rgba(0, 0, 0, 0.5);
+}
+
+.table.table-hover tbody tr:hover td.sticky-col-first {
+    background-color: #2c3035 !important;
+}
+
+@media print {
+    .table thead th.sticky-col-first,
+    .table tbody td.sticky-col-first {
+        position: static !important;
+        box-shadow: none !important;
+        background-color: transparent !important;
+    }
+}
