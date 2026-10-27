@@ -153,6 +153,85 @@ class SubAccountDashboardTest extends TestCase
         $this->assertEquals(4.0, $subAccountData[0]['consumed']);
         $this->assertEquals(200.0, $subAccountData[0]['actual_consumed']);
         $this->assertEquals(800.0, $subAccountData[0]['remaining']);
+        $this->assertEquals(20.0, $subAccountData[0]['fuel_used_percentage']);
+
+        // Breakdown table Fuel Used (%) displays 20.0% (actual / total budget = 200 / 1000) rather than 0.4% (calculated / total budget = 4 / 1000)
+        $response->assertSee('20.0%');
+        $response->assertDontSee('0.4%');
+    }
+
+    public function test_sub_account_dashboard_calculates_fuel_used_percentage_using_actual_fuel_consumption(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Actual vs Calc Account',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Sub Test Percentage',
+        ]);
+
+        SubAccountBudget::create([
+            'sub_account_id' => $subAccount->id,
+            'budget_quantity' => 500,
+            'status' => 'Approved',
+            'allocated_by' => $this->admin->id,
+        ]);
+
+        // Fuel order with 150 actual liters dispensed
+        $order = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'status' => 'DONE',
+            'actual_quantity' => 150,
+        ]);
+
+        // Utilization entry calculates to 10 L (5 hrs * 2.0 hr factor)
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-07-01',
+            'start_time' => '08:00',
+            'end_time' => '13:00',
+            'fuel_factor_hr' => 2.0,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'fuel_order_id' => $order->id,
+            'calculation_type' => 'Timeframe',
+            'driver_operator_name' => 'Operator',
+            'reference' => 'REF-PCT',
+            'particulars' => 'Percentage test',
+        ]);
+
+        // 1. Authenticated Sub-Account Dashboard:
+        // Actual Fuel Consumption = 150 L, Total Budget = 500 L => 150 / 500 = 30.0%
+        // Calculated fuel = 10 L => 10 / 500 = 2.0%
+        $response = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account));
+        $response->assertStatus(200);
+
+        $subAccountData = $response->viewData('subAccountData');
+        $this->assertEquals(30.0, $subAccountData[0]['fuel_used_percentage']);
+
+        // Check Fuel Used (%) displays 30.0%
+        $response->assertSee('30.0%');
+        $response->assertDontSee('2.0%');
+
+        // 2. Public Shared Sub-Account Dashboard:
+        $link = PublicDashboardLink::create([
+            'slug' => 'pct-test-slug',
+            'name' => 'PCT Link',
+            'is_active' => true,
+            'created_by' => $this->admin->id,
+        ]);
+
+        $publicResponse = $this->get(route('public.dashboard.sub-accounts', [
+            'slug' => $link->slug,
+            'chargeable_account' => $account->id,
+        ]));
+
+        $publicResponse->assertStatus(200);
+        $publicResponse->assertSee('30.0%');
+        $publicResponse->assertDontSee('2.0%');
     }
 
     public function test_zero_budget_with_non_zero_consumption_is_exhausted(): void

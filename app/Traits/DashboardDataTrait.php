@@ -363,6 +363,8 @@ trait DashboardDataTrait
             $latestAccomplishment = $sa->accomplishments()->latest('date_at')->latest('id')->first();
             $accomplishedQty = $latestAccomplishment ? $latestAccomplishment->quantity : null;
 
+            $fuelUsedPercentage = $totalBudget > 0 ? ($actualConsumed / $totalBudget) * 100 : ($actualConsumed > 0 ? 100.0 : 0.0);
+
             $subAccountData[] = [
                 'id' => $sa->id,
                 'name' => $sa->name,
@@ -371,6 +373,7 @@ trait DashboardDataTrait
                 'actual_consumed' => $actualConsumed,
                 'remaining' => $remaining,
                 'accomplishment' => $sa->accomplishment,
+                'fuel_used_percentage' => round($fuelUsedPercentage, 2),
                 'quantity' => $sa->quantity,
                 'unit' => $sa->unit,
                 'accomplished_qty' => $accomplishedQty,

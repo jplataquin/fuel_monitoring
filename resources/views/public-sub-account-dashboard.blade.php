@@ -230,8 +230,9 @@
                                 @php
                                     $totalBudgets = collect($subAccountData)->sum('total_budget');
                                     $totalConsumed = $totalCalculatedQuantity ?? collect($subAccountData)->sum('consumed');
+                                    $totalActual = $totalActualQuantity ?? collect($subAccountData)->sum('actual_consumed');
                                     $totalRemaining = collect($subAccountData)->sum('remaining');
-                                    $utilizationPercent = $totalBudgets > 0 ? ($totalConsumed / $totalBudgets) * 100 : 0;
+                                    $utilizationPercent = $totalBudgets > 0 ? ($totalActual / $totalBudgets) * 100 : 0;
                                 @endphp
 
                                 <div class="vstack gap-3">
@@ -313,7 +314,7 @@
                                         <tbody class="border-secondary">
                                             @forelse($subAccountData as $sa)
                                                 @php
-                                                    $saPercent = $sa['total_budget'] > 0 ? ($sa['consumed'] / $sa['total_budget']) * 100 : ($sa['consumed'] > 0 ? 100 : 0);
+                                                    $saPercent = $sa['fuel_used_percentage'] ?? ($sa['total_budget'] > 0 ? ($sa['actual_consumed'] / $sa['total_budget']) * 100 : ($sa['actual_consumed'] > 0 ? 100 : 0));
                                                     $saStatus = 'Healthy';
                                                     $saStatusBg = 'bg-success bg-opacity-10 text-success';
                                                     if ($saPercent >= 100) {
@@ -400,7 +401,7 @@
                     const ctx = document.getElementById('subAccountChart').getContext('2d');
                     const labels = @json(collect($subAccountData)->pluck('name'));
                     const budgetValues = @json(collect($subAccountData)->pluck('total_budget'));
-                    const consumedValues = @json(collect($subAccountData)->pluck('consumed'));
+                    const consumedValues = @json(collect($subAccountData)->pluck('actual_consumed'));
                     const remainingValues = @json(collect($subAccountData)->pluck('remaining'));
                     const accomplishmentValues = @json(collect($subAccountData)->pluck('accomplishment'));
 
