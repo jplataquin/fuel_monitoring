@@ -461,14 +461,9 @@
 
                                 <!-- Tooltip bubble element -->
                                 <div x-show="tooltipVisible"
-                                     x-transition:enter="transition ease-out duration-150"
-                                     x-transition:enter-start="opacity-0 scale-95"
-                                     x-transition:enter-end="opacity-100 scale-100"
-                                     x-transition:leave="transition ease-in duration-100"
-                                     x-transition:leave-start="opacity-100 scale-100"
-                                     x-transition:leave-end="opacity-0 scale-95"
+                                     x-cloak
                                      class="position-fixed text-white px-3 py-2 rounded-3 shadow-lg text-nowrap"
-                                     :style="'left: ' + tooltipX + 'px; top: ' + tooltipY + 'px; z-index: 9999; transform: translate(-50%, calc(-100% - 15px)); pointer-events: none; max-width: 300px; font-size: 0.875rem; font-weight: 500; background-color: #1e293b !important; border: 1px solid #475569 !important;'"
+                                     :style="'left: ' + tooltipX + 'px; top: ' + tooltipY + 'px; z-index: 9999; transform: translate(-50%, calc(-100% - 15px)); pointer-events: none; max-width: 300px; font-size: 0.875rem; font-weight: 500; background-color: #1e293b !important; border: 1px solid #475569 !important; transition: opacity 0.15s ease-out;'"
                                      x-text="tooltipText">
                                 </div>
                             </div>
