@@ -154,6 +154,63 @@ Retrieve asset performance and variance data comparing estimated fuel orders (`s
   - `asset_id` *(integer, optional)*: Retrieve performance metrics for a specific asset.
 - **Returns**: A list of assets with aggregated `total_say`, `total_actual`, `variance_percent`, and completed `order_count`.
 
+### 6. `search_accounts` (aliases: `get_accounts`, `accounts`)
+Retrieve and search Chargeable Accounts with filters for name (partial match), ID, or status.
+- **Parameters**:
+  - `name` *(string, optional)*: Filter accounts by name (LIKE search, partial match). Aliases: `query`, `search`.
+  - `id` *(integer, optional)*: Filter by exact account ID. Alias: `account_id`.
+  - `status` *(string, optional)*: Filter by account status (e.g., `Active`, `Inactive`).
+- **Returns**: A list of Chargeable Accounts with their associated sub-accounts.
+
+### 7. `overall_account_preformance` (alias: `overall_account_performance`)
+Retrieve comprehensive overall account performance metrics matching `/dashboard/account/{account_id}/sub-accounts`.
+- **Parameters**:
+  - `account_id` *(integer, required)*: The ID of the Chargeable Account. Alias: `id`.
+- **Returns**:
+  ```json
+  {
+    "account": {
+      "id": 1,
+      "name": "Project Alpha",
+      "classification": "Running",
+      "status": "Active"
+    },
+    "summary_statistics": {
+      "total_allocated_budget": 50000.0,
+      "total_calculated_quantity": 12450.0,
+      "total_actual_quantity": 13100.0,
+      "total_remaining_balance": 36900.0,
+      "overall_budget_utilization_percentage": 26.2
+    },
+    "projection_summary": {
+      "savings": 2500.0,
+      "excess": 350.0,
+      "net": 2150.0
+    },
+    "sub_account_breakdown": [
+      {
+        "id": 10,
+        "name": "Site Clearing",
+        "total_budget": 10000.0,
+        "calculated_quantity": 2500.0,
+        "actual_quantity": 2600.0,
+        "remaining_balance": 7400.0,
+        "target_quantity": 500.0,
+        "accomplished_quantity": 200.0,
+        "remaining_quantity": 300.0,
+        "unit": "sq.m",
+        "rate": 0.08,
+        "projection": 3750.0,
+        "projected_variance": 3650.0,
+        "optimal_rate": 0.04,
+        "accomplishment_percentage": 40.0,
+        "fuel_used_percentage": 26.0,
+        "utilization_status": "Healthy"
+      }
+    ]
+  }
+  ```
+
 ---
 
 ## 5. Testing & Debugging

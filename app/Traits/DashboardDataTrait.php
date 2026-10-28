@@ -388,4 +388,112 @@ trait DashboardDataTrait
             'totalCalculatedQuantity' => $totalCalculatedQuantity,
         ];
     }
+
+    /**
+     * Compute comprehensive overall account performance metrics matching the sub-accounts dashboard view.
+     */
+    public function getOverallAccountPerformanceData(ChargeableAccount $chargeableAccount): array
+    {
+        $dashboardData = $this->getSubAccountDashboardData($chargeableAccount);
+        $subAccountData = $dashboardData['subAccountData'];
+        $totalActualQuantity = $dashboardData['totalActualQuantity'];
+        $totalCalculatedQuantity = $dashboardData['totalCalculatedQuantity'];
+
+        $totalBudgets = (float) collect($subAccountData)->sum('total_budget');
+        $totalConsumed = (float) ($totalCalculatedQuantity ?? collect($subAccountData)->sum('consumed'));
+        $totalActual = (float) ($totalActualQuantity ?? collect($subAccountData)->sum('actual_consumed'));
+        $totalRemaining = (float) ($totalBudgets - ($totalActualQuantity ?? 0));
+        $utilizationPercent = $totalBudgets > 0 ? ($totalActual / $totalBudgets) * 100 : 0;
+
+        $totalSavings = 0;
+        $totalExcess = 0;
+        $subAccountBreakdown = [];
+
+        foreach ($subAccountData as $sa) {
+            $saPercent = $sa['fuel_used_percentage'] ?? ($sa['total_budget'] > 0 ? ($sa['actual_consumed'] / $sa['total_budget']) * 100 : ($sa['actual_consumed'] > 0 ? 100.0 : 0.0));
+
+            $saStatus = 'Healthy';
+            if ($saPercent >= 100) {
+                $saStatus = 'Exhausted';
+            } elseif ($saPercent >= 90) {
+                $saStatus = 'Critical';
+            } elseif ($saPercent >= 75) {
+                $saStatus = 'Warning';
+            }
+
+            $rateVal = $sa['consumed'] > 0 && $sa['accomplished_qty'] !== null
+                ? ceil(($sa['accomplished_qty'] / $sa['consumed']) * 100) / 100
+                : null;
+
+            $projectedVal = $rateVal > 0 && $sa['quantity'] !== null && $sa['accomplished_qty'] !== null
+                ? ($sa['quantity'] - $sa['accomplished_qty']) / $rateVal
+                : null;
+
+            $optimalVal = $sa['remaining'] > 0 && $sa['quantity'] !== null && $sa['accomplished_qty'] !== null
+                ? ($sa['quantity'] - $sa['accomplished_qty']) / $sa['remaining']
+                : null;
+
+            $remainingQty = $sa['quantity'] !== null && $sa['accomplished_qty'] !== null
+                ? $sa['quantity'] - $sa['accomplished_qty']
+                : null;
+
+            $varianceVal = $projectedVal !== null
+                ? $sa['remaining'] - $projectedVal
+                : ($rateVal === null && $sa['remaining'] < 0 ? $sa['remaining'] : null);
+
+            if ($varianceVal !== null) {
+                if ($varianceVal > 0) {
+                    $totalSavings += $varianceVal;
+                } elseif ($varianceVal < 0) {
+                    $totalExcess += abs($varianceVal);
+                }
+            }
+
+            $subAccountBreakdown[] = [
+                'id' => $sa['id'],
+                'name' => $sa['name'],
+                'total_budget' => round((float) $sa['total_budget'], 2),
+                'calculated_quantity' => round((float) $sa['consumed'], 2),
+                'actual_quantity' => round((float) ($sa['actual_consumed'] ?? 0), 2),
+                'remaining_balance' => round((float) $sa['remaining'], 2),
+                'target_quantity' => $sa['quantity'] !== null ? round((float) $sa['quantity'], 2) : null,
+                'accomplished_quantity' => $sa['accomplished_qty'] !== null ? round((float) $sa['accomplished_qty'], 2) : null,
+                'remaining_quantity' => $remainingQty !== null ? round((float) $remainingQty, 2) : null,
+                'unit' => $sa['unit'],
+                'rate' => $rateVal !== null ? round((float) $rateVal, 2) : null,
+                'projection' => $projectedVal !== null ? round((float) $projectedVal, 2) : null,
+                'projected_variance' => $varianceVal !== null ? round((float) $varianceVal, 2) : null,
+                'optimal_rate' => $optimalVal !== null ? round((float) $optimalVal, 2) : null,
+                'accomplishment_percentage' => round((float) ($sa['accomplishment'] ?? 0.0), 2),
+                'fuel_used_percentage' => round((float) $saPercent, 2),
+                'utilization_status' => $saStatus,
+            ];
+        }
+
+        return [
+            'account' => [
+                'id' => $chargeableAccount->id,
+                'name' => $chargeableAccount->name,
+                'classification' => $chargeableAccount->classification,
+                'status' => $chargeableAccount->status,
+                'start_date' => $chargeableAccount->start_date ? $chargeableAccount->start_date->format('Y-m-d') : null,
+                'end_date' => $chargeableAccount->end_date ? $chargeableAccount->end_date->format('Y-m-d') : null,
+            ],
+            'summary_statistics' => [
+                'total_allocated_budget' => round($totalBudgets, 2),
+                'total_calculated_quantity' => round($totalConsumed, 2),
+                'total_actual_quantity' => round($totalActual, 2),
+                'total_remaining_balance' => round($totalRemaining, 2),
+                'overall_budget_utilization_percentage' => round($utilizationPercent, 2),
+            ],
+            'projection_summary' => [
+                'savings' => round((float) $totalSavings, 2),
+                'excess' => round((float) $totalExcess, 2),
+                'net' => round((float) ($totalSavings - $totalExcess), 2),
+            ],
+            'sub_account_breakdown' => $subAccountBreakdown,
+            'chart_labels' => $dashboardData['chartLabels'],
+            'remaining_balances' => $dashboardData['remainingBalances'],
+        ];
+    }
 }

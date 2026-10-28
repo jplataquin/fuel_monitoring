@@ -8,10 +8,15 @@ use App\Mcp\Resources\AssetsListResource;
 use App\Mcp\Resources\DashboardResource;
 use App\Mcp\Resources\RecentFuelOrdersResource;
 use App\Mcp\Servers\FuelMonitoringServer;
+use App\Mcp\Tools\AccountsTool;
+use App\Mcp\Tools\GetAccountsTool;
 use App\Mcp\Tools\GetAssetPerformanceTool;
 use App\Mcp\Tools\GetAssetUtilizationLogsTool;
 use App\Mcp\Tools\GetFuelOrderDetailsTool;
 use App\Mcp\Tools\GetSubAccountAccomplishmentTool;
+use App\Mcp\Tools\OverallAccountPerformanceTool;
+use App\Mcp\Tools\OverallAccountPreformanceTool;
+use App\Mcp\Tools\SearchAccountsTool;
 use App\Mcp\Tools\SearchAssetsTool;
 use App\Models\AccomplishmentRegistry;
 use App\Models\Asset;
@@ -77,6 +82,11 @@ class McpServerTest extends TestCase
             GetFuelOrderDetailsTool::class,
             GetSubAccountAccomplishmentTool::class,
             GetAssetPerformanceTool::class,
+            SearchAccountsTool::class,
+            GetAccountsTool::class,
+            AccountsTool::class,
+            OverallAccountPreformanceTool::class,
+            OverallAccountPerformanceTool::class,
         ]);
 
         FuelMonitoringServer::actingAs($user)->resources()->assertRegistered([
@@ -346,5 +356,217 @@ class McpServerTest extends TestCase
             ->assertSee('100')
             ->assertSee('110')
             ->assertSee('10');
+    }
+
+    public function test_search_accounts_tool_with_name_filter(): void
+    {
+        $user = User::factory()->create();
+        ChargeableAccount::create(['name' => 'Highway Maintenance Project', 'status' => 'Active', 'classification' => 'Running']);
+        ChargeableAccount::create(['name' => 'Office Building Construction', 'status' => 'Active', 'classification' => 'Running']);
+
+        $response = FuelMonitoringServer::actingAs($user)->tool(SearchAccountsTool::class, [
+            'name' => 'Highway',
+        ]);
+
+        $response->assertOk()
+            ->assertSee('Highway Maintenance Project')
+            ->assertDontSee('Office Building Construction');
+    }
+
+    public function test_search_accounts_tool_with_id_filter(): void
+    {
+        $user = User::factory()->create();
+        $account1 = ChargeableAccount::create(['name' => 'First Account', 'status' => 'Active', 'classification' => 'Running']);
+        $account2 = ChargeableAccount::create(['name' => 'Second Account', 'status' => 'Active', 'classification' => 'Running']);
+
+        $response = FuelMonitoringServer::actingAs($user)->tool(SearchAccountsTool::class, [
+            'id' => $account1->id,
+        ]);
+
+        $response->assertOk()
+            ->assertSee('First Account')
+            ->assertDontSee('Second Account');
+    }
+
+    public function test_search_accounts_tool_with_status_filter(): void
+    {
+        $user = User::factory()->create();
+        ChargeableAccount::create(['name' => 'Active Account One', 'status' => 'Active', 'classification' => 'Running']);
+        ChargeableAccount::create(['name' => 'Inactive Account Two', 'status' => 'Inactive', 'classification' => 'Running']);
+
+        $response = FuelMonitoringServer::actingAs($user)->tool(SearchAccountsTool::class, [
+            'status' => 'Inactive',
+        ]);
+
+        $response->assertOk()
+            ->assertSee('Inactive Account Two')
+            ->assertDontSee('Active Account One');
+    }
+
+    public function test_get_accounts_and_accounts_aliases(): void
+    {
+        $user = User::factory()->create();
+        ChargeableAccount::create(['name' => 'Alpha Core', 'status' => 'Active', 'classification' => 'Running']);
+
+        $responseGet = FuelMonitoringServer::actingAs($user)->tool(GetAccountsTool::class, [
+            'name' => 'Alpha',
+        ]);
+        $responseGet->assertOk()->assertSee('Alpha Core');
+
+        $responseAccounts = FuelMonitoringServer::actingAs($user)->tool(AccountsTool::class, [
+            'name' => 'Alpha',
+        ]);
+        $responseAccounts->assertOk()->assertSee('Alpha Core');
+    }
+
+    public function test_overall_account_preformance_tool(): void
+    {
+        $user = User::factory()->create();
+        $type = AssetType::create(['name' => 'Hauler']);
+        $asset = Asset::create([
+            'fleet_no' => 'HL-100',
+            'asset_type_id' => $type->id,
+            'tank_capacity' => 250,
+            'fuel_type' => 'Diesel',
+        ]);
+
+        $account = ChargeableAccount::create([
+            'name' => 'Expressway Corridor',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Earthmoving Section',
+            'quantity' => 1000,
+            'unit' => 'cu.m',
+        ]);
+
+        SubAccountBudget::create([
+            'sub_account_id' => $subAccount->id,
+            'budget_quantity' => 1000,
+            'status' => 'Approved',
+        ]);
+
+        $order = FuelOrder::create([
+            'asset_id' => $asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'status' => 'DONE',
+            'actual_quantity' => 200,
+            'say_quantity' => 180,
+        ]);
+
+        UtilizationEntry::create([
+            'asset_id' => $asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'fuel_order_id' => $order->id,
+            'date' => '2026-10-15',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'fuel_factor_hr' => 2.0,
+            'calculation_type' => 'Timeframe',
+            'driver_operator_name' => 'Driver One',
+            'reference' => 'REF-EXP-01',
+            'particulars' => 'Earthmoving activities',
+        ]);
+
+        AccomplishmentRegistry::create([
+            'sub_account_id' => $subAccount->id,
+            'quantity' => 250,
+            'date_at' => '2026-10-16',
+            'reference_id' => 'ACC-001',
+            'remarks' => 'Quarter milestone',
+        ]);
+
+        $response = FuelMonitoringServer::actingAs($user)->tool(OverallAccountPreformanceTool::class, [
+            'account_id' => $account->id,
+        ]);
+
+        $response->assertOk()
+            ->assertSee('Expressway Corridor')
+            ->assertSee('Earthmoving Section')
+            ->assertSee('Healthy')
+            ->assertSee('1000')
+            ->assertSee('788');
+    }
+
+    public function test_json_rpc_tools_call_for_accounts_and_overall_account_preformance(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token')->plainTextToken;
+        $account = ChargeableAccount::create([
+            'name' => 'Solar Farm Project',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $searchRpcResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/mcp', [
+                'jsonrpc' => '2.0',
+                'method' => 'tools/call',
+                'id' => 10,
+                'params' => [
+                    'name' => 'search_accounts',
+                    'arguments' => [
+                        'name' => 'Solar',
+                    ],
+                ],
+            ]);
+
+        $searchRpcResponse->assertOk()
+            ->assertSee('Solar Farm Project');
+
+        $performanceRpcResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/mcp', [
+                'jsonrpc' => '2.0',
+                'method' => 'tools/call',
+                'id' => 11,
+                'params' => [
+                    'name' => 'overall_account_preformance',
+                    'arguments' => [
+                        'account_id' => $account->id,
+                    ],
+                ],
+            ]);
+
+        $performanceRpcResponse->assertOk()
+            ->assertSee('Solar Farm Project')
+            ->assertSee('summary_statistics')
+            ->assertSee('projection_summary')
+            ->assertSee('sub_account_breakdown');
+
+        $rpcJson = $performanceRpcResponse->json();
+        $payloadText = data_get($rpcJson, 'result.content.0.text');
+        $this->assertNotNull($payloadText);
+        $payload = json_decode($payloadText, true);
+
+        $this->assertArrayHasKey('account', $payload);
+        $this->assertArrayHasKey('summary_statistics', $payload);
+        $this->assertArrayHasKey('projection_summary', $payload);
+        $this->assertArrayHasKey('sub_account_breakdown', $payload);
+        $this->assertEquals('Solar Farm Project', $payload['account']['name']);
+    }
+
+    public function test_overall_account_performance_alias_and_not_found(): void
+    {
+        $user = User::factory()->create();
+        $account = ChargeableAccount::create([
+            'name' => 'Metro Line 1',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $responseOk = FuelMonitoringServer::actingAs($user)->tool(OverallAccountPerformanceTool::class, [
+            'account_id' => $account->id,
+        ]);
+        $responseOk->assertOk()->assertSee('Metro Line 1');
+
+        $responseNotFound = FuelMonitoringServer::actingAs($user)->tool(OverallAccountPreformanceTool::class, [
+            'account_id' => 99999,
+        ]);
+        $responseNotFound->assertSee('not found');
     }
 }
