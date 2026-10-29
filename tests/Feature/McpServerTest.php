@@ -8,14 +8,12 @@ use App\Mcp\Resources\AssetsListResource;
 use App\Mcp\Resources\DashboardResource;
 use App\Mcp\Resources\RecentFuelOrdersResource;
 use App\Mcp\Servers\FuelMonitoringServer;
-use App\Mcp\Tools\AccountsTool;
 use App\Mcp\Tools\GetAccountsTool;
 use App\Mcp\Tools\GetAssetPerformanceTool;
 use App\Mcp\Tools\GetAssetUtilizationLogsTool;
 use App\Mcp\Tools\GetFuelOrderDetailsTool;
 use App\Mcp\Tools\GetSubAccountAccomplishmentTool;
 use App\Mcp\Tools\OverallAccountPerformanceTool;
-use App\Mcp\Tools\SearchAccountsTool;
 use App\Mcp\Tools\SearchAssetsTool;
 use App\Models\AccomplishmentRegistry;
 use App\Models\Asset;
@@ -81,9 +79,7 @@ class McpServerTest extends TestCase
             GetFuelOrderDetailsTool::class,
             GetSubAccountAccomplishmentTool::class,
             GetAssetPerformanceTool::class,
-            SearchAccountsTool::class,
             GetAccountsTool::class,
-            AccountsTool::class,
             OverallAccountPerformanceTool::class,
         ]);
 
@@ -356,13 +352,13 @@ class McpServerTest extends TestCase
             ->assertSee('10');
     }
 
-    public function test_search_accounts_tool_with_name_filter(): void
+    public function test_get_accounts_tool_with_name_filter(): void
     {
         $user = User::factory()->create();
         ChargeableAccount::create(['name' => 'Highway Maintenance Project', 'status' => 'Active', 'classification' => 'Running']);
         ChargeableAccount::create(['name' => 'Office Building Construction', 'status' => 'Active', 'classification' => 'Running']);
 
-        $response = FuelMonitoringServer::actingAs($user)->tool(SearchAccountsTool::class, [
+        $response = FuelMonitoringServer::actingAs($user)->tool(GetAccountsTool::class, [
             'name' => 'Highway',
         ]);
 
@@ -371,13 +367,13 @@ class McpServerTest extends TestCase
             ->assertDontSee('Office Building Construction');
     }
 
-    public function test_search_accounts_tool_with_id_filter(): void
+    public function test_get_accounts_tool_with_id_filter(): void
     {
         $user = User::factory()->create();
         $account1 = ChargeableAccount::create(['name' => 'First Account', 'status' => 'Active', 'classification' => 'Running']);
         $account2 = ChargeableAccount::create(['name' => 'Second Account', 'status' => 'Active', 'classification' => 'Running']);
 
-        $response = FuelMonitoringServer::actingAs($user)->tool(SearchAccountsTool::class, [
+        $response = FuelMonitoringServer::actingAs($user)->tool(GetAccountsTool::class, [
             'id' => $account1->id,
         ]);
 
@@ -386,35 +382,19 @@ class McpServerTest extends TestCase
             ->assertDontSee('Second Account');
     }
 
-    public function test_search_accounts_tool_with_status_filter(): void
+    public function test_get_accounts_tool_with_status_filter(): void
     {
         $user = User::factory()->create();
         ChargeableAccount::create(['name' => 'Active Account One', 'status' => 'Active', 'classification' => 'Running']);
         ChargeableAccount::create(['name' => 'Inactive Account Two', 'status' => 'Inactive', 'classification' => 'Running']);
 
-        $response = FuelMonitoringServer::actingAs($user)->tool(SearchAccountsTool::class, [
+        $response = FuelMonitoringServer::actingAs($user)->tool(GetAccountsTool::class, [
             'status' => 'Inactive',
         ]);
 
         $response->assertOk()
             ->assertSee('Inactive Account Two')
             ->assertDontSee('Active Account One');
-    }
-
-    public function test_get_accounts_and_accounts_aliases(): void
-    {
-        $user = User::factory()->create();
-        ChargeableAccount::create(['name' => 'Alpha Core', 'status' => 'Active', 'classification' => 'Running']);
-
-        $responseGet = FuelMonitoringServer::actingAs($user)->tool(GetAccountsTool::class, [
-            'name' => 'Alpha',
-        ]);
-        $responseGet->assertOk()->assertSee('Alpha Core');
-
-        $responseAccounts = FuelMonitoringServer::actingAs($user)->tool(AccountsTool::class, [
-            'name' => 'Alpha',
-        ]);
-        $responseAccounts->assertOk()->assertSee('Alpha Core');
     }
 
     public function test_overall_account_performance_tool(): void
@@ -507,7 +487,7 @@ class McpServerTest extends TestCase
                 'method' => 'tools/call',
                 'id' => 10,
                 'params' => [
-                    'name' => 'search_accounts',
+                    'name' => 'get_accounts',
                     'arguments' => [
                         'name' => 'Solar',
                     ],

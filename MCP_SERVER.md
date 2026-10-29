@@ -154,10 +154,10 @@ Retrieve asset performance and variance data comparing estimated fuel orders (`s
   - `asset_id` *(integer, optional)*: Retrieve performance metrics for a specific asset.
 - **Returns**: A list of assets with aggregated `total_say`, `total_actual`, `variance_percent`, and completed `order_count`.
 
-### 6. `search_accounts` (aliases: `get_accounts`, `accounts`)
+### 6. `get_accounts`
 Retrieve and search Chargeable Accounts with filters for name (partial match), ID, or status.
 - **Parameters**:
-  - `name` *(string, optional)*: Filter accounts by name (LIKE search, partial match). Aliases: `query`, `search`.
+  - `name` *(string, optional)*: Filter accounts by name (LIKE search, partial match). Aliases: `query`, `search`, `account_name`.
   - `id` *(integer, optional)*: Filter by exact account ID. Alias: `account_id`.
   - `status` *(string, optional)*: Filter by account status (e.g., `Active`, `Inactive`).
 - **Returns**: A list of Chargeable Accounts with their associated sub-accounts.
