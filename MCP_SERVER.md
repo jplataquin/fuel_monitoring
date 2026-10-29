@@ -162,7 +162,7 @@ Retrieve and search Chargeable Accounts with filters for name (partial match), I
   - `status` *(string, optional)*: Filter by account status (e.g., `Active`, `Inactive`).
 - **Returns**: A list of Chargeable Accounts with their associated sub-accounts.
 
-### 7. `overall_account_preformance` (alias: `overall_account_performance`)
+### 7. `overall_account_performance`
 Retrieve comprehensive overall account performance metrics matching `/dashboard/account/{account_id}/sub-accounts`.
 - **Parameters**:
   - `account_id` *(integer, required)*: The ID of the Chargeable Account. Alias: `id`.

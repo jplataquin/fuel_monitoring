@@ -15,7 +15,6 @@ use App\Mcp\Tools\GetAssetUtilizationLogsTool;
 use App\Mcp\Tools\GetFuelOrderDetailsTool;
 use App\Mcp\Tools\GetSubAccountAccomplishmentTool;
 use App\Mcp\Tools\OverallAccountPerformanceTool;
-use App\Mcp\Tools\OverallAccountPreformanceTool;
 use App\Mcp\Tools\SearchAccountsTool;
 use App\Mcp\Tools\SearchAssetsTool;
 use App\Models\AccomplishmentRegistry;
@@ -85,7 +84,6 @@ class McpServerTest extends TestCase
             SearchAccountsTool::class,
             GetAccountsTool::class,
             AccountsTool::class,
-            OverallAccountPreformanceTool::class,
             OverallAccountPerformanceTool::class,
         ]);
 
@@ -419,7 +417,7 @@ class McpServerTest extends TestCase
         $responseAccounts->assertOk()->assertSee('Alpha Core');
     }
 
-    public function test_overall_account_preformance_tool(): void
+    public function test_overall_account_performance_tool(): void
     {
         $user = User::factory()->create();
         $type = AssetType::create(['name' => 'Hauler']);
@@ -481,7 +479,7 @@ class McpServerTest extends TestCase
             'remarks' => 'Quarter milestone',
         ]);
 
-        $response = FuelMonitoringServer::actingAs($user)->tool(OverallAccountPreformanceTool::class, [
+        $response = FuelMonitoringServer::actingAs($user)->tool(OverallAccountPerformanceTool::class, [
             'account_id' => $account->id,
         ]);
 
@@ -493,7 +491,7 @@ class McpServerTest extends TestCase
             ->assertSee('788');
     }
 
-    public function test_json_rpc_tools_call_for_accounts_and_overall_account_preformance(): void
+    public function test_json_rpc_tools_call_for_accounts_and_overall_account_performance(): void
     {
         $user = User::factory()->create();
         $token = $user->createToken('test-token')->plainTextToken;
@@ -525,7 +523,7 @@ class McpServerTest extends TestCase
                 'method' => 'tools/call',
                 'id' => 11,
                 'params' => [
-                    'name' => 'overall_account_preformance',
+                    'name' => 'overall_account_performance',
                     'arguments' => [
                         'account_id' => $account->id,
                     ],
@@ -550,7 +548,7 @@ class McpServerTest extends TestCase
         $this->assertEquals('Solar Farm Project', $payload['account']['name']);
     }
 
-    public function test_overall_account_performance_alias_and_not_found(): void
+    public function test_overall_account_performance_not_found(): void
     {
         $user = User::factory()->create();
         $account = ChargeableAccount::create([
@@ -564,7 +562,7 @@ class McpServerTest extends TestCase
         ]);
         $responseOk->assertOk()->assertSee('Metro Line 1');
 
-        $responseNotFound = FuelMonitoringServer::actingAs($user)->tool(OverallAccountPreformanceTool::class, [
+        $responseNotFound = FuelMonitoringServer::actingAs($user)->tool(OverallAccountPerformanceTool::class, [
             'account_id' => 99999,
         ]);
         $responseNotFound->assertSee('not found');

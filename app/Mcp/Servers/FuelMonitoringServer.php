@@ -14,7 +14,6 @@ use App\Mcp\Tools\GetAssetUtilizationLogsTool;
 use App\Mcp\Tools\GetFuelOrderDetailsTool;
 use App\Mcp\Tools\GetSubAccountAccomplishmentTool;
 use App\Mcp\Tools\OverallAccountPerformanceTool;
-use App\Mcp\Tools\OverallAccountPreformanceTool;
 use App\Mcp\Tools\SearchAccountsTool;
 use App\Mcp\Tools\SearchAssetsTool;
 use Laravel\Mcp\Server;
@@ -72,7 +71,7 @@ You are interacting with the official **Fuel Monitoring Management System** MCP 
 
 - **Checking Accounts & Performance**:
   - Use `search_accounts` (or `get_accounts` / `accounts`) with optional filters (`name` for partial match, `id`, `status`) to query Chargeable Accounts.
-  - Call `overall_account_preformance` (or `overall_account_performance`) with `account_id` to retrieve comprehensive metrics matching `/dashboard/account/{account_id}/sub-accounts`, including Summary Statistics, Projection Summary (savings, excess, net), and the complete Sub-Account Breakdown.
+  - Call `overall_account_performance` with `account_id` to retrieve comprehensive metrics matching `/dashboard/account/{account_id}/sub-accounts`, including Summary Statistics, Projection Summary (savings, excess, net), and the complete Sub-Account Breakdown.
 
 - **Checking Project Budgets & Consumption Dashboards**:
   - Use `dashboard://{account_id}` to retrieve comprehensive sub-account consumption graphs, remaining balances, and allocation metrics matching the web dashboard.
@@ -106,7 +105,6 @@ MARKDOWN;
         SearchAccountsTool::class,
         GetAccountsTool::class,
         AccountsTool::class,
-        OverallAccountPreformanceTool::class,
         OverallAccountPerformanceTool::class,
     ];
 
