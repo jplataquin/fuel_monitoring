@@ -48,19 +48,19 @@
                 </li>
 
                 
-                @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
+                @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer', 'viewer']))
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('chargeable-accounts.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('chargeable-accounts.index') }}">{{ __('Accounts') }}</a>
                 </li>
                 @endif
-                @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
+                @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer', 'viewer']))
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('account-budgets.*') ? 'active fw-bold border-bottom border-primary' : '' }}" href="{{ route('account-budgets.index') }}">
                         {{ __('Budget') }}
                         @php
                             $pendingBudgetCount = \App\Models\SubAccountBudget::where('status', 'Pending')->count();
                         @endphp
-                        @if($pendingBudgetCount > 0)
+                        @if($pendingBudgetCount > 0 && Auth::user()->role !== 'viewer')
                             <span class="badge rounded-pill bg-danger ms-1 align-middle font-monospace" style="font-size: 0.75rem; padding: 0.25em 0.55em;">
                                 {{ $pendingBudgetCount > 99 ? '99+' : $pendingBudgetCount }}
                             </span>

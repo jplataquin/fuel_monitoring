@@ -22,7 +22,7 @@
                             </div>
                             <h3 class="h5 fw-bold text-light mb-2">Users</h3>
                             <p class="text-secondary small mb-4">
-                                Create, view, edit and delete system users. Manage user roles (Administrators, Moderators, Budgeteers, Fuel Men, and Data Loggers).
+                                Create, view, edit and delete system users. Manage user roles (Administrators, Moderators, Budgeteers, Fuel Men, Data Loggers, and Viewers).
                             </p>
                         </div>
                         <a href="{{ route('users.index') }}" class="btn btn-outline-primary rounded-pill w-100 fw-bold text-uppercase small py-2.5 cursor-pointer">

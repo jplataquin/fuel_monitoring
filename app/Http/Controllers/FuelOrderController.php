@@ -139,6 +139,18 @@ class FuelOrderController extends Controller
     }
 
     /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        if (! in_array(Auth::user()->role, ['data_logger', 'data logger', 'administrator'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        abort(405, 'Fuel orders are created via the Livewire interface.');
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show(FuelOrder $fuelOrder, Request $request)

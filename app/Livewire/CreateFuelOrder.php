@@ -58,6 +58,10 @@ class CreateFuelOrder extends Component
 
     public function mount()
     {
+        if (! in_array(Auth::user()->role, ['data_logger', 'data logger', 'administrator'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $this->assets = Asset::all();
         $this->chargeable_accounts = ChargeableAccount::where('status', 'Active')->orderBy('name', 'asc')->get();
         if ($this->asset_id) {
@@ -320,6 +324,10 @@ class CreateFuelOrder extends Component
 
     public function submit()
     {
+        if (! in_array(Auth::user()->role, ['data_logger', 'data logger', 'administrator'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $this->validate([
             'asset_id' => 'nullable|exists:assets,id',
             'chargeable_account_id' => 'required_without:asset_id|nullable|exists:chargeable_accounts,id',

@@ -14,7 +14,7 @@ class UserController extends Controller
     public function index(): View
     {
         $users = User::when(Auth::user()->role !== 'administrator', function ($query) {
-            $query->whereIn('role', ['data_logger', 'fuel_man', 'budgeteer']);
+            $query->whereIn('role', ['data_logger', 'fuel_man', 'budgeteer', 'viewer']);
         })->get();
 
         return view('users.index', compact('users'));
@@ -40,12 +40,17 @@ class UserController extends Controller
         return view('users.create', ['role' => 'budgeteer']);
     }
 
+    public function createViewer(): View
+    {
+        return view('users.create', ['role' => 'viewer']);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'role' => 'required|in:moderator,data_logger,fuel_man,budgeteer',
+            'role' => 'required|in:moderator,data_logger,fuel_man,budgeteer,viewer',
             'password' => 'required|string|min:8',
         ]);
 
@@ -77,7 +82,7 @@ class UserController extends Controller
         ];
 
         if (Auth::user()->role === 'administrator') {
-            $rules['role'] = 'required|in:administrator,moderator,data_logger,fuel_man,budgeteer';
+            $rules['role'] = 'required|in:administrator,moderator,data_logger,fuel_man,budgeteer,viewer';
         }
 
         $validated = $request->validate($rules);

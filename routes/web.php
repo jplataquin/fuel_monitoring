@@ -64,17 +64,28 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::get('fuel-orders/{fuel_order}/actualize', [FuelOrderController::class, 'actualize'])->name('fuel-orders.actualize');
     Route::post('fuel-orders/{fuel_order}/actualize', [FuelOrderController::class, 'storeActualization'])->name('fuel-orders.store-actualization');
 
-    // Admin, Moderator and Budgeteer routes for accounts
+    // Admin, Moderator and Budgeteer routes for accounts management
     Route::middleware('role:administrator,moderator,budgeteer')->group(function () {
-        Route::resource('chargeable-accounts', ChargeableAccountController::class);
-        Route::get('chargeable-accounts/{chargeable_account}/print', [ChargeableAccountController::class, 'print'])->name('chargeable-accounts.print');
-        Route::get('sub-accounts/{sub_account}', [SubAccountController::class, 'show'])->name('sub-accounts.show');
+        Route::get('chargeable-accounts/create', [ChargeableAccountController::class, 'create'])->name('chargeable-accounts.create');
+        Route::post('chargeable-accounts', [ChargeableAccountController::class, 'store'])->name('chargeable-accounts.store');
+        Route::get('chargeable-accounts/{chargeable_account}/edit', [ChargeableAccountController::class, 'edit'])->name('chargeable-accounts.edit');
+        Route::match(['put', 'patch'], 'chargeable-accounts/{chargeable_account}', [ChargeableAccountController::class, 'update'])->name('chargeable-accounts.update');
+        Route::delete('chargeable-accounts/{chargeable_account}', [ChargeableAccountController::class, 'destroy'])->name('chargeable-accounts.destroy');
+
         Route::get('sub-accounts/{sub_account}/edit', [SubAccountController::class, 'edit'])->name('sub-accounts.edit');
         Route::patch('sub-accounts/{sub_account}', [SubAccountController::class, 'update'])->name('sub-accounts.update');
         Route::post('chargeable-accounts/{chargeable_account}/sub-accounts', [SubAccountController::class, 'store'])->name('chargeable-accounts.sub-accounts.store');
         Route::delete('sub-accounts/{sub_account}', [SubAccountController::class, 'destroy'])->name('sub-accounts.destroy');
         Route::post('sub-accounts/{sub_account}/accomplishments', [SubAccountController::class, 'storeAccomplishment'])->name('sub-accounts.accomplishments.store');
         Route::delete('accomplishments/{accomplishment}', [SubAccountController::class, 'destroyAccomplishment'])->name('sub-accounts.accomplishments.destroy');
+    });
+
+    // Accounts view routes for admin, moderator, budgeteer, and viewer
+    Route::middleware('role:administrator,moderator,budgeteer,viewer')->group(function () {
+        Route::get('chargeable-accounts', [ChargeableAccountController::class, 'index'])->name('chargeable-accounts.index');
+        Route::get('chargeable-accounts/{chargeable_account}', [ChargeableAccountController::class, 'show'])->name('chargeable-accounts.show');
+        Route::get('chargeable-accounts/{chargeable_account}/print', [ChargeableAccountController::class, 'print'])->name('chargeable-accounts.print');
+        Route::get('sub-accounts/{sub_account}', [SubAccountController::class, 'show'])->name('sub-accounts.show');
     });
 
     // Admin and Moderator only routes for budget approval
@@ -84,10 +95,19 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
         Route::post('fuel-orders/{fuel_order}/unlink-sub-account', [FuelOrderController::class, 'unlinkSubAccount'])->name('fuel-orders.unlink-sub-account');
     });
 
-    // Admin, Moderator and Budgeteer routes
-    Route::middleware('role:administrator,moderator,budgeteer')->group(function () {
+    // Sub Account Budget view routes for admin, moderator, budgeteer, and viewer
+    Route::middleware('role:administrator,moderator,budgeteer,viewer')->group(function () {
+        Route::get('account-budgets', [SubAccountBudgetController::class, 'index'])->name('account-budgets.index');
         Route::get('account-budgets/print', [SubAccountBudgetController::class, 'print'])->name('account-budgets.print');
-        Route::resource('account-budgets', SubAccountBudgetController::class)->except(['create']);
+        Route::get('account-budgets/{account_budget}', [SubAccountBudgetController::class, 'show'])->name('account-budgets.show');
+    });
+
+    // Sub Account Budget management routes (admin, moderator, budgeteer only)
+    Route::middleware('role:administrator,moderator,budgeteer')->group(function () {
+        Route::post('account-budgets', [SubAccountBudgetController::class, 'store'])->name('account-budgets.store');
+        Route::get('account-budgets/{account_budget}/edit', [SubAccountBudgetController::class, 'edit'])->name('account-budgets.edit');
+        Route::match(['put', 'patch'], 'account-budgets/{account_budget}', [SubAccountBudgetController::class, 'update'])->name('account-budgets.update');
+        Route::delete('account-budgets/{account_budget}', [SubAccountBudgetController::class, 'destroy'])->name('account-budgets.destroy');
     });
 
     // Admin only routes
@@ -103,6 +123,7 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
         Route::get('users/create-data-logger', [UserController::class, 'createDataLogger'])->name('users.create-data-logger');
         Route::get('users/create-fuel-man', [UserController::class, 'createFuelMan'])->name('users.create-fuel-man');
         Route::get('users/create-budgeteer', [UserController::class, 'createBudgeteer'])->name('users.create-budgeteer');
+        Route::get('users/create-viewer', [UserController::class, 'createViewer'])->name('users.create-viewer');
 
         // User management resource
         Route::resource('users', UserController::class)->except(['create', 'show']);

@@ -82,14 +82,14 @@
 
             <!-- Terminal Tabbed Navigation (with High-Contrast Opacity Active States) -->
             <div class="d-flex border-bottom border-secondary border-opacity-25 mb-4 gap-2">
-                @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
+                @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer', 'viewer']))
                     <button @click="activeTab = 'accomplishments'" 
                             :class="activeTab === 'accomplishments' ? 'border-bottom border-3 border-success text-success fw-bold bg-success bg-opacity-5' : 'text-secondary hover-text-white'"
                             class="px-4 py-3 small text-uppercase tracking-widest text-decoration-none transition border-0 rounded-0 bg-transparent focus-ring focus-ring-success" style="cursor: pointer;">
                         Progress Logs
                     </button>
                 @endif
-                @if(in_array(Auth::user()->role, ['administrator', 'budgeteer']))
+                @if(in_array(Auth::user()->role, ['administrator', 'budgeteer', 'viewer']))
                     <button @click="activeTab = 'budgets'" 
                             :class="activeTab === 'budgets' ? 'border-bottom border-3 border-info text-info fw-bold bg-info bg-opacity-5' : 'text-secondary hover-text-white'"
                             class="px-4 py-3 small text-uppercase tracking-widest text-decoration-none transition border-0 rounded-0 bg-transparent focus-ring focus-ring-info" style="cursor: pointer;">
@@ -99,9 +99,10 @@
             </div>
 
             <!-- Tab 1: Progress / Accomplishment logs -->
-            @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
+            @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer', 'viewer']))
                 <div x-show="activeTab === 'accomplishments'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
                     
+                    @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
                     <!-- Log Accomplishment Card -->
                     <div class="card bg-dark border border-secondary border-opacity-25 rounded-2 p-4 mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -133,58 +134,59 @@
                                 </div>
                             </div>
                         </form>
+                    </div>
+                    @endif
 
-                        <!-- Accomplishment History -->
-                        <div class="mt-4 card bg-dark border border-secondary border-opacity-25 rounded-2 overflow-hidden">
-                            <div class="card-header bg-secondary bg-opacity-5 border-bottom border-secondary border-opacity-25 p-4">
-                                <h3 class="h5 fw-bold text-white mb-0">Accomplishment History</h3>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-dark table-hover mb-0">
-                                        <thead>
-                                            <tr class="bg-secondary bg-opacity-5">
-                                                <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Date</th>
-                                                <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Quantity</th>
-                                                <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Actions</th>
+                    <!-- Accomplishment History -->
+                    <div class="card bg-dark border border-secondary border-opacity-25 rounded-2 overflow-hidden mb-4">
+                        <div class="card-header bg-secondary bg-opacity-5 border-bottom border-secondary border-opacity-25 p-4">
+                            <h3 class="h5 fw-bold text-white mb-0">Accomplishment History</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover mb-0">
+                                    <thead>
+                                        <tr class="bg-secondary bg-opacity-5">
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Date</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Quantity</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($subAccount->accomplishments()->orderBy('date_at', 'desc')->orderBy('created_at', 'desc')->get() as $acc)
+                                            <tr>
+                                                <td class="px-4 py-3 align-middle">
+                                                    <span class="text-white small">{{ $acc->date_at->format('M d, Y') }}</span>
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end font-monospace fw-bold text-success">
+                                                    {{ number_format($acc->quantity, 2) }} {{ $subAccount->unit }}
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end">
+                                                    @if(Auth::user()->role === 'administrator')
+                                                        <form action="{{ route('sub-accounts.accomplishments.destroy', $acc) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-link text-danger p-2 rounded-circle" onclick="return confirm('Are you sure you want to delete this accomplishment entry?')" title="Delete Entry" style="cursor: pointer;">
+                                                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                            </button>
+                                                        </form>
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($subAccount->accomplishments()->orderBy('date_at', 'desc')->orderBy('created_at', 'desc')->get() as $acc)
-                                                <tr>
-                                                    <td class="px-4 py-3 align-middle">
-                                                        <span class="text-white small">{{ $acc->date_at->format('M d, Y') }}</span>
-                                                    </td>
-                                                    <td class="px-4 py-3 align-middle text-end font-monospace fw-bold text-success">
-                                                        {{ number_format($acc->quantity, 2) }} {{ $subAccount->unit }}
-                                                    </td>
-                                                    <td class="px-4 py-3 align-middle text-end">
-                                                        @if(Auth::user()->role === 'administrator')
-                                                            <form action="{{ route('sub-accounts.accomplishments.destroy', $acc) }}" method="POST" class="d-inline">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="btn btn-link text-danger p-2 rounded-circle" onclick="return confirm('Are you sure you want to delete this accomplishment entry?')" title="Delete Entry" style="cursor: pointer;">
-                                                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                                                </button>
-                                                            </form>
-                                                        @else
-                                                            —
-                                                        @endif
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="3" class="px-4 py-5 text-center text-secondary">
-                                                        <svg class="mb-2" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        <h3 class="h6 text-white mb-0">No accomplishment history found</h3>
-                                                    </td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="px-4 py-5 text-center text-secondary">
+                                                    <svg class="mb-2" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <h3 class="h6 text-white mb-0">No accomplishment history found</h3>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -192,9 +194,10 @@
             @endif
 
             <!-- Tab 2: Budgets / Allocations -->
-            @if(in_array(Auth::user()->role, ['administrator', 'budgeteer']))
+            @if(in_array(Auth::user()->role, ['administrator', 'budgeteer', 'viewer']))
                 <div x-show="activeTab === 'budgets'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
                     
+                    @if(in_array(Auth::user()->role, ['administrator', 'budgeteer']))
                     <!-- Allocate Budget Form Card -->
                     <div class="card bg-dark border border-secondary border-opacity-25 rounded-2 p-4 mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -232,63 +235,64 @@
                                 </button>
                             </div>
                         </form>
+                    </div>
+                    @endif
 
-                        <!-- Budget History -->
-                        <div class="mt-4 card bg-dark border border-secondary border-opacity-25 rounded-2 overflow-hidden">
-                            <div class="card-header bg-secondary bg-opacity-5 border-bottom border-secondary border-opacity-25 p-4">
-                                <h3 class="h5 fw-bold text-white mb-0">Budget Allocation History</h3>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-dark table-hover mb-0">
-                                        <thead>
-                                            <tr class="bg-secondary bg-opacity-5">
-                                                <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Date</th>
-                                                <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Quantity</th>
-                                                <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-center">Status</th>
-                                                <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Remarks</th>
-                                                <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Actions</th>
+                    <!-- Budget History -->
+                    <div class="card bg-dark border border-secondary border-opacity-25 rounded-2 overflow-hidden mb-4">
+                        <div class="card-header bg-secondary bg-opacity-5 border-bottom border-secondary border-opacity-25 p-4">
+                            <h3 class="h5 fw-bold text-white mb-0">Budget Allocation History</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover mb-0">
+                                    <thead>
+                                        <tr class="bg-secondary bg-opacity-5">
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Date</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Quantity</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-center">Status</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Remarks</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($subAccount->budgets()->orderBy('created_at', 'desc')->get() as $budget)
+                                            <tr>
+                                                <td class="px-4 py-3 align-middle">
+                                                    <span class="text-white small">{{ $budget->created_at->format('M d, Y') }}</span>
+                                                    <span class="d-block text-secondary smaller fw-bold text-uppercase" style="font-size: 0.75rem;">{{ $budget->created_at->format('h:i A') }}</span>
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end font-monospace fw-bold text-info">
+                                                    {{ number_format($budget->budget_quantity, 2) }} L
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-center">
+                                                    <span class="badge rounded-1 fw-bold text-uppercase smaller px-3 py-2
+                                                        {{ $budget->status === 'Approved' ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-25' : 
+                                                        ($budget->status === 'Rejected' ? 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25' : 'bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25') }}">
+                                                        {{ $budget->status }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-4 py-3 align-middle small text-secondary">
+                                                    {{ Str::limit($budget->remarks, 50) ?: '—' }}
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end">
+                                                    <a href="{{ route('account-budgets.show', $budget) }}" class="btn btn-link text-info p-2 rounded-circle" title="View Budget Details" style="cursor: pointer;">
+                                                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                    </a>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($subAccount->budgets()->orderBy('created_at', 'desc')->get() as $budget)
-                                                <tr>
-                                                    <td class="px-4 py-3 align-middle">
-                                                        <span class="text-white small">{{ $budget->created_at->format('M d, Y') }}</span>
-                                                        <span class="d-block text-secondary smaller fw-bold text-uppercase" style="font-size: 0.75rem;">{{ $budget->created_at->format('h:i A') }}</span>
-                                                    </td>
-                                                    <td class="px-4 py-3 align-middle text-end font-monospace fw-bold text-info">
-                                                        {{ number_format($budget->budget_quantity, 2) }} L
-                                                    </td>
-                                                    <td class="px-4 py-3 align-middle text-center">
-                                                        <span class="badge rounded-1 fw-bold text-uppercase smaller px-3 py-2
-                                                            {{ $budget->status === 'Approved' ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-25' : 
-                                                            ($budget->status === 'Rejected' ? 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25' : 'bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25') }}">
-                                                            {{ $budget->status }}
-                                                        </span>
-                                                    </td>
-                                                    <td class="px-4 py-3 align-middle small text-secondary">
-                                                        {{ Str::limit($budget->remarks, 50) ?: '—' }}
-                                                    </td>
-                                                    <td class="px-4 py-3 align-middle text-end">
-                                                        <a href="{{ route('account-budgets.show', $budget) }}" class="btn btn-link text-info p-2 rounded-circle" title="View Budget Details" style="cursor: pointer;">
-                                                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="5" class="px-4 py-5 text-center text-secondary">
-                                                        <svg class="mb-2" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        <h3 class="h6 text-white mb-0">No budget history found</h3>
-                                                    </td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        @empty
+                                            <tr>
+                                                <td colspan="5" class="px-4 py-5 text-center text-secondary">
+                                                    <svg class="mb-2" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <h3 class="h6 text-white mb-0">No budget history found</h3>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

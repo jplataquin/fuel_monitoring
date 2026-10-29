@@ -102,17 +102,19 @@
                                 </ul>
                             </div>
                         @endif
-                        <div class="d-flex justify-content-end pt-1 pb-3 border-bottom border-secondary border-opacity-25">
+                        <div class="d-flex justify-content-end pt-1">
                             <button type="submit" class="btn btn-info px-4 py-2 rounded-pill fw-bold small text-uppercase tracking-wider shadow">
                                 Add
                             </button>
                         </div>
                     </form>
+                </div>
+            @endif
 
-                    <div class="mt-5 card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden">
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover mb-0">
+            <div class="card bg-dark border-secondary shadow-lg rounded-4 overflow-hidden mb-4">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
                                     <thead>
                                         <tr class="bg-secondary bg-opacity-10">
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Sub Account</th>
@@ -182,8 +184,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            @endif
             
           
         </div>

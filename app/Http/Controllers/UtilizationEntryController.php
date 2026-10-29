@@ -129,6 +129,10 @@ class UtilizationEntryController extends Controller
 
     public function store(Request $request): JsonResponse|RedirectResponse
     {
+        if (Auth::user()->role === 'viewer') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $asset = Asset::findOrFail($request->asset_id);
 
         $rules = [
@@ -590,11 +594,19 @@ class UtilizationEntryController extends Controller
 
     public function bulkUpload(Asset $asset): View
     {
+        if (Auth::user()->role === 'viewer') {
+            abort(403, 'Unauthorized action.');
+        }
+
         return view('utilization-entries.bulk-upload', compact('asset'));
     }
 
     public function bulkPreview(Request $request, Asset $asset): JsonResponse
     {
+        if (Auth::user()->role === 'viewer') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv',
         ]);
@@ -640,6 +652,10 @@ class UtilizationEntryController extends Controller
 
     public function bulkStore(Request $request, Asset $asset): JsonResponse
     {
+        if (Auth::user()->role === 'viewer') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'rows' => 'required|array',
         ]);
@@ -1044,6 +1060,10 @@ class UtilizationEntryController extends Controller
 
     public function bulkTemplate(Asset $asset)
     {
+        if (Auth::user()->role === 'viewer') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -1155,6 +1175,10 @@ class UtilizationEntryController extends Controller
 
     public function bulkUploadChunk(Request $request, Asset $asset): JsonResponse
     {
+        if (Auth::user()->role === 'viewer') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'file_chunk' => 'required|file',
             'chunk_index' => 'required|integer',

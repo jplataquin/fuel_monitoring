@@ -310,6 +310,7 @@
             <div class="card-header bg-secondary bg-opacity-10 py-3 px-4 border-bottom border-secondary border-opacity-25">
                 <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
                     <h3 class="h5 fw-bold text-light mb-0 tracking-tight">{{ __('Utilization Logs') }}</h3>
+                    @if(Auth::user()->role !== 'viewer')
                     <div class="d-flex flex-wrap gap-2">
                         <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-bold text-uppercase tracking-widest d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#utilizationModal" style="font-size: 0.75rem;">
                             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
@@ -320,6 +321,7 @@
                             Bulk Upload
                         </a>
                     </div>
+                    @endif
                 </div>
             </div>
             

@@ -19,6 +19,9 @@
                 <a href="{{ route('users.create-budgeteer') }}" class="btn btn-success rounded-pill shadow-sm px-4 fw-bold small text-uppercase">
                     {{ __('Add Budgeteer') }}
                 </a>
+                <a href="{{ route('users.create-viewer') }}" class="btn btn-outline-light rounded-pill shadow-sm px-4 fw-bold small text-uppercase">
+                    {{ __('Add Viewer') }}
+                </a>
             </div>
         </div>
     </x-slot>
@@ -52,6 +55,7 @@
                                             elseif ($user->role === 'moderator') $badgeClass = 'bg-primary bg-opacity-10 text-primary border-primary';
                                             elseif ($user->role === 'budgeteer') $badgeClass = 'bg-danger bg-opacity-10 text-danger border-danger';
                                             elseif ($user->role === 'fuel_man') $badgeClass = 'bg-info bg-opacity-10 text-info border-info';
+                                            elseif ($user->role === 'viewer') $badgeClass = 'bg-secondary bg-opacity-25 text-light border-secondary';
                                         @endphp
                                         <span class="badge {{ $badgeClass }} border opacity-75 rounded-pill text-uppercase tracking-widest px-3 py-2" style="font-size: 0.65rem;">
                                             {{ str_replace('_', ' ', $user->role) }}

@@ -40,6 +40,7 @@
                                     <option value="data_logger" {{ old('role', $user->role) === 'data_logger' ? 'selected' : '' }}>Data Logger</option>
                                     <option value="fuel_man" {{ old('role', $user->role) === 'fuel_man' ? 'selected' : '' }}>Fuel Man</option>
                                     <option value="budgeteer" {{ old('role', $user->role) === 'budgeteer' ? 'selected' : '' }}>Budgeteer</option>
+                                    <option value="viewer" {{ old('role', $user->role) === 'viewer' ? 'selected' : '' }}>Viewer</option>
                                 </select>
                                 <x-input-error :messages="$errors->get('role')" class="mt-2" />
                             </div>
