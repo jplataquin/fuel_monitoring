@@ -330,15 +330,19 @@
                                                 $saPercent = $sa['fuel_used_percentage'] ?? ($sa['total_budget'] > 0 ? ($sa['actual_consumed'] / $sa['total_budget']) * 100 : ($sa['actual_consumed'] > 0 ? 100 : 0));
                                                 $saStatus = 'Healthy';
                                                 $saStatusBg = 'bg-success bg-opacity-10 text-success';
+                                                $cellHighlightClass = '';
                                                 if ($saPercent >= 100) {
                                                     $saStatus = 'Exhausted';
                                                     $saStatusBg = 'bg-danger bg-opacity-10 text-danger';
+                                                    $cellHighlightClass = 'sub-account-cell-danger';
                                                 } elseif ($saPercent >= 90) {
                                                     $saStatus = 'Critical';
                                                     $saStatusBg = 'bg-danger bg-opacity-10 text-danger';
+                                                    $cellHighlightClass = 'sub-account-cell-danger';
                                                 } elseif ($saPercent >= 75) {
                                                     $saStatus = 'Warning';
                                                     $saStatusBg = 'bg-warning bg-opacity-10 text-warning';
+                                                    $cellHighlightClass = 'sub-account-cell-warning';
                                                 }
 
                                                 $rateVal = $sa['consumed'] > 0 && $sa['accomplished_qty'] !== null 
@@ -373,7 +377,7 @@
                                                 @touchmove="hideTooltip()"
                                                 class="text-nowrap" 
                                                 style="cursor: pointer;">
-                                                <td class="px-4 py-3 fw-bold text-white border-secondary text-nowrap sticky-col-first">
+                                                <td class="px-4 py-3 fw-bold text-white border-secondary text-nowrap sticky-col-first {{ $cellHighlightClass }}">
                                                     {{ $sa['name'] }}
                                                 </td>
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary text-nowrap">

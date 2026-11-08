@@ -72,6 +72,25 @@ a, button, [role="button"], input[type="button"], input[type="submit"], input[ty
     background-color: #2c3035 !important;
 }
 
+/* Highlighted Sub-Account Name Sticky Cells */
+.table tbody td.sticky-col-first.sub-account-cell-warning {
+    background-color: rgba(245, 158, 11, 0.18) !important;
+    color: #fcd34d !important;
+}
+
+.table.table-hover tbody tr:hover td.sticky-col-first.sub-account-cell-warning {
+    background-color: rgba(245, 158, 11, 0.28) !important;
+}
+
+.table tbody td.sticky-col-first.sub-account-cell-danger {
+    background-color: rgba(239, 68, 68, 0.18) !important;
+    color: #fca5a5 !important;
+}
+
+.table.table-hover tbody tr:hover td.sticky-col-first.sub-account-cell-danger {
+    background-color: rgba(239, 68, 68, 0.28) !important;
+}
+
 @media print {
     .table thead th.sticky-col-first,
     .table tbody td.sticky-col-first {

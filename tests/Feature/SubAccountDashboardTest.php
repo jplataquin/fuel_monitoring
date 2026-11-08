@@ -282,6 +282,53 @@ class SubAccountDashboardTest extends TestCase
         $this->assertEquals(4.0, $subAccountData[0]['consumed']);
 
         $response->assertSee('Exhausted');
+        $response->assertSee('sub-account-cell-danger');
+    }
+
+    public function test_sub_account_name_cell_highlight_for_warning_status(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Warning Project',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Sub In Warning',
+        ]);
+
+        SubAccountBudget::create([
+            'sub_account_id' => $subAccount->id,
+            'budget_quantity' => 100,
+            'status' => 'Approved',
+        ]);
+
+        $order = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'status' => 'DONE',
+            'actual_quantity' => 80,
+        ]);
+
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'actual_hours' => 80,
+            'fuel_factor_hr' => 1.0,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'fuel_order_id' => $order->id,
+            'calculation_type' => 'Actual Operation Time',
+            'driver_operator_name' => 'Operator',
+            'reference' => 'REF-WARN',
+            'particulars' => 'Warning work',
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account));
+        $response->assertStatus(200);
+        $response->assertSee('Warning');
+        $response->assertSee('sub-account-cell-warning');
     }
 
     public function test_guest_can_access_public_sub_account_dashboard_with_active_slug(): void
