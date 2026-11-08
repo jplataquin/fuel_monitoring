@@ -380,6 +380,9 @@ trait DashboardDataTrait
             ];
         }
 
+        $totalActualQuantity = array_sum(array_column($subAccountData, 'actual_consumed'));
+        $totalCalculatedQuantity = array_sum(array_column($subAccountData, 'consumed'));
+
         return [
             'chartLabels' => $chartLabels,
             'remainingBalances' => $remainingBalances,

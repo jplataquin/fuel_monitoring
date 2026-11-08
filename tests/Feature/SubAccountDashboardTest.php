@@ -218,6 +218,7 @@ class SubAccountDashboardTest extends TestCase
         // Check Fuel Used (%) displays 30.0%
         $response->assertSee('30.0%');
         $response->assertDontSee('2.0%');
+        $response->assertSee('Actual Consumed:');
 
         // 2. Public Shared Sub-Account Dashboard:
         $link = PublicDashboardLink::create([
@@ -235,6 +236,7 @@ class SubAccountDashboardTest extends TestCase
         $publicResponse->assertStatus(200);
         $publicResponse->assertSee('30.0%');
         $publicResponse->assertDontSee('2.0%');
+        $publicResponse->assertSee('Actual Consumed:');
     }
 
     public function test_zero_budget_with_non_zero_consumption_is_exhausted(): void
@@ -707,5 +709,76 @@ class SubAccountDashboardTest extends TestCase
         $response2->assertStatus(200);
         $this->assertEquals(60.0, $response2->viewData('totalActualQuantity'));
         $this->assertEquals(60.0, $response2->viewData('totalCalculatedQuantity'));
+    }
+
+    public function test_sub_account_dashboard_totals_match_sum_of_sub_accounts_when_entries_lack_sub_account(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Project With Mixed Entries',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Sub With Entries',
+        ]);
+
+        $order = FuelOrder::create([
+            'order_no' => 'FO-MIXED-01',
+            'asset_id' => $this->asset->id,
+            'status' => 'DONE',
+            'calculated_quantity' => 100,
+            'say_quantity' => 100,
+            'actual_quantity' => 100,
+        ]);
+
+        // Entry 1 has sub_account_id: 10 hours * 2 = 20 L
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'end_time' => '18:00',
+            'driver_operator_name' => 'Operator A',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'calculation_type' => 'Timeframe',
+            'particulars' => 'Operation 1',
+            'reference' => 'REF-01',
+            'fuel_order_id' => $order->id,
+            'fuel_factor_hr' => 2.0,
+        ]);
+
+        // Entry 2 belongs to the same account but has NO sub_account_id: 30 hours * 2 = 60 L
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'actual_hours' => 30,
+            'driver_operator_name' => 'Operator B',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => null,
+            'calculation_type' => 'Actual Operation Time',
+            'particulars' => 'Operation 2',
+            'reference' => 'REF-02',
+            'fuel_order_id' => $order->id,
+            'fuel_factor_hr' => 2.0,
+        ]);
+
+        // Total calculated for the order = 80 L (20 L for Sub With Entries, 60 L unassigned to any sub account)
+        // Sub With Entries actual consumed = 100 * (20 / 80) = 25 L.
+        // Therefore, the dashboard summary totals should equal 25 L (the sum of the sub-account column), not 100 L.
+
+        $response = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account));
+        $response->assertStatus(200);
+
+        $subAccountData = $response->viewData('subAccountData');
+        $sumActualConsumed = collect($subAccountData)->sum('actual_consumed');
+        $sumCalculatedConsumed = collect($subAccountData)->sum('consumed');
+
+        $this->assertEquals(25.0, $sumActualConsumed);
+        $this->assertEquals(20.0, $sumCalculatedConsumed);
+        $this->assertEquals($sumActualConsumed, $response->viewData('totalActualQuantity'));
+        $this->assertEquals($sumCalculatedConsumed, $response->viewData('totalCalculatedQuantity'));
     }
 }

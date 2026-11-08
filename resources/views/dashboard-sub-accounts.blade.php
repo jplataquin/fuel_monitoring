@@ -485,11 +485,7 @@
                 const consumedValues = @json(collect($subAccountData)->pluck('actual_consumed'));
                 const remainingValues = @json(collect($subAccountData)->pluck('remaining'));
                 const accomplishmentValues = @json(collect($subAccountData)->pluck('accomplishment'));
-
-                const percentages = budgetValues.map((budget, index) => {
-                    const consumed = consumedValues[index];
-                    return budget > 0 ? Math.round((consumed / budget) * 100) : (consumed > 0 ? 100 : 0);
-                });
+                const percentages = @json(collect($subAccountData)->pluck('fuel_used_percentage'));
 
                 const fuelBackgroundColors = percentages.map(() => 'rgba(52, 211, 153, 0.75)'); // Green for Healthy
                 const fuelBorderColors = percentages.map(() => 'rgb(52, 211, 153)');
@@ -544,15 +540,15 @@
                                     label: function(context) {
                                         const idx = context.dataIndex;
                                         if (context.datasetIndex === 0) {
-                                            const percent = percentages[idx];
-                                            const budget = budgetValues[idx].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                            const consumed = consumedValues[idx].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                            const remaining = remainingValues[idx].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                            const percent = Number(percentages[idx] || 0).toFixed(2);
+                                            const budget = Number(budgetValues[idx] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                            const consumed = Number(consumedValues[idx] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                            const remaining = Number(remainingValues[idx] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                                             
                                             return [
                                                 `Fuel Consumption: ${percent}%`,
                                                 `  Budget: ${budget} L`,
-                                                `  Consumed: ${consumed} L`,
+                                                `  Actual Consumed: ${consumed} L`,
                                                 `  Remaining: ${remaining} L`
                                             ];
                                         } else {
