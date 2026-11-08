@@ -899,4 +899,100 @@ class SubAccountDashboardTest extends TestCase
         $this->assertEquals($sumActualConsumed, $response->viewData('totalActualQuantity'));
         $this->assertEquals($sumCalculatedConsumed, $response->viewData('totalCalculatedQuantity'));
     }
+
+    public function test_dashboard_calculations_ignore_soft_deleted_sub_accounts(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Project With Soft Deleted Sub',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $activeSub = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Active Sub Account',
+        ]);
+        SubAccountBudget::create([
+            'sub_account_id' => $activeSub->id,
+            'budget_quantity' => 1000.0,
+            'status' => 'Approved',
+            'created_by' => $this->admin->id,
+        ]);
+
+        $deletedSub = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Deleted Sub Account',
+        ]);
+        SubAccountBudget::create([
+            'sub_account_id' => $deletedSub->id,
+            'budget_quantity' => 500.0,
+            'status' => 'Approved',
+            'created_by' => $this->admin->id,
+        ]);
+        $deletedSubId = $deletedSub->id;
+        $deletedSub->delete();
+
+        $order = FuelOrder::create([
+            'order_no' => 'FO-DEL-SUB',
+            'asset_id' => $this->asset->id,
+            'status' => 'DONE',
+            'calculated_quantity' => 100,
+            'say_quantity' => 100,
+            'actual_quantity' => 100,
+        ]);
+
+        // Entry 1 belongs to activeSub: 25 L calculated
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'actual_hours' => 25,
+            'driver_operator_name' => 'Operator A',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $activeSub->id,
+            'calculation_type' => 'Actual Operation Time',
+            'particulars' => 'Operation 1',
+            'reference' => 'REF-01',
+            'fuel_order_id' => $order->id,
+            'fuel_factor_hr' => 1.0,
+        ]);
+
+        // Entry 2 belongs to deletedSub: 75 L calculated
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-15',
+            'start_time' => '08:00',
+            'actual_hours' => 75,
+            'driver_operator_name' => 'Operator B',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $deletedSubId,
+            'calculation_type' => 'Actual Operation Time',
+            'particulars' => 'Operation 2',
+            'reference' => 'REF-02',
+            'fuel_order_id' => $order->id,
+            'fuel_factor_hr' => 1.0,
+        ]);
+
+        // Sub-Account Dashboard check
+        $subResponse = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account));
+        $subResponse->assertStatus(200);
+
+        // Only active sub-account should be present (25 L)
+        $this->assertEquals(25.0, $subResponse->viewData('totalActualQuantity'));
+        $this->assertEquals(25.0, $subResponse->viewData('totalCalculatedQuantity'));
+
+        // Main Dashboard Card check
+        $dashResponse = $this->actingAs($this->admin)->get(route('dashboard'));
+        $dashResponse->assertStatus(200);
+
+        $chartData = $dashResponse->viewData('chartData');
+        $summary = collect($chartData)->firstWhere('name', 'Project With Soft Deleted Sub');
+
+        $this->assertNotNull($summary);
+        $this->assertEquals(1000.0, $summary['total_budget']);
+        $this->assertEquals(25.0, $summary['budgeted_fuel']);
+        $this->assertEquals(0.0, $summary['unbudgeted_fuel']);
+        $this->assertEquals(25.0, $summary['actual_fuel']);
+        $this->assertEquals($subResponse->viewData('totalActualQuantity'), $summary['budgeted_fuel']);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\ChargeableAccount;
 use App\Models\FuelOrder;
+use App\Models\SubAccount;
 use App\Traits\DashboardDataTrait;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -192,7 +193,8 @@ class DiagnoseDashboardBudget extends Command
 
                     $calcQty = (float) $e->calculated_quantity;
                     $prorated = $orderTotalCalcQty > 0 ? ($calcQty / $orderTotalCalcQty) * (float) $order->actual_quantity : 0;
-                    $subName = $e->subAccount ? $e->subAccount->name : 'None';
+                    $subModel = $e->sub_account_id ? SubAccount::withTrashed()->find($e->sub_account_id) : null;
+                    $subName = $subModel ? ($subModel->name.($subModel->trashed() ? ' [DELETED]' : '')) : 'None';
                     $hasValidSub = $e->sub_account_id && in_array($e->sub_account_id, $activeSubIds);
 
                     // Scoped check
@@ -211,8 +213,14 @@ class DiagnoseDashboardBudget extends Command
                         }
                     }
 
-                    $dashboardCategory = $e->sub_account_id ? 'Budgeted' : 'Unbudgeted';
-                    $subAccountIncluded = ($hasValidSub && $scopedMatch) ? 'YES' : 'SKIPPED ('.(! $hasValidSub ? 'Sub not active/found' : 'Scoped date mismatch').')';
+                    $isSoftDeletedSub = $e->sub_account_id && ! in_array($e->sub_account_id, $activeSubIds);
+                    if ($isSoftDeletedSub) {
+                        $dashboardCategory = 'IGNORED (Deleted Sub)';
+                        $subAccountIncluded = 'IGNORED (Deleted Sub)';
+                    } else {
+                        $dashboardCategory = $e->sub_account_id ? 'Budgeted' : 'Unbudgeted';
+                        $subAccountIncluded = ($hasValidSub && $scopedMatch) ? 'YES' : 'SKIPPED ('.(! $hasValidSub ? 'Sub not active/found' : 'Scoped date mismatch').')';
+                    }
 
                     $entryRows[] = [
                         '#'.$e->id,

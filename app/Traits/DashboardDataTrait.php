@@ -113,7 +113,9 @@ trait DashboardDataTrait
 
                 if (! isset($accountSummaries[$accountName])) {
                     $totalBudget = 0;
+                    $activeSubAccountIds = [];
                     if ($account) {
+                        $activeSubAccountIds = $account->subAccounts->pluck('id')->all();
                         foreach ($account->subAccounts as $sa) {
                             $totalBudget += SubAccountBudget::where('sub_account_id', $sa->id)
                                 ->where('status', 'Approved')
@@ -135,7 +137,13 @@ trait DashboardDataTrait
                         'budgeted_fuel' => 0,
                         'unbudgeted_fuel' => 0,
                         'total_calculated_fuel' => 0,
+                        '_active_sub_ids' => $activeSubAccountIds,
                     ];
+                }
+
+                // Ignore entries assigned to soft-deleted or inactive sub-accounts
+                if ($entry->sub_account_id && ! in_array($entry->sub_account_id, $accountSummaries[$accountName]['_active_sub_ids'])) {
+                    continue;
                 }
 
                 $entryCalcQty = $entry->_calculated_qty;
@@ -207,13 +215,17 @@ trait DashboardDataTrait
 
             if (! isset($accountSummaries[$accountName])) {
                 $totalBudget = 0;
-                foreach ($account->subAccounts as $sa) {
-                    $totalBudget += SubAccountBudget::where('sub_account_id', $sa->id)
-                        ->where('status', 'Approved')
-                        ->sum('budget_quantity');
-                    $totalBudget += SubAccountOffset::where('sub_account_id', $sa->id)
-                        ->where('status', 'Approved')
-                        ->sum('quantity');
+                $activeSubAccountIds = [];
+                if ($account) {
+                    $activeSubAccountIds = $account->subAccounts->pluck('id')->all();
+                    foreach ($account->subAccounts as $sa) {
+                        $totalBudget += SubAccountBudget::where('sub_account_id', $sa->id)
+                            ->where('status', 'Approved')
+                            ->sum('budget_quantity');
+                        $totalBudget += SubAccountOffset::where('sub_account_id', $sa->id)
+                            ->where('status', 'Approved')
+                            ->sum('quantity');
+                    }
                 }
 
                 $accountSummaries[$accountName] = [
@@ -227,7 +239,13 @@ trait DashboardDataTrait
                     'budgeted_fuel' => 0,
                     'unbudgeted_fuel' => 0,
                     'total_calculated_fuel' => 0,
+                    '_active_sub_ids' => $activeSubAccountIds,
                 ];
+            }
+
+            // Ignore direct orders assigned to soft-deleted or inactive sub-accounts
+            if ($order->sub_account_id && ! in_array($order->sub_account_id, $accountSummaries[$accountName]['_active_sub_ids'])) {
+                continue;
             }
 
             $directActual = (float) $order->actual_quantity;
@@ -276,6 +294,11 @@ trait DashboardDataTrait
                 }
             }
         }
+
+        foreach ($accountSummaries as &$summary) {
+            unset($summary['_active_sub_ids']);
+        }
+        unset($summary);
 
         ksort($accountSummaries);
 
@@ -407,6 +430,11 @@ trait DashboardDataTrait
                     }
 
                     if ($dateMatches) {
+                        // If entry has a sub_account_id that is NOT an active sub-account, ignore it
+                        if ($entry->sub_account_id && ! isset($subAccountConsumption[$entry->sub_account_id])) {
+                            continue;
+                        }
+
                         $projectCalcQty += $qty;
                         $totalCalculatedQuantity += $qty;
 
