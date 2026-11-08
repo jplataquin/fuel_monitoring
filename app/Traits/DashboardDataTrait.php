@@ -146,10 +146,10 @@ trait DashboardDataTrait
                     $proratedActual = $orderActualQty / max(1, $order->utilizationEntries->count());
                 }
 
-                if ($entry->unbudgeted) {
-                    $accountSummaries[$accountName]['unbudgeted_fuel'] += $proratedActual;
-                } else {
+                if ($entry->sub_account_id) {
                     $accountSummaries[$accountName]['budgeted_fuel'] += $proratedActual;
+                } else {
+                    $accountSummaries[$accountName]['unbudgeted_fuel'] += $proratedActual;
                 }
                 $accountSummaries[$accountName]['total_calculated_fuel'] += $entryCalcQty;
                 $accountSummaries[$accountName]['actual_fuel'] += $proratedActual;
@@ -231,10 +231,10 @@ trait DashboardDataTrait
             }
 
             $directActual = (float) $order->actual_quantity;
-            if ($order->unbudgeted) {
-                $accountSummaries[$accountName]['unbudgeted_fuel'] += $directActual;
-            } else {
+            if ($order->sub_account_id) {
                 $accountSummaries[$accountName]['budgeted_fuel'] += $directActual;
+            } else {
+                $accountSummaries[$accountName]['unbudgeted_fuel'] += $directActual;
             }
             $accountSummaries[$accountName]['total_calculated_fuel'] += $directActual;
             $accountSummaries[$accountName]['actual_fuel'] += $directActual;
@@ -431,6 +431,38 @@ trait DashboardDataTrait
                         $subAccountActualConsumption[$subAccountId] += $order->actual_quantity * $saWeightedPercentage;
                     }
                 }
+            }
+        }
+
+        // Incorporate completed direct fuel orders
+        $directOrders = FuelOrder::whereNull('asset_id')
+            ->where('status', 'DONE')
+            ->where(function ($q) use ($chargeableAccount) {
+                $q->where('chargeable_account_id', $chargeableAccount->id)
+                    ->orWhereHas('subAccount', function ($sq) use ($chargeableAccount) {
+                        $sq->where('chargeable_account_id', $chargeableAccount->id);
+                    });
+            })
+            ->get();
+
+        foreach ($directOrders as $order) {
+            $orderDate = Carbon::parse($order->created_at)->startOfDay();
+            if ($chargeableAccount->classification === 'Scoped') {
+                $startDate = $chargeableAccount->start_date ? Carbon::parse($chargeableAccount->start_date)->startOfDay() : null;
+                $endDate = $chargeableAccount->end_date ? Carbon::parse($chargeableAccount->end_date)->startOfDay() : null;
+
+                if ($startDate && $orderDate->lt($startDate)) {
+                    continue;
+                }
+                if ($endDate && $orderDate->gt($endDate)) {
+                    continue;
+                }
+            }
+
+            $directActual = (float) $order->actual_quantity;
+            if ($order->sub_account_id && isset($subAccountActualConsumption[$order->sub_account_id])) {
+                $subAccountActualConsumption[$order->sub_account_id] += $directActual;
+                $subAccountConsumption[$order->sub_account_id] += $directActual;
             }
         }
 

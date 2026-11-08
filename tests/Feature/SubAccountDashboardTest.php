@@ -737,6 +737,16 @@ class SubAccountDashboardTest extends TestCase
         $response->assertSee('150.00 L'); // Budgeted Consumed (using actual calculation)
         $response->assertSee('350.00 L'); // Remaining (500 - 150)
         $response->assertSee('30%'); // Utilization percent (150 / 500 = 30%)
+
+        $chartData = $response->viewData('chartData');
+        $accountSummary = collect($chartData)->firstWhere('name', 'Actual Budget Account');
+        $this->assertEquals(150.0, $accountSummary['budgeted_fuel']);
+
+        // Request /dashboard/account/{id}/sub-accounts
+        $subResponse = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account));
+        $subResponse->assertStatus(200);
+        $this->assertEquals(150.0, $subResponse->viewData('totalActualQuantity'));
+        $this->assertEquals($accountSummary['budgeted_fuel'], $subResponse->viewData('totalActualQuantity'));
     }
 
     public function test_sub_account_dashboard_calculates_prorated_total_actual_quantity_correctly(): void
