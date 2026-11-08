@@ -165,26 +165,29 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="row g-4 mb-4">
-                            <div class="col-12 ">
-                                <div>
-                                    <h4 class="small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase tracking-wider mb-1">Chargeable Account</h4>
-                                    <p class="h5 fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }} mb-0">{{ $fuelOrder->chargeableAccount->name ?? ($fuelOrder->utilizationEntries->first()?->chargeableAccount->name ?? 'Unassigned') }}</p>
-                                </div>
-                            </div>
-                        </div>
                         @php
                             $groupedTotals = [];
                             foreach ($fuelOrder->utilizationEntries as $entry) {
+                                $chargeableAccount = $entry->chargeableAccount ?? $entry->subAccount?->chargeableAccount;
+                                $chargeableAccountName = $chargeableAccount ? $chargeableAccount->name : 'Unassigned';
+                                $chargeableAccountId = $chargeableAccount?->id;
+
                                 $subAccount = $entry->subAccount;
                                 $subAccountName = $subAccount ? $subAccount->display_name : ($entry->unbudgeted ? 'UNBUDGETED' : 'Unassigned');
-                                if (!isset($groupedTotals[$subAccountName])) {
-                                    $groupedTotals[$subAccountName] = [
+                                $unbudgeted = (bool) $entry->unbudgeted;
+
+                                $groupKey = ($chargeableAccountId ?? 'null').'_'.($subAccount?->id ?? ($unbudgeted ? 'unbudgeted' : 'null'));
+
+                                if (!isset($groupedTotals[$groupKey])) {
+                                    $groupedTotals[$groupKey] = [
+                                        'chargeable_account_name' => $chargeableAccountName,
+                                        'chargeable_account_id' => $chargeableAccountId,
+                                        'sub_account_name' => $subAccountName,
+                                        'subAccount' => $subAccount,
+                                        'unbudgeted' => $unbudgeted,
                                         'km' => 0, 
                                         'hr' => 0, 
                                         'qty' => 0,
-                                        'subAccount' => $subAccount,
                                         'remaining' => $subAccount ? $subAccount->remainingBudget() : 0,
                                     ];
                                 }
@@ -192,29 +195,29 @@
                                 $calcType = strtolower($entry->calculation_type ?? '');
                                 if (str_contains($calcType, 'kilometer')) {
                                     $diff = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
-                                    $groupedTotals[$subAccountName]['km'] += $diff;
-                                    $groupedTotals[$subAccountName]['qty'] += $fuelOrder->fuel_factor_km > 0 ? $diff / $fuelOrder->fuel_factor_km : 0;
+                                    $groupedTotals[$groupKey]['km'] += $diff;
+                                    $groupedTotals[$groupKey]['qty'] += $fuelOrder->fuel_factor_km > 0 ? $diff / $fuelOrder->fuel_factor_km : 0;
                                 } elseif (str_contains($calcType, 'timeframe')) {
                                     if ($entry->end_time && $entry->start_time) {
                                         $start = \Illuminate\Support\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
                                         $end = \Illuminate\Support\Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
                                         $diffInHours = max(0, $start->diffInMinutes($end) / 60);
-                                        $groupedTotals[$subAccountName]['hr'] += $diffInHours;
-                                        $groupedTotals[$subAccountName]['qty'] += $diffInHours * $fuelOrder->fuel_factor_hr;
+                                        $groupedTotals[$groupKey]['hr'] += $diffInHours;
+                                        $groupedTotals[$groupKey]['qty'] += $diffInHours * $fuelOrder->fuel_factor_hr;
                                     }
                                 } elseif (str_contains($calcType, 'actual')) {
                                     $diffInHours = $entry->actual_hours ?? 0;
-                                    $groupedTotals[$subAccountName]['hr'] += $diffInHours;
-                                    $groupedTotals[$subAccountName]['qty'] += $diffInHours * $fuelOrder->fuel_factor_hr;
+                                    $groupedTotals[$groupKey]['hr'] += $diffInHours;
+                                    $groupedTotals[$groupKey]['qty'] += $diffInHours * $fuelOrder->fuel_factor_hr;
                                 } elseif (str_contains($calcType, 'hour')) {
                                     $diff = max(0, $entry->end_hour_reading - $entry->start_hour_reading);
-                                    $groupedTotals[$subAccountName]['hr'] += $diff;
-                                    $groupedTotals[$subAccountName]['qty'] += $diff * $fuelOrder->fuel_factor_hr;
+                                    $groupedTotals[$groupKey]['hr'] += $diff;
+                                    $groupedTotals[$groupKey]['qty'] += $diff * $fuelOrder->fuel_factor_hr;
                                 }
                             }
 
                             // Adjust remaining and calculate balance after the loop:
-                            foreach ($groupedTotals as $subAccountName => &$totals) {
+                            foreach ($groupedTotals as $groupKey => &$totals) {
                                 if ($totals['subAccount']) {
                                     if ($fuelOrder->status === 'DONE') {
                                         // Current remaining budget in DB already has this order's quantity subtracted.
@@ -237,7 +240,8 @@
                                     <table class="table {{ $isPrint ? 'table-bordered text-dark mb-0' : 'table-dark table-hover mb-0 align-middle' }}">
                                         <thead>
                                             <tr class="{{ $isPrint ? 'bg-light' : 'bg-secondary bg-opacity-10' }}">
-                                                <th class="ps-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase">Sub-Account</th>
+                                                <th class="ps-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase">Chargeable Account</th>
+                                                <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase">Sub-Account</th>
                                                 <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">KM</th>
                                                 <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Hours</th>
                                                 <th class="px-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-uppercase text-end">Fuel (L)</th>
@@ -249,7 +253,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach($groupedTotals as $account => $totals)
+                                            @foreach($groupedTotals as $groupKey => $totals)
                                                 @php
                                                     $url = '#';
                                                     $onClickAttr = '';
@@ -258,7 +262,7 @@
                                                         $queryParams = ['fuel_order_id' => $fuelOrder->id];
                                                         if ($totals['subAccount']) {
                                                             $queryParams['sub_account_id'] = $totals['subAccount']->id;
-                                                        } elseif ($account === 'UNBUDGETED') {
+                                                        } elseif ($totals['unbudgeted']) {
                                                             $queryParams['unbudgeted'] = 1;
                                                         } else {
                                                             $queryParams['sub_account_id'] = 'null';
@@ -269,7 +273,8 @@
                                                     }
                                                 @endphp
                                                 <tr {!! $onClickAttr !!} {!! $rowStyle !!}>
-                                                    <td class="ps-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }}">{{ $account }}</td>
+                                                    <td class="ps-4 py-2 small fw-bold {{ $isPrint ? 'text-dark' : 'text-light' }}">{{ $totals['chargeable_account_name'] }}</td>
+                                                    <td class="px-4 py-2 small {{ $isPrint ? 'text-dark' : 'text-secondary' }}">{{ $totals['sub_account_name'] }}</td>
                                                     <td class="px-4 py-2 small {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-end font-monospace">{{ number_format($totals['km'], 2) }}</td>
                                                     <td class="px-4 py-2 small {{ $isPrint ? 'text-dark' : 'text-secondary' }} text-end font-monospace">{{ number_format($totals['hr'], 2) }}</td>
                                                     <td class="px-4 py-2 small text-primary fw-bold text-end font-monospace">{{ number_format($totals['qty'], 2) }}</td>
@@ -292,8 +297,9 @@
                                                             @if(in_array(Auth::user()->role, ['administrator', 'moderator']) && $fuelOrder->status === 'PEND')
                                                                 <form action="{{ route('fuel-orders.unlink-sub-account', $fuelOrder) }}" method="POST" class="d-inline-block m-0" onclick="event.stopPropagation();">
                                                                     @csrf
+                                                                    <input type="hidden" name="chargeable_account_id" value="{{ $totals['chargeable_account_id'] ?? 'null' }}">
                                                                     <input type="hidden" name="sub_account_id" value="{{ $totals['subAccount'] ? $totals['subAccount']->id : 'null' }}">
-                                                                    <input type="hidden" name="unbudgeted" value="{{ $account === 'UNBUDGETED' ? 1 : 0 }}">
+                                                                    <input type="hidden" name="unbudgeted" value="{{ $totals['unbudgeted'] ? 1 : 0 }}">
                                                                     <button type="submit" class="btn btn-link text-danger p-1 rounded-circle hover-bg-light hover-bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; margin-left: auto;" title="Unlink Row" onclick="return confirm('Are you sure you want to unlink this row and all its related utilization entries from this fuel order?');">
                                                                         <i class="bi bi-x-circle fs-6"></i>
                                                                     </button>

@@ -155,7 +155,7 @@ class FuelOrderController extends Controller
      */
     public function show(FuelOrder $fuelOrder, Request $request)
     {
-        $fuelOrder->load(['asset.assetType', 'creator', 'updater', 'actualizer', 'voider', 'utilizationEntries.chargeableAccount', 'utilizationEntries.subAccount']);
+        $fuelOrder->load(['asset.assetType', 'creator', 'updater', 'actualizer', 'voider', 'utilizationEntries.chargeableAccount', 'utilizationEntries.subAccount.chargeableAccount']);
         $isPrint = $request->boolean('print');
 
         if ($isPrint && $fuelOrder->is_waiver_pending) {
@@ -358,6 +358,10 @@ class FuelOrderController extends Controller
         $unbudgeted = $request->boolean('unbudgeted');
 
         $query = $fuelOrder->utilizationEntries();
+
+        if ($request->filled('chargeable_account_id') && $request->input('chargeable_account_id') !== 'null') {
+            $query->where('chargeable_account_id', $request->input('chargeable_account_id'));
+        }
 
         if ($subAccountId === 'null' || ! $subAccountId) {
             $query->whereNull('sub_account_id');

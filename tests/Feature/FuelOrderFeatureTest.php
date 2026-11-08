@@ -1305,4 +1305,100 @@ class FuelOrderFeatureTest extends TestCase
         $this->assertEquals(0.0, (float) $fuelOrder->fresh()->calculated_quantity);
         $this->assertEquals(0.0, (float) $fuelOrder->fresh()->calculated_kilometers);
     }
+
+    public function test_show_fuel_order_breakdown_displays_chargeable_account_column_and_rows()
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $assetType = AssetType::create(['name' => 'Heavy Equipment']);
+
+        $accountA = ChargeableAccount::create([
+            'name' => 'Project Alpha Account',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+        $subA = $accountA->subAccounts()->create(['name' => 'Earthmoving Sub']);
+
+        $accountB = ChargeableAccount::create([
+            'name' => 'Project Beta Account',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+        $subB = $accountB->subAccounts()->create(['name' => 'Drainage Sub']);
+
+        $asset = Asset::create([
+            'fleet_no' => 'EQ-999',
+            'asset_type_id' => $assetType->id,
+            'fuel_factor_km' => 2.0,
+            'fuel_factor_hr' => 5.0,
+            'tank_capacity' => 200,
+        ]);
+
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $asset->id,
+            'calculated_quantity' => 25.0,
+            'calculated_hours' => 5.0,
+            'say_quantity' => 25.0,
+            'status' => 'PEND',
+            'fuel_factor_km' => 2.0,
+            'fuel_factor_hr' => 5.0,
+            'created_by' => $user->id,
+        ]);
+
+        // Entry under Account A
+        UtilizationEntry::create([
+            'asset_id' => $asset->id,
+            'date' => '2026-03-01',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'reference' => 'REF-A',
+            'particulars' => 'Earthmoving',
+            'driver_operator_name' => 'Operator A',
+            'chargeable_account_id' => $accountA->id,
+            'sub_account_id' => $subA->id,
+            'actual_hours' => 2.0,
+            'calculation_type' => 'Actual Hours',
+            'fuel_order_id' => $fuelOrder->id,
+        ]);
+
+        // Entry under Account B
+        UtilizationEntry::create([
+            'asset_id' => $asset->id,
+            'date' => '2026-03-01',
+            'start_time' => '10:00',
+            'end_time' => '13:00',
+            'reference' => 'REF-B',
+            'particulars' => 'Drainage',
+            'driver_operator_name' => 'Operator B',
+            'chargeable_account_id' => $accountB->id,
+            'sub_account_id' => $subB->id,
+            'actual_hours' => 3.0,
+            'calculation_type' => 'Actual Hours',
+            'fuel_order_id' => $fuelOrder->id,
+        ]);
+
+        // 1. Web View
+        $response = $this->actingAs($user)->get(route('fuel-orders.show', $fuelOrder));
+        $response->assertStatus(200);
+
+        // Standalone field header should NOT exist
+        $response->assertDontSee('<h4 class="small fw-bold text-secondary text-uppercase tracking-wider mb-1">Chargeable Account</h4>', false);
+
+        // Breakdown table headers must contain Chargeable Account column
+        $response->assertSee('<th class="ps-4 py-2 small fw-bold text-secondary text-uppercase">Chargeable Account</th>', false);
+        $response->assertSee('<th class="px-4 py-2 small fw-bold text-secondary text-uppercase">Sub-Account</th>', false);
+
+        // Both accounts must appear as rows in the breakdown table
+        $response->assertSee('Project Alpha Account');
+        $response->assertSee('Earthmoving Sub');
+        $response->assertSee('Project Beta Account');
+        $response->assertSee('Drainage Sub');
+
+        // 2. Print View
+        $printResponse = $this->actingAs($user)->get(route('fuel-orders.show', $fuelOrder).'?print=1');
+        $printResponse->assertStatus(200);
+        $printResponse->assertDontSee('<h4 class="small fw-bold text-dark text-uppercase tracking-wider mb-1">Chargeable Account</h4>', false);
+        $printResponse->assertSee('<th class="ps-4 py-2 small fw-bold text-dark text-uppercase">Chargeable Account</th>', false);
+        $printResponse->assertSee('Project Alpha Account');
+        $printResponse->assertSee('Project Beta Account');
+    }
 }
