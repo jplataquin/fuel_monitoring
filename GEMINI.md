@@ -24,3 +24,10 @@ Static analysis check: `composer stan`.
 
 **CRITICAL WARNING FOR AI AGENTS:** 
 When running tests manually (e.g., using `php artisan test` or `phpunit`), you **MUST ALWAYS** run `php artisan config:clear` beforehand. Failure to clear the configuration cache may cause Laravel to ignore the `phpunit.xml` SQLite in-memory database configuration and fall back to the `.env` MySQL connection. Since tests utilize the `RefreshDatabase` trait, this will accidentally wipe the user's local development database. Always prefer using `composer test`, which is configured to clear the cache automatically.
+
+## Git Workflow & Shipping to Main
+When instructed to push changes to remote `origin`:
+In non-interactive CLI agent environments where terminal prompts are disabled, GUI credential managers may hang or fail due to command-line overrides. Always explicitly pass `-c credential.helper=store` to authenticate using stored credentials:
+```bash
+git -c credential.helper=store push origin main
+```
