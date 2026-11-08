@@ -73,8 +73,13 @@
                     
                     <div class="col-md-12 text-md-end">
                         <h3 class="text-secondary small fw-bold text-uppercase tracking-widest mb-2" style="font-size: 0.75rem;">Approved Budget</h3>
+                        @php
+                            $approvedBudget = $subAccount->budgets()->where('status', 'Approved')->sum('budget_quantity');
+                            $approvedOffsets = $subAccount->offsets()->where('status', 'Approved')->sum('quantity');
+                            $totalApproved = $approvedBudget + $approvedOffsets;
+                        @endphp
                         <p class="display-6 fw-bold text-white mb-0 font-monospace">
-                            {{ number_format($subAccount->budgets()->where('status', 'Approved')->sum('budget_quantity'), 2) }} <span class="h6 text-secondary text-uppercase" style="font-size: 0.75rem;">L</span>
+                            {{ number_format($totalApproved, 2) }} <span class="h6 text-secondary text-uppercase" style="font-size: 0.75rem;">L</span>
                         </p>
                     </div>
                 </div>
@@ -94,6 +99,11 @@
                             :class="activeTab === 'budgets' ? 'border-bottom border-3 border-info text-info fw-bold bg-info bg-opacity-5' : 'text-secondary hover-text-white'"
                             class="px-4 py-3 small text-uppercase tracking-widest text-decoration-none transition border-0 rounded-0 bg-transparent focus-ring focus-ring-info" style="cursor: pointer;">
                         Budget Allocations
+                    </button>
+                    <button @click="activeTab = 'offsets'" 
+                            :class="activeTab === 'offsets' ? 'border-bottom border-3 border-warning text-warning fw-bold bg-warning bg-opacity-5' : 'text-secondary hover-text-white'"
+                            class="px-4 py-3 small text-uppercase tracking-widest text-decoration-none transition border-0 rounded-0 bg-transparent focus-ring focus-ring-warning" style="cursor: pointer;">
+                        Offsets
                     </button>
                 @endif
             </div>
@@ -288,6 +298,134 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
                                                     <h3 class="h6 text-white mb-0">No budget history found</h3>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Tab 3: Offsets -->
+            @if(in_array(Auth::user()->role, ['administrator', 'budgeteer', 'viewer']))
+                <div x-show="activeTab === 'offsets'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
+                    
+                    @if(in_array(Auth::user()->role, ['administrator', 'budgeteer']))
+                    <!-- Register Offset Form Card -->
+                    <div class="card bg-dark border border-secondary border-opacity-25 rounded-2 p-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="h5 fw-bold text-white mb-0">Register New Offset</h4>
+                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-1 px-3 py-2 fw-bold text-uppercase small" style="font-size: 0.75rem;">Pending Approval</span>
+                        </div>
+                        <form action="{{ route('sub-accounts.offsets.store', $subAccount) }}" method="POST">
+                            @csrf
+                            
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-6">
+                                    <label for="offset_quantity" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Offset Quantity (Liters)</label>
+                                    <input type="number" name="quantity" id="offset_quantity" step="0.01" required placeholder="e.g. 50.00 or -50.00" class="form-control bg-dark border-secondary text-white rounded-1 p-3 focus-ring focus-ring-warning @error('quantity') is-invalid @enderror">
+                                    <div class="form-text text-secondary mt-2">
+                                        Use positive numbers to add budget or negative numbers to deduct budget.
+                                    </div>
+                                    @error('quantity')
+                                        <div class="text-danger small fw-bold mt-2">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="offset_remarks" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Remarks</label>
+                                    <input type="text" name="remarks" id="offset_remarks" placeholder="Reason for offset..." class="form-control bg-dark border-secondary text-white rounded-1 p-3 focus-ring focus-ring-warning @error('remarks') is-invalid @enderror">
+                                    @error('remarks')
+                                        <div class="text-danger small fw-bold mt-2">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end pt-1 pb-3">
+                                <button type="submit" class="btn btn-warning px-4 py-2 rounded-1 fw-bold small text-uppercase tracking-wider shadow-sm transition duration-150" style="cursor: pointer;">
+                                    Submit Offset for Approval
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    @endif
+
+                    <!-- Offset History -->
+                    <div class="card bg-dark border border-secondary border-opacity-25 rounded-2 overflow-hidden mb-4">
+                        <div class="card-header bg-secondary bg-opacity-5 border-bottom border-secondary border-opacity-25 p-4">
+                            <h3 class="h5 fw-bold text-white mb-0">Offset History</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover mb-0">
+                                    <thead>
+                                        <tr class="bg-secondary bg-opacity-5">
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Date</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Quantity</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-center">Status</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Remarks</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($subAccount->offsets()->orderBy('created_at', 'desc')->get() as $offset)
+                                            <tr>
+                                                <td class="px-4 py-3 align-middle">
+                                                    <span class="text-white small">{{ $offset->created_at->format('M d, Y') }}</span>
+                                                    <span class="d-block text-secondary smaller fw-bold text-uppercase" style="font-size: 0.75rem;">{{ $offset->created_at->format('h:i A') }}</span>
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end font-monospace fw-bold {{ $offset->quantity >= 0 ? 'text-success' : 'text-danger' }}">
+                                                    {{ $offset->quantity >= 0 ? '+' : '' }}{{ number_format($offset->quantity, 2) }} L
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-center">
+                                                    <span class="badge rounded-1 fw-bold text-uppercase smaller px-3 py-2
+                                                        {{ $offset->status === 'Approved' ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-25' : 
+                                                        ($offset->status === 'Rejected' ? 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25' : 'bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25') }}">
+                                                        {{ $offset->status }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-4 py-3 align-middle small text-secondary">
+                                                    {{ Str::limit($offset->remarks, 50) ?: '—' }}
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end">
+                                                    <div class="d-flex justify-content-end gap-1">
+                                                        @if(in_array(Auth::user()->role, ['administrator', 'moderator']) && $offset->status === 'Pending')
+                                                            <form action="{{ route('sub-account-offsets.approve', $offset) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                @method('PATCH')
+                                                                <button type="submit" class="btn btn-sm btn-outline-success px-2 py-1 rounded-1" title="Approve Offset" onclick="return confirm('Approve this offset?')" style="cursor: pointer;">
+                                                                    Approve
+                                                                </button>
+                                                            </form>
+                                                            <form action="{{ route('sub-account-offsets.reject', $offset) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                @method('PATCH')
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger px-2 py-1 rounded-1" title="Reject Offset" onclick="return confirm('Reject this offset?')" style="cursor: pointer;">
+                                                                    Reject
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                        @if((in_array(Auth::user()->role, ['administrator', 'budgeteer'])) && $offset->status === 'Pending')
+                                                            <form action="{{ route('sub-account-offsets.destroy', $offset) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-link text-danger p-1 rounded-circle" onclick="return confirm('Delete this pending offset?')" title="Delete Offset" style="cursor: pointer;">
+                                                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="5" class="px-4 py-5 text-center text-secondary">
+                                                    <svg class="mb-2" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <h3 class="h6 text-white mb-0">No offset history found</h3>
                                                 </td>
                                             </tr>
                                         @endforelse

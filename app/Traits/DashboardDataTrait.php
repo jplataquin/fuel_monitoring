@@ -6,6 +6,7 @@ use App\Models\Asset;
 use App\Models\ChargeableAccount;
 use App\Models\FuelOrder;
 use App\Models\SubAccountBudget;
+use App\Models\SubAccountOffset;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -117,6 +118,9 @@ trait DashboardDataTrait
                             $totalBudget += SubAccountBudget::where('sub_account_id', $sa->id)
                                 ->where('status', 'Approved')
                                 ->sum('budget_quantity');
+                            $totalBudget += SubAccountOffset::where('sub_account_id', $sa->id)
+                                ->where('status', 'Approved')
+                                ->sum('quantity');
                         }
                     }
 
@@ -167,6 +171,9 @@ trait DashboardDataTrait
                     $totalBudget += SubAccountBudget::where('sub_account_id', $sa->id)
                         ->where('status', 'Approved')
                         ->sum('budget_quantity');
+                    $totalBudget += SubAccountOffset::where('sub_account_id', $sa->id)
+                        ->where('status', 'Approved')
+                        ->sum('quantity');
                 }
 
                 if ($totalBudget > 0) {
@@ -349,9 +356,14 @@ trait DashboardDataTrait
         $subAccountData = [];
 
         foreach ($subAccounts as $sa) {
-            $totalBudget = SubAccountBudget::where('sub_account_id', $sa->id)
+            $approvedBudgets = SubAccountBudget::where('sub_account_id', $sa->id)
                 ->where('status', 'Approved')
                 ->sum('budget_quantity');
+            $approvedOffsets = SubAccountOffset::where('sub_account_id', $sa->id)
+                ->where('status', 'Approved')
+                ->sum('quantity');
+
+            $totalBudget = $approvedBudgets + $approvedOffsets;
 
             $consumed = $subAccountConsumption[$sa->id] ?? 0;
             $actualConsumed = $subAccountActualConsumption[$sa->id] ?? 0;

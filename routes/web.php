@@ -13,6 +13,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SubAccountBudgetController;
 use App\Http\Controllers\SubAccountController;
+use App\Http\Controllers\SubAccountOffsetController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UtilizationEntryController;
 use Illuminate\Support\Facades\Route;
@@ -92,6 +93,8 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
     Route::middleware('role:administrator,moderator')->group(function () {
         Route::patch('account-budgets/{account_budget}/approve', [SubAccountBudgetController::class, 'approve'])->name('account-budgets.approve');
         Route::patch('account-budgets/{account_budget}/reject', [SubAccountBudgetController::class, 'reject'])->name('account-budgets.reject');
+        Route::patch('sub-account-offsets/{sub_account_offset}/approve', [SubAccountOffsetController::class, 'approve'])->name('sub-account-offsets.approve');
+        Route::patch('sub-account-offsets/{sub_account_offset}/reject', [SubAccountOffsetController::class, 'reject'])->name('sub-account-offsets.reject');
         Route::post('fuel-orders/{fuel_order}/unlink-sub-account', [FuelOrderController::class, 'unlinkSubAccount'])->name('fuel-orders.unlink-sub-account');
     });
 
@@ -102,12 +105,15 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
         Route::get('account-budgets/{account_budget}', [SubAccountBudgetController::class, 'show'])->name('account-budgets.show');
     });
 
-    // Sub Account Budget management routes (admin, moderator, budgeteer only)
+    // Sub Account Budget & Offset management routes (admin, moderator, budgeteer only)
     Route::middleware('role:administrator,moderator,budgeteer')->group(function () {
         Route::post('account-budgets', [SubAccountBudgetController::class, 'store'])->name('account-budgets.store');
         Route::get('account-budgets/{account_budget}/edit', [SubAccountBudgetController::class, 'edit'])->name('account-budgets.edit');
         Route::match(['put', 'patch'], 'account-budgets/{account_budget}', [SubAccountBudgetController::class, 'update'])->name('account-budgets.update');
         Route::delete('account-budgets/{account_budget}', [SubAccountBudgetController::class, 'destroy'])->name('account-budgets.destroy');
+
+        Route::post('sub-accounts/{sub_account}/offsets', [SubAccountOffsetController::class, 'store'])->name('sub-accounts.offsets.store');
+        Route::delete('sub-account-offsets/{sub_account_offset}', [SubAccountOffsetController::class, 'destroy'])->name('sub-account-offsets.destroy');
     });
 
     // Admin only routes

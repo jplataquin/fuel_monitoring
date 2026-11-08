@@ -62,6 +62,11 @@ class SubAccount extends Model
         return $this->hasMany(SubAccountBudget::class);
     }
 
+    public function offsets(): HasMany
+    {
+        return $this->hasMany(SubAccountOffset::class);
+    }
+
     public function utilizationEntries(): HasMany
     {
         return $this->hasMany(UtilizationEntry::class);
@@ -121,9 +126,12 @@ class SubAccount extends Model
 
     public function remainingBudget(): float
     {
-        $approved = $this->budgets()->where('status', 'Approved')->sum('budget_quantity');
+        $approvedBudget = $this->budgets()->where('status', 'Approved')->sum('budget_quantity');
+        $approvedOffsets = $this->offsets()->where('status', 'Approved')->sum('quantity');
 
-        return max(0.0, (float) $approved - $this->consumedBudget());
+        $totalApproved = $approvedBudget + $approvedOffsets;
+
+        return max(0.0, (float) $totalApproved - $this->consumedBudget());
     }
 
     public function getDisplayNameAttribute(): string
