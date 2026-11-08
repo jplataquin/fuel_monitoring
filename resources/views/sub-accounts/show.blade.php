@@ -336,7 +336,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="offset_remarks" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Remarks</label>
-                                    <input type="text" name="remarks" id="offset_remarks" placeholder="Reason for offset..." class="form-control bg-dark border-secondary text-white rounded-1 p-3 focus-ring focus-ring-warning @error('remarks') is-invalid @enderror">
+                                    <textarea name="remarks" id="offset_remarks" rows="3" placeholder="Reason for offset..." class="form-control bg-dark border-secondary text-white rounded-1 p-3 focus-ring focus-ring-warning @error('remarks') is-invalid @enderror">{{ old('remarks') }}</textarea>
                                     @error('remarks')
                                         <div class="text-danger small fw-bold mt-2">{{ $message }}</div>
                                     @enderror
