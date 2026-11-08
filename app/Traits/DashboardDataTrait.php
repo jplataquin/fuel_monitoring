@@ -17,7 +17,7 @@ trait DashboardDataTrait
      */
     protected function getBudgetDashboardData(?string $dateFrom = null, ?string $dateTo = null, ?int $accountId = null): array
     {
-        $query = FuelOrder::with(['utilizationEntries.chargeableAccount', 'utilizationEntries.subAccount'])
+        $query = FuelOrder::with(['utilizationEntries.chargeableAccount.subAccounts', 'utilizationEntries.subAccount'])
             ->where('status', 'DONE')
             ->whereHas('utilizationEntries.chargeableAccount', function ($q) {
                 $q->where('status', 'Active');
@@ -139,21 +139,105 @@ trait DashboardDataTrait
                 }
 
                 $entryCalcQty = $entry->_calculated_qty;
-                if ($entry->unbudgeted) {
-                    $accountSummaries[$accountName]['unbudgeted_fuel'] += $entryCalcQty;
-                } else {
-                    $accountSummaries[$accountName]['budgeted_fuel'] += $entryCalcQty;
-                }
-                $accountSummaries[$accountName]['total_calculated_fuel'] += $entryCalcQty;
-
                 $proratedActual = 0;
                 if ($orderTotalCalcQty > 0) {
                     $proratedActual = ($entryCalcQty / $orderTotalCalcQty) * $orderActualQty;
                 } else {
                     $proratedActual = $orderActualQty / max(1, $order->utilizationEntries->count());
                 }
+
+                if ($entry->unbudgeted) {
+                    $accountSummaries[$accountName]['unbudgeted_fuel'] += $proratedActual;
+                } else {
+                    $accountSummaries[$accountName]['budgeted_fuel'] += $proratedActual;
+                }
+                $accountSummaries[$accountName]['total_calculated_fuel'] += $entryCalcQty;
                 $accountSummaries[$accountName]['actual_fuel'] += $proratedActual;
             }
+        }
+
+        // Fetch DONE direct fuel orders (orders without an asset)
+        $directQuery = FuelOrder::with(['chargeableAccount.subAccounts'])
+            ->whereNull('asset_id')
+            ->where('status', 'DONE')
+            ->whereHas('chargeableAccount', function ($q) {
+                $q->where('status', 'Active');
+            })
+            ->orderBy('created_at', 'desc');
+
+        if ($accountId) {
+            $directQuery->where('chargeable_account_id', $accountId);
+        }
+
+        $directOrders = $directQuery->get();
+
+        foreach ($directOrders as $order) {
+            $account = $order->chargeableAccount;
+            if (! $account || $account->status !== 'Active') {
+                continue;
+            }
+            $accountName = $account->name ?? 'Unassigned';
+
+            // Automatically filter Scoped accounts by their dates, and Running by user-selected filters
+            $orderDate = Carbon::parse($order->created_at)->startOfDay();
+            if ($account->classification === 'Scoped') {
+                $startDate = $account->start_date ? Carbon::parse($account->start_date)->startOfDay() : null;
+                $endDate = $account->end_date ? Carbon::parse($account->end_date)->startOfDay() : null;
+
+                if ($startDate && $orderDate->lt($startDate)) {
+                    continue;
+                }
+                if ($endDate && $orderDate->gt($endDate)) {
+                    continue;
+                }
+            } else {
+                if ($dateFrom) {
+                    $dateFromBound = Carbon::parse($dateFrom)->startOfDay();
+                    if ($orderDate->lt($dateFromBound)) {
+                        continue;
+                    }
+                }
+                if ($dateTo) {
+                    $dateToBound = Carbon::parse($dateTo)->startOfDay();
+                    if ($orderDate->gt($dateToBound)) {
+                        continue;
+                    }
+                }
+            }
+
+            if (! isset($accountSummaries[$accountName])) {
+                $totalBudget = 0;
+                foreach ($account->subAccounts as $sa) {
+                    $totalBudget += SubAccountBudget::where('sub_account_id', $sa->id)
+                        ->where('status', 'Approved')
+                        ->sum('budget_quantity');
+                    $totalBudget += SubAccountOffset::where('sub_account_id', $sa->id)
+                        ->where('status', 'Approved')
+                        ->sum('quantity');
+                }
+
+                $accountSummaries[$accountName] = [
+                    'name' => $accountName,
+                    'account_id' => $account ? $account->id : null,
+                    'classification' => $account ? $account->classification : null,
+                    'start_date' => $account && $account->start_date ? $account->start_date->format('Y-m-d') : null,
+                    'end_date' => $account && $account->end_date ? $account->end_date->format('Y-m-d') : null,
+                    'total_budget' => $totalBudget,
+                    'actual_fuel' => 0,
+                    'budgeted_fuel' => 0,
+                    'unbudgeted_fuel' => 0,
+                    'total_calculated_fuel' => 0,
+                ];
+            }
+
+            $directActual = (float) $order->actual_quantity;
+            if ($order->unbudgeted) {
+                $accountSummaries[$accountName]['unbudgeted_fuel'] += $directActual;
+            } else {
+                $accountSummaries[$accountName]['budgeted_fuel'] += $directActual;
+            }
+            $accountSummaries[$accountName]['total_calculated_fuel'] += $directActual;
+            $accountSummaries[$accountName]['actual_fuel'] += $directActual;
         }
 
         // Add accounts that have budget but no fuel orders yet in this period

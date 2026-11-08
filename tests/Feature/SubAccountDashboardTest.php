@@ -654,16 +654,15 @@ class SubAccountDashboardTest extends TestCase
         $response = $this->actingAs($this->admin)->get(route('dashboard'));
         $response->assertStatus(200);
 
-        // The calculated/consumed fuel should ONLY count the valid entry (10.0 L).
-        // Since there is only 1 valid entry with calculated quantity of 10.0 L on the DONE order,
-        // total calculated fuel must be 10.0 L, and budgeted fuel must be 10.0 L.
+        // The calculated fuel counts the valid entry (10.0 L), while budgeted consumed uses the actual consumed quantity (20.0 L).
         // It must NOT include the soft-deleted 30.0 L or unassigned 50.0 L.
         $chartData = $response->viewData('chartData');
         $this->assertNotEmpty($chartData);
         $summary = collect($chartData)->firstWhere('name', 'Calc Test Account');
         $this->assertNotNull($summary);
         $this->assertEquals(10.0, $summary['total_calculated_fuel']);
-        $this->assertEquals(10.0, $summary['budgeted_fuel']);
+        $this->assertEquals(20.0, $summary['budgeted_fuel']);
+        $this->assertEquals(20.0, $summary['actual_fuel']);
 
         // Access sub-account dashboard
         $subResponse = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $account));
@@ -676,6 +675,68 @@ class SubAccountDashboardTest extends TestCase
         $this->assertEquals(10.0, $subSummary['consumed']);
         $this->assertEquals(20.0, $subSummary['actual_consumed']);
         $this->assertEquals(80.0, $subSummary['remaining']);
+    }
+
+    public function test_dashboard_chargeable_accounts_card_displays_actual_budget_consumed(): void
+    {
+        $account = ChargeableAccount::create([
+            'name' => 'Actual Budget Account',
+            'classification' => 'Running',
+            'status' => 'Active',
+        ]);
+
+        $subAccount = SubAccount::create([
+            'chargeable_account_id' => $account->id,
+            'name' => 'Sub Earthworks',
+        ]);
+
+        // Allocate budget of 500 L
+        SubAccountBudget::create([
+            'sub_account_id' => $subAccount->id,
+            'budget_quantity' => 500.0,
+            'status' => 'Approved',
+            'created_by' => $this->admin->id,
+        ]);
+
+        // Create Fuel Order: calculated = 100 L, actual dispensed = 150 L
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $this->asset->id,
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'calculated_quantity' => 100.0,
+            'say_quantity' => 100.0,
+            'actual_quantity' => 150.0,
+            'status' => 'DONE',
+            'created_by' => $this->admin->id,
+        ]);
+
+        // Utilization entry: 50 hours * 2 = 100 L calculated
+        UtilizationEntry::create([
+            'asset_id' => $this->asset->id,
+            'date' => '2026-06-20',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'actual_hours' => 50.0,
+            'calculation_type' => 'Actual Hours',
+            'driver_operator_name' => 'Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subAccount->id,
+            'reference' => 'REF-ACTUAL',
+            'particulars' => 'Earthworks',
+            'fuel_order_id' => $fuelOrder->id,
+            'fuel_factor_hr' => 2.0,
+        ]);
+
+        // Request /dashboard
+        $response = $this->actingAs($this->admin)->get(route('dashboard'));
+        $response->assertStatus(200);
+
+        // Assert card renders actual budget consumed (150.00 L) and remaining (350.00 L)
+        $response->assertSee('Actual Budget Account');
+        $response->assertSee('500.00 L'); // Total Budget
+        $response->assertSee('150.00 L'); // Budgeted Consumed (using actual calculation)
+        $response->assertSee('350.00 L'); // Remaining (500 - 150)
+        $response->assertSee('30%'); // Utilization percent (150 / 500 = 30%)
     }
 
     public function test_sub_account_dashboard_calculates_prorated_total_actual_quantity_correctly(): void
