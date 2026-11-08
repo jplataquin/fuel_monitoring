@@ -1401,4 +1401,87 @@ class FuelOrderFeatureTest extends TestCase
         $printResponse->assertSee('Project Alpha Account');
         $printResponse->assertSee('Project Beta Account');
     }
+
+    public function test_actual_consumed_quantity_is_prorated_when_order_is_done()
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $assetType = AssetType::create(['name' => 'Generator']);
+        $account = ChargeableAccount::create(['name' => 'Project Site', 'status' => 'Active']);
+
+        $subA = $account->subAccounts()->create(['name' => 'Sub A']);
+        $subB = $account->subAccounts()->create(['name' => 'Sub B']);
+
+        // Give them initial budgets
+        $subA->budgets()->create(['budget_quantity' => 100, 'status' => 'Approved', 'allocated_by' => $user->id]);
+        $subB->budgets()->create(['budget_quantity' => 100, 'status' => 'Approved', 'allocated_by' => $user->id]);
+
+        $asset = Asset::create([
+            'fleet_no' => 'GEN-01',
+            'asset_type_id' => $assetType->id,
+            'fuel_factor_km' => 1.0,
+            'fuel_factor_hr' => 2.0,
+            'tank_capacity' => 500,
+        ]);
+
+        // Total calculated = 100L, actual = 120L
+        $fuelOrder = FuelOrder::create([
+            'asset_id' => $asset->id,
+            'calculated_quantity' => 100.0,
+            'say_quantity' => 100.0,
+            'actual_quantity' => 120.0,
+            'status' => 'DONE',
+            'fuel_factor_km' => 1.0,
+            'fuel_factor_hr' => 2.0,
+            'created_by' => $user->id,
+        ]);
+
+        // Entry A: 20 hours * 2.0 = 40L (40% of total)
+        UtilizationEntry::create([
+            'asset_id' => $asset->id,
+            'date' => '2026-03-01',
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'reference' => 'REF-A',
+            'particulars' => 'Operation A',
+            'driver_operator_name' => 'Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subA->id,
+            'actual_hours' => 20.0,
+            'calculation_type' => 'Actual Hours',
+            'fuel_order_id' => $fuelOrder->id,
+            'fuel_factor_hr' => 2.0,
+        ]);
+
+        // Entry B: 30 hours * 2.0 = 60L (60% of total)
+        UtilizationEntry::create([
+            'asset_id' => $asset->id,
+            'date' => '2026-03-01',
+            'start_time' => '10:00',
+            'end_time' => '12:00',
+            'reference' => 'REF-B',
+            'particulars' => 'Operation B',
+            'driver_operator_name' => 'Operator',
+            'chargeable_account_id' => $account->id,
+            'sub_account_id' => $subB->id,
+            'actual_hours' => 30.0,
+            'calculation_type' => 'Actual Hours',
+            'fuel_order_id' => $fuelOrder->id,
+            'fuel_factor_hr' => 2.0,
+        ]);
+
+        // 1. Assert SubAccount model consumedBudget uses actual prorated amounts
+        // 40% of 120 = 48.0
+        $this->assertEquals(48.0, $subA->consumedBudget());
+        $this->assertEquals(52.0, $subA->remainingBudget()); // 100 - 48 = 52
+
+        // 60% of 120 = 72.0
+        $this->assertEquals(72.0, $subB->consumedBudget());
+        $this->assertEquals(28.0, $subB->remainingBudget()); // 100 - 72 = 28
+
+        // 2. Assert Fuel Order Show breakdown displays actual amounts
+        $response = $this->actingAs($user)->get(route('fuel-orders.show', $fuelOrder));
+        $response->assertStatus(200);
+        $response->assertSee('48.00');
+        $response->assertSee('72.00');
+    }
 }

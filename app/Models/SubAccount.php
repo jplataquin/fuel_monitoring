@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 class SubAccount extends Model
 {
@@ -86,33 +85,31 @@ class SubAccount extends Model
     {
         // 1. Asset-based consumption via utilization entries attached to DONE fuel orders
         $entries = $this->utilizationEntries()
+            ->with('fuelOrder')
             ->whereHas('fuelOrder', function ($q) {
                 $q->where('status', 'DONE');
             })
             ->get();
 
         $assetConsumed = 0;
-        foreach ($entries as $entry) {
-            $calcType = strtolower($entry->calculation_type ?? '');
-            $qty = 0;
+        $entriesByOrder = $entries->groupBy('fuel_order_id');
 
-            if (str_contains($calcType, 'kilometer')) {
-                $calcKm = max(0, $entry->end_kilometer_reading - $entry->start_kilometer_reading);
-                $qty = $entry->fuel_factor_km > 0 ? $calcKm / $entry->fuel_factor_km : 0;
-            } elseif (str_contains($calcType, 'timeframe')) {
-                if ($entry->end_time && $entry->start_time) {
-                    $start = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->start_time->format('H:i:s'));
-                    $end = Carbon::parse($entry->date->format('Y-m-d').' '.$entry->end_time->format('H:i:s'));
-                    $calcHours = max(0, $start->diffInMinutes($end) / 60);
-                    $qty = $calcHours * $entry->fuel_factor_hr;
-                }
-            } elseif (str_contains($calcType, 'actual')) {
-                $qty = ($entry->actual_hours ?? 0) * $entry->fuel_factor_hr;
-            } elseif (str_contains($calcType, 'hour')) {
-                $calcHours = max(0, $entry->end_hour_reading - $entry->start_hour_reading);
-                $qty = $calcHours * $entry->fuel_factor_hr;
+        foreach ($entriesByOrder as $orderId => $orderEntries) {
+            $fuelOrder = $orderEntries->first()->fuelOrder;
+            if (! $fuelOrder) {
+                continue;
             }
-            $assetConsumed += $qty;
+
+            $subCalcQty = 0;
+            foreach ($orderEntries as $entry) {
+                $subCalcQty += $entry->calculated_quantity;
+            }
+
+            if ($fuelOrder->calculated_quantity > 0) {
+                $assetConsumed += ($subCalcQty / $fuelOrder->calculated_quantity) * $fuelOrder->actual_quantity;
+            } else {
+                $assetConsumed += $subCalcQty;
+            }
         }
 
         // 2. Direct fuel orders consumption (actual_quantity of DONE direct orders)

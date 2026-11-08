@@ -216,6 +216,21 @@
                                 }
                             }
 
+                            // Prorate actual quantity across breakdown rows if the order is DONE
+                            if ($fuelOrder->status === 'DONE') {
+                                $totalCalcQty = 0;
+                                foreach ($groupedTotals as $t) {
+                                    $totalCalcQty += $t['qty'];
+                                }
+
+                                if ($totalCalcQty > 0) {
+                                    foreach ($groupedTotals as &$totals) {
+                                        $totals['qty'] = ($totals['qty'] / $totalCalcQty) * $fuelOrder->actual_quantity;
+                                    }
+                                    unset($totals);
+                                }
+                            }
+
                             // Adjust remaining and calculate balance after the loop:
                             foreach ($groupedTotals as $groupKey => &$totals) {
                                 if ($totals['subAccount']) {
