@@ -374,6 +374,9 @@ class SubAccountDashboardTest extends TestCase
         $response->assertViewHasAll(['link', 'chargeableAccount', 'chartLabels', 'remainingBalances', 'subAccountData']);
         $response->assertSee('Public Sub Section');
         $response->assertSee('500.00');
+        $response->assertSee('Budget (L)');
+        $response->assertSee('Offset (L)');
+        $response->assertSee('Total Budget (L)');
         $response->assertSee('Public Test Link');
         $response->assertSee('sticky-col-first');
     }

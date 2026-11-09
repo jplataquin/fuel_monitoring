@@ -380,7 +380,15 @@
                                                 class="text-nowrap" 
                                                 style="cursor: pointer;">
                                                 <td class="px-4 py-3 fw-bold text-white border-secondary text-nowrap sticky-col-first {{ $cellHighlightClass }}">
-                                                    {{ $sa['name'] }}
+                                                    <div class="d-flex align-items-center justify-content-between gap-2">
+                                                        <span>{{ $sa['name'] }}</span>
+                                                        <button type="button" 
+                                                                @click.stop="$dispatch('open-notes-modal', { id: {{ $sa['id'] }}, name: '{{ addslashes($sa['name']) }}' })" 
+                                                                class="btn btn-sm btn-link text-secondary p-0 text-decoration-none" 
+                                                                title="View or Add Notes">
+                                                            <i class="bi bi-chat-left-text"></i>
+                                                        </button>
+                                                    </div>
                                                 </td>
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary text-nowrap">
                                                     {{ number_format($sa['budget'] ?? 0, 2) }}
@@ -612,4 +620,144 @@
             });
         </script>
     @endif
+
+    <!-- Notes Modal -->
+    <div x-data="subAccountNotesModal()"
+         x-on:open-notes-modal.window="open($event.detail)"
+         class="modal fade"
+         id="subAccountNotesModal"
+         tabindex="-1"
+         aria-labelledby="subAccountNotesModalLabel"
+         aria-hidden="true"
+         x-ref="modal">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark border-secondary text-light">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title fw-bold" id="subAccountNotesModalLabel">
+                        <i class="bi bi-chat-left-text me-2 text-info"></i>
+                        Notes for <span x-text="subAccountName" class="text-info"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Note Creation Form (only for non-viewers) -->
+                    @if(auth()->user()->role !== 'viewer')
+                        <form @submit.prevent="saveNote" class="mb-4">
+                            <div class="mb-3">
+                                <label for="noteContent" class="form-label small text-secondary text-uppercase fw-bold tracking-wider">Add a Note</label>
+                                <textarea x-model="newNote" 
+                                          id="noteContent" 
+                                          class="form-control bg-dark text-light border-secondary" 
+                                          rows="3" 
+                                          placeholder="Type your note here..." 
+                                          required></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary btn-sm px-3" :disabled="loading || !newNote.trim()">
+                                    <span x-show="!saving">Post Note</span>
+                                    <span x-show="saving" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </form>
+                        <hr class="border-secondary opacity-50">
+                    @endif
+
+                    <!-- Notes List -->
+                    <div class="notes-list" style="max-height: 400px; overflow-y: auto;">
+                        <template x-if="loading">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-info spinner-border-sm" role="status"></div>
+                                <span class="ms-2 text-secondary small">Loading notes...</span>
+                            </div>
+                        </template>
+
+                        <template x-if="!loading && notes.length === 0">
+                            <div class="text-center py-4 text-secondary small">
+                                No notes recorded for this sub-account yet.
+                            </div>
+                        </template>
+
+                        <template x-if="!loading && notes.length > 0">
+                            <div class="vstack gap-3">
+                                <template x-for="note in notes" :key="note.id">
+                                    <div class="p-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25 rounded-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fw-bold small text-light" x-text="note.user ? note.user.name : 'Unknown'"></span>
+                                            <span class="text-secondary small" style="font-size: 0.75rem;" x-text="formatDate(note.created_at)"></span>
+                                        </div>
+                                        <div class="text-light small" style="white-space: pre-wrap;" x-text="note.note"></div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function subAccountNotesModal() {
+            return {
+                modalInstance: null,
+                subAccountId: null,
+                subAccountName: '',
+                notes: [],
+                newNote: '',
+                loading: false,
+                saving: false,
+                init() {
+                    this.modalInstance = new bootstrap.Modal(this.$refs.modal);
+                },
+                open(detail) {
+                    this.subAccountId = detail.id;
+                    this.subAccountName = detail.name;
+                    this.newNote = '';
+                    this.notes = [];
+                    this.modalInstance.show();
+                    this.fetchNotes();
+                },
+                fetchNotes() {
+                    this.loading = true;
+                    axios.get(`/sub-accounts/${this.subAccountId}/notes`)
+                        .then(response => {
+                            this.notes = response.data;
+                        })
+                        .catch(error => {
+                            console.error('Failed to load notes', error);
+                        })
+                        .finally(() => {
+                            this.loading = false;
+                        });
+                },
+                saveNote() {
+                    if (!this.newNote.trim()) return;
+                    this.saving = true;
+                    axios.post(`/sub-accounts/${this.subAccountId}/notes`, { note: this.newNote })
+                        .then(response => {
+                            this.notes.unshift(response.data);
+                            this.newNote = '';
+                        })
+                        .catch(error => {
+                            console.error('Failed to save note', error);
+                            alert('Error saving note. Please try again.');
+                        })
+                        .finally(() => {
+                            this.saving = false;
+                        });
+                },
+                formatDate(dateString) {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toLocaleString(undefined, { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                }
+            };
+        }
+    </script>
 </x-dynamic-component>

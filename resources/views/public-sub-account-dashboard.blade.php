@@ -299,10 +299,12 @@
                                          }
                                      }"
                                      @mouseleave="hideTooltip()">
-                                    <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 1100px;">
+                                    <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 1400px;">
                                         <thead class="table-secondary">
                                             <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
                                                 <th class="px-4 py-3 border-secondary sticky-col-first" style="min-width: 220px;">Sub-Account Name</th>
+                                                <th class="px-4 py-3 border-secondary text-end">Budget (L)</th>
+                                                <th class="px-4 py-3 border-secondary text-end">Offset (L)</th>
                                                 <th class="px-4 py-3 border-secondary text-end">Total Budget (L)</th>
                                                 <th class="px-4 py-3 border-secondary text-end">Consumed (L)</th>
                                                 <th class="px-4 py-3 border-secondary text-end">Remaining (L)</th>
@@ -343,6 +345,12 @@
                                                         {{ $sa['name'] }}
                                                     </td>
                                                     <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary">
+                                                        {{ number_format($sa['budget'] ?? 0, 2) }}
+                                                    </td>
+                                                    <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary {{ ($sa['offset'] ?? 0) > 0 ? 'text-success' : (($sa['offset'] ?? 0) < 0 ? 'text-danger' : 'text-secondary') }}">
+                                                        {{ ($sa['offset'] ?? 0) > 0 ? '+' : '' }}{{ number_format($sa['offset'] ?? 0, 2) }}
+                                                    </td>
+                                                    <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary">
                                                         {{ number_format($sa['total_budget'], 2) }}
                                                     </td>
                                                     <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-warning">
@@ -365,7 +373,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="7" class="px-4 py-5 text-center text-secondary border-secondary">
+                                                    <td colspan="9" class="px-4 py-5 text-center text-secondary border-secondary">
                                                         No sub-accounts allocated to this chargeable account.
                                                     </td>
                                                 </tr>

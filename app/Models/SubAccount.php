@@ -66,6 +66,11 @@ class SubAccount extends Model
         return $this->hasMany(SubAccountOffset::class);
     }
 
+    public function notes(): HasMany
+    {
+        return $this->hasMany(SubAccountNote::class);
+    }
+
     public function utilizationEntries(): HasMany
     {
         return $this->hasMany(UtilizationEntry::class);

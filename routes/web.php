@@ -13,6 +13,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SubAccountBudgetController;
 use App\Http\Controllers\SubAccountController;
+use App\Http\Controllers\SubAccountNoteController;
 use App\Http\Controllers\SubAccountOffsetController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UtilizationEntryController;
@@ -115,6 +116,12 @@ Route::middleware(['auth', 'check_temp_password'])->group(function () {
         Route::post('sub-accounts/{sub_account}/offsets', [SubAccountOffsetController::class, 'store'])->name('sub-accounts.offsets.store');
         Route::delete('sub-account-offsets/{sub_account_offset}', [SubAccountOffsetController::class, 'destroy'])->name('sub-account-offsets.destroy');
     });
+
+    // Sub Account Notes (Any user except viewers can add notes)
+    Route::middleware('role:administrator,moderator,data_logger,fuel_man,budgeteer')->group(function () {
+        Route::post('sub-accounts/{sub_account}/notes', [SubAccountNoteController::class, 'store'])->name('sub-accounts.notes.store');
+    });
+    Route::get('sub-accounts/{sub_account}/notes', [SubAccountNoteController::class, 'index'])->name('sub-accounts.notes.index');
 
     // Admin only routes
     Route::middleware('role:administrator')->group(function () {
