@@ -84,11 +84,11 @@ class SubAccountDashboardTest extends TestCase
         $response->assertSee('45.50%');
 
         // Check that the breakdown table includes the Optimal column and formatted value
-        $response->assertSee('Optimal');
+        $response->assertSee('Optimal (Qty/L)');
         $response->assertSee('0.05 meters / L');
 
         // Check that the breakdown table includes the Projected Variance column
-        $response->assertSee('Projected Variance');
+        $response->assertSee('Projected Variance (L)');
 
         // Check that the Projection Summary section and cards are present
         $response->assertSee('Projection Summary');
@@ -104,6 +104,10 @@ class SubAccountDashboardTest extends TestCase
         $response->assertSee('Budget (L)');
         $response->assertSee('Offset (L)');
         $response->assertSee('Total Budget (L)');
+        $response->assertSee('Calc. Qty (L)');
+        $response->assertSee('Actu. Qty (L)');
+        $response->assertSee('Rate (Qty/L)');
+        $response->assertSee('Projection (L)');
 
         // Check that the Sub-Account Name column is frozen with sticky-col-first
         $response->assertSee('sticky-col-first');

@@ -304,23 +304,23 @@
                                  @mouseup="mouseup($event)"
                                  @mousemove="mousemove($event)"
                                  style="cursor: grab; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 2560px;">
+                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 2590px;">
                                     <thead class="table-secondary" x-ref="thead" :style="'transform: translateY(' + translateY + 'px); z-index: 10; position: relative; background-color: #2b3035 !important;'">
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
                                             <th class="px-4 py-3 border-secondary sticky-col-first" style="min-width: 220px;">Sub-Account Name</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Budget (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Offset (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Total Budget (L)</th>
-                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Calc. Qty</th>
-                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Actu. Qty</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Calc. Qty (L)</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Actu. Qty (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Remaining (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Quantity</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Accomplished (Qty)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Remaining (Qty)</th>
-                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Rate</th>
-                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Projection</th>
-                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Projected Variance</th>
-                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Optimal</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Rate (Qty/L)</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Projection (L)</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 210px;">Projected Variance (L)</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Optimal (Qty/L)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 180px;">Accomplishment (%)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Fuel Used (%)</th>
                                             <th class="px-4 py-3 border-secondary text-center" style="min-width: 180px; width: 15%">Utilization Status</th>
