@@ -304,11 +304,12 @@
                                  @mouseup="mouseup($event)"
                                  @mousemove="mousemove($event)"
                                  style="cursor: grab; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 2260px;">
+                                <table class="table table-dark table-hover mb-0 border-secondary align-middle" style="min-width: 2410px;">
                                     <thead class="table-secondary" x-ref="thead" :style="'transform: translateY(' + translateY + 'px); z-index: 10; position: relative; background-color: #2b3035 !important;'">
                                         <tr class="text-uppercase small fw-bold tracking-widest text-nowrap">
                                             <th class="px-4 py-3 border-secondary sticky-col-first" style="min-width: 220px;">Sub-Account Name</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Total Budget (L)</th>
+                                            <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Offset (L)</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Calc. Qty</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Actu. Qty</th>
                                             <th class="px-4 py-3 border-secondary text-end" style="min-width: 150px;">Remaining (L)</th>
@@ -383,6 +384,9 @@
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-secondary text-nowrap">
                                                     {{ number_format($sa['total_budget'], 2) }}
                                                 </td>
+                                                <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-nowrap {{ ($sa['offset'] ?? 0) > 0 ? 'text-success' : (($sa['offset'] ?? 0) < 0 ? 'text-danger' : 'text-secondary') }}">
+                                                    {{ ($sa['offset'] ?? 0) > 0 ? '+' : '' }}{{ number_format($sa['offset'] ?? 0, 2) }}
+                                                </td>
                                                 <td class="px-4 py-3 text-end font-monospace fw-bold border-secondary text-success text-nowrap">
                                                     {{ number_format($sa['consumed'], 2) }}
                                                 </td>
@@ -455,7 +459,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="14" class="px-4 py-5 text-center text-secondary border-secondary">
+                                                <td colspan="16" class="px-4 py-5 text-center text-secondary border-secondary">
                                                     No sub-accounts allocated to this chargeable account.
                                                 </td>
                                             </tr>

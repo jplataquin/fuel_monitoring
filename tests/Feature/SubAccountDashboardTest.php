@@ -100,6 +100,9 @@ class SubAccountDashboardTest extends TestCase
         $response->assertSee('Remaining (Qty)');
         $response->assertSee('54.50');
 
+        // Check that the breakdown table includes the Offset (L) column
+        $response->assertSee('Offset (L)');
+
         // Check that the Sub-Account Name column is frozen with sticky-col-first
         $response->assertSee('sticky-col-first');
     }

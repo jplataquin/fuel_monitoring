@@ -171,5 +171,48 @@ class SubAccountOffsetTest extends TestCase
 
         $subAccountData = $response->viewData('subAccountData');
         $this->assertEquals(450.0, $subAccountData[0]['total_budget']);
+        $this->assertEquals(-50.0, $subAccountData[0]['offset']);
+    }
+
+    public function test_sub_account_breakdown_displays_offset_column_and_formatted_values(): void
+    {
+        $subAccount2 = SubAccount::create([
+            'chargeable_account_id' => $this->account->id,
+            'name' => 'Grading',
+        ]);
+
+        SubAccountBudget::create([
+            'sub_account_id' => $subAccount2->id,
+            'budget_quantity' => 300,
+            'status' => 'Approved',
+        ]);
+
+        // Negative offset for subAccount 1 (-50)
+        SubAccountOffset::create([
+            'sub_account_id' => $this->subAccount->id,
+            'quantity' => -50,
+            'status' => 'Approved',
+            'approved_by' => $this->admin->id,
+            'approved_at' => now(),
+        ]);
+
+        // Positive offset for subAccount 2 (+75)
+        SubAccountOffset::create([
+            'sub_account_id' => $subAccount2->id,
+            'quantity' => 75,
+            'status' => 'Approved',
+            'approved_by' => $this->admin->id,
+            'approved_at' => now(),
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $this->account));
+        $response->assertStatus(200);
+
+        // Header exists
+        $response->assertSee('Offset (L)');
+
+        // Formatted offset values
+        $response->assertSee('-50.00');
+        $response->assertSee('+75.00');
     }
 }
