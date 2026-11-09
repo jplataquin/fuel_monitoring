@@ -170,8 +170,9 @@ class SubAccountOffsetTest extends TestCase
         $response->assertStatus(200);
 
         $subAccountData = $response->viewData('subAccountData');
-        $this->assertEquals(450.0, $subAccountData[0]['total_budget']);
+        $this->assertEquals(500.0, $subAccountData[0]['budget']);
         $this->assertEquals(-50.0, $subAccountData[0]['offset']);
+        $this->assertEquals(450.0, $subAccountData[0]['total_budget']);
     }
 
     public function test_sub_account_breakdown_displays_offset_column_and_formatted_values(): void
@@ -208,11 +209,17 @@ class SubAccountOffsetTest extends TestCase
         $response = $this->actingAs($this->admin)->get(route('dashboard.sub-accounts', $this->account));
         $response->assertStatus(200);
 
-        // Header exists
+        // Headers exist
+        $response->assertSee('Budget (L)');
         $response->assertSee('Offset (L)');
+        $response->assertSee('Total Budget (L)');
 
-        // Formatted offset values
+        // Formatted budget, offset, and total budget values
+        $response->assertSee('500.00');
         $response->assertSee('-50.00');
+        $response->assertSee('450.00');
+        $response->assertSee('300.00');
         $response->assertSee('+75.00');
+        $response->assertSee('375.00');
     }
 }

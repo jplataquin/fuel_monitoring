@@ -524,6 +524,7 @@ trait DashboardDataTrait
             $subAccountData[] = [
                 'id' => $sa->id,
                 'name' => $sa->name,
+                'budget' => (float) $approvedBudgets,
                 'total_budget' => $totalBudget,
                 'offset' => (float) $approvedOffsets,
                 'consumed' => $consumed,
@@ -612,8 +613,9 @@ trait DashboardDataTrait
             $subAccountBreakdown[] = [
                 'id' => $sa['id'],
                 'name' => $sa['name'],
-                'total_budget' => round((float) $sa['total_budget'], 2),
+                'budget' => round((float) ($sa['budget'] ?? 0), 2),
                 'offset' => round((float) ($sa['offset'] ?? 0), 2),
+                'total_budget' => round((float) $sa['total_budget'], 2),
                 'calculated_quantity' => round((float) $sa['consumed'], 2),
                 'actual_quantity' => round((float) ($sa['actual_consumed'] ?? 0), 2),
                 'remaining_balance' => round((float) $sa['remaining'], 2),
