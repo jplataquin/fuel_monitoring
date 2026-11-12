@@ -21,7 +21,7 @@
     </x-slot>
 
     <div class="py-5">
-        <div class="container" style="max-width: 1000px;">
+        <div class="container" style="max-width: 1200px;">
             <!-- Account Info -->
             <div class="card bg-dark border-secondary shadow-lg rounded-4 p-4 mb-5">
                 <div class="row align-items-center mb-4 pb-4 border-bottom border-secondary border-opacity-25">
@@ -116,52 +116,71 @@
                     <div class="table-responsive">
                         <table class="table table-dark table-hover mb-0">
                                     <thead>
-                                        <tr class="bg-secondary bg-opacity-10">
+                                        <tr class="bg-secondary bg-opacity-10 text-nowrap">
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider">Sub Account</th>
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Quantity</th>
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Accomplishment</th>
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Approved Budget</th>
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Pending Budget</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Pending Offset</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Approved Offset</th>
+                                            <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Total Approved Budget</th>
                                             <th class="px-4 py-3 text-uppercase small fw-bold text-secondary tracking-wider text-end">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse($chargeableAccount->subAccounts as $subAccount)
+                                            @php
+                                                $approvedBudget = (float) $subAccount->budgets->where('status', 'Approved')->sum('budget_quantity');
+                                                $pendingBudget = (float) $subAccount->budgets->where('status', 'Pending')->sum('budget_quantity');
+                                                $pendingOffset = (float) $subAccount->offsets->where('status', 'Pending')->sum('quantity');
+                                                $approvedOffset = (float) $subAccount->offsets->where('status', 'Approved')->sum('quantity');
+                                                $totalApprovedBudget = $approvedBudget + $approvedOffset;
+                                            @endphp
                                             <tr>
                                                 <td class="px-4 py-3 align-middle">
                                                     <div class="d-flex align-items-center">
                                                         <span class="text-light fw-medium">{{ $subAccount->display_name }}</span>
                                                     </div>
                                                 </td>
-                                                <td class="px-4 py-3 align-middle text-end font-monospace text-secondary fw-bold">
+                                                <td class="px-4 py-3 align-middle text-end font-monospace text-secondary fw-bold text-nowrap">
                                                     @if($subAccount->quantity)
                                                         {{ number_format($subAccount->quantity, 2) }} {{ $subAccount->unit }}
                                                     @else
                                                         —
                                                     @endif
                                                 </td>
-                                                <td class="px-4 py-3 align-middle text-end font-monospace text-info fw-bold">
+                                                <td class="px-4 py-3 align-middle text-end font-monospace text-info fw-bold text-nowrap">
                                                     {{ number_format($subAccount->accomplishment, 2) }}%
                                                 </td>
-                                                <td class="px-4 py-3 align-middle text-end font-monospace text-success fw-bold">
-                                                    {{ number_format($subAccount->budgets->where('status', 'Approved')->sum('budget_quantity'), 2) }} L
+                                                <td class="px-4 py-3 align-middle text-end font-monospace text-success fw-bold text-nowrap">
+                                                    {{ number_format($approvedBudget, 2) }} L
                                                 </td>
-                                                <td class="px-4 py-3 align-middle text-end font-monospace text-warning fw-bold">
-                                                    {{ number_format($subAccount->budgets->where('status', 'Pending')->sum('budget_quantity'), 2) }} L
+                                                <td class="px-4 py-3 align-middle text-end font-monospace text-warning fw-bold text-nowrap">
+                                                    {{ number_format($pendingBudget, 2) }} L
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end font-monospace {{ $pendingOffset != 0 ? 'text-warning' : 'text-secondary' }} fw-bold text-nowrap">
+                                                    {{ ($pendingOffset > 0 ? '+' : '') . number_format($pendingOffset, 2) }} L
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end font-monospace {{ $approvedOffset > 0 ? 'text-success' : ($approvedOffset < 0 ? 'text-danger' : 'text-secondary') }} fw-bold text-nowrap">
+                                                    {{ ($approvedOffset > 0 ? '+' : '') . number_format($approvedOffset, 2) }} L
+                                                </td>
+                                                <td class="px-4 py-3 align-middle text-end font-monospace text-white fw-bold text-nowrap">
+                                                    {{ number_format($totalApprovedBudget, 2) }} L
                                                 </td>
                                                 <td class="px-4 py-3 align-middle text-end">
                                                     <div class="btn-group">
-                                                        <a href="{{ route('sub-accounts.show', $subAccount) }}" class="btn btn-link text-info p-2 rounded-circle" title="View Sub-Account Details">
+                                                        <a href="{{ route('sub-accounts.show', $subAccount) }}" class="btn btn-link text-info p-2 rounded-circle" title="View Sub-Account Details" style="cursor: pointer;">
                                                             <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                                         </a>
                                                         @if(in_array(Auth::user()->role, ['administrator', 'moderator', 'budgeteer']))
-                                                            <a href="{{ route('sub-accounts.edit', $subAccount) }}" class="btn btn-link text-warning p-2 rounded-circle" title="Edit Sub-Account">
+                                                            <a href="{{ route('sub-accounts.edit', $subAccount) }}" class="btn btn-link text-warning p-2 rounded-circle" title="Edit Sub-Account" style="cursor: pointer;">
                                                                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                                             </a>
                                                             <form action="{{ route('sub-accounts.destroy', $subAccount) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 @method('DELETE')
-                                                                <button type="submit" class="btn btn-link text-danger p-2 rounded-circle" onclick="return confirm('Are you sure you want to delete this sub-account?')" title="Delete Sub-Account">
+                                                                <button type="submit" class="btn btn-link text-danger p-2 rounded-circle" onclick="return confirm('Are you sure you want to delete this sub-account?')" title="Delete Sub-Account" style="cursor: pointer;">
                                                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                                                 </button>
                                                             </form>
@@ -171,7 +190,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="5" class="px-4 py-5 text-center text-secondary">
+                                                <td colspan="9" class="px-4 py-5 text-center text-secondary">
                                                     <svg class="mb-2" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                                     </svg>

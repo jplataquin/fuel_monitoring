@@ -216,6 +216,57 @@ class ChargeableAccountFeatureTest extends TestCase
         $response->assertSee('350.50 L');
     }
 
+    public function test_chargeable_accounts_show_page_displays_offsets_and_total_approved_budget(): void
+    {
+        $user = User::factory()->create(['role' => 'administrator']);
+        $account = ChargeableAccount::create(['name' => 'Account With Offsets', 'status' => 'Active', 'classification' => 'Running']);
+
+        $subAccount = $account->subAccounts()->create(['name' => 'Sub With Offsets']);
+
+        // Approved base budget: 1,000.00
+        $subAccount->budgets()->create([
+            'budget_quantity' => 1000.00,
+            'status' => 'Approved',
+            'created_by' => $user->id,
+        ]);
+
+        // Pending budget: 200.00
+        $subAccount->budgets()->create([
+            'budget_quantity' => 200.00,
+            'status' => 'Pending',
+            'created_by' => $user->id,
+        ]);
+
+        // Approved offset: +150.00
+        $subAccount->offsets()->create([
+            'quantity' => 150.00,
+            'status' => 'Approved',
+            'created_by' => $user->id,
+        ]);
+
+        // Pending offset: +75.00
+        $subAccount->offsets()->create([
+            'quantity' => 75.00,
+            'status' => 'Pending',
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('chargeable-accounts.show', $account));
+
+        $response->assertStatus(200);
+        $response->assertSee('Pending Offset');
+        $response->assertSee('Approved Offset');
+        $response->assertSee('Total Approved Budget');
+
+        $response->assertSee('Sub With Offsets');
+        $response->assertSee('1,000.00 L');
+        $response->assertSee('200.00 L');
+        $response->assertSee('+75.00 L');
+        $response->assertSee('+150.00 L');
+        // Total Approved Budget = 1000.00 + 150.00 = 1,150.00 L
+        $response->assertSee('1,150.00 L');
+    }
+
     public function test_chargeable_accounts_index_page_displays_total_budgets(): void
     {
         $user = User::factory()->create(['role' => 'administrator']);
@@ -282,7 +333,7 @@ class ChargeableAccountFeatureTest extends TestCase
         $response->assertSee('Sub Printable');
         $response->assertSee('1,250.00 L');
         $response->assertSee('350.50 L');
-        $response->assertSee('Sub-Account Budget Breakdown');
+        $response->assertSee('Sub-Account Breakdown');
         $response->assertSee('Print Date');
         $response->assertSee(now()->format('M d, Y'));
         $response->assertDontSee('Account Information');

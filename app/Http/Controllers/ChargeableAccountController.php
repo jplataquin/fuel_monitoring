@@ -30,7 +30,7 @@ class ChargeableAccountController extends Controller
 
     public function show(ChargeableAccount $chargeableAccount): View
     {
-        $chargeableAccount->load(['subAccounts.budgets']);
+        $chargeableAccount->load(['subAccounts.budgets', 'subAccounts.offsets']);
 
         return view('chargeable-accounts.show', compact('chargeableAccount'));
     }
